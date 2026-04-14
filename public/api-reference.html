@@ -451,11 +451,14 @@ pre {
     width: 100% !important;
     overflow-x: hidden;
   }
-  .params-table  { width: 100%; table-layout: fixed; }
-  .params-table td { padding: 10px 0; }
-  .param-name    { width: 110px; font-size: 11px; }
-  .param-type    { width: 60px; }
-  .param-req     { width: 56px; font-size: 9px; }
+  .params-table  { width: 100%; }
+  .params-table tr { display: block; padding: 10px 0; }
+  .params-table td { display: inline-block; padding: 0; vertical-align: baseline; }
+  .param-name    { width: auto; font-size: 12px; padding-right: 10px; }
+  .param-type    { width: auto; padding-right: 10px; padding-top: 0; }
+  .param-req     { width: auto; font-size: 10px; padding-right: 0; padding-top: 0; }
+  .param-req:empty { display: none; }
+  .param-desc    { display: block; width: 100%; margin-top: 6px; padding-right: 0; }
   .error-table   { width: 100%; table-layout: fixed; }
   .page-header   { padding: 28px 16px 24px; }
   .base-url      { flex-wrap: wrap; }
