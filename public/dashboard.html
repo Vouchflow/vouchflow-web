@@ -492,7 +492,7 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
 
 <!-- TOPBAR -->
 <header class="topbar">
-  <a class="topbar-logo" href="#">
+  <a class="topbar-logo" href="/">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <rect x="3" y="3" width="11" height="11" rx="2.5" stroke="#111" stroke-width="1.8"/>
       <rect x="10" y="10" width="11" height="11" rx="2.5" fill="white" stroke="#111" stroke-width="1.8"/>
@@ -536,14 +536,14 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 4V3a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
       </span>
       Verifications
-      <span class="nav-count">1.2k</span>
+      <span class="nav-count" id="nav-count-verifications"></span>
     </a>
     <a class="nav-item" href="/verifications">
       <span class="nav-icon">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
       </span>
       Devices
-      <span class="nav-count">248</span>
+      <span class="nav-count" id="nav-count-devices"></span>
     </a>
 
     <div class="nav-section-label">Configure</div>
@@ -589,25 +589,20 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   <main class="main">
 
     <!-- ONBOARDING BANNER -->
-    <div class="onboarding-banner">
-      <svg width="40" height="40" viewBox="0 0 40 40">
+    <div class="onboarding-banner" id="onboarding-banner" style="display:none">
+      <svg width="40" height="40" viewBox="0 0 40 40" id="ob-ring">
         <circle cx="20" cy="20" r="17" fill="none" stroke="#E4E4DF" stroke-width="3"/>
         <circle cx="20" cy="20" r="17" fill="none" stroke="#111" stroke-width="3"
           stroke-dasharray="107" stroke-dashoffset="27"
-          stroke-linecap="round" transform="rotate(-90 20 20)"/>
-        <text x="20" y="20" class="progress-ring-text">3/4</text>
+          stroke-linecap="round" transform="rotate(-90 20 20)" id="ob-ring-fill"/>
+        <text x="20" y="20" class="progress-ring-text" id="ob-ring-text">—</text>
       </svg>
       <div class="ob-text">
         <div class="ob-title">Complete your setup</div>
-        <div class="ob-sub">One step left before you're ready to go live.</div>
-        <div class="ob-steps">
-          <div class="ob-step done"></div>
-          <div class="ob-step done"></div>
-          <div class="ob-step done"></div>
-          <div class="ob-step active"></div>
-        </div>
+        <div class="ob-sub" id="ob-sub">Continue where you left off.</div>
+        <div class="ob-steps" id="ob-steps"></div>
       </div>
-      <a class="ob-cta" href="#">Configure webhooks →</a>
+      <a class="ob-cta" href="/onboarding">Continue setup →</a>
     </div>
 
     <!-- PAGE HEADER -->
@@ -630,38 +625,23 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">Verifications</div>
-        <div class="stat-value" id="stat-verifications">1,284</div>
-        <div class="stat-delta up">
-          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          +18%
-          <span class="delta-sub">vs prior 7d</span>
-        </div>
+        <div class="stat-value loading-skeleton" id="stat-verifications"></div>
+        <div class="stat-delta" id="stat-verifications-delta" style="display:none"></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Enrolled devices</div>
-        <div class="stat-value" id="stat-devices">248</div>
-        <div class="stat-delta up">
-          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          +34
-          <span class="delta-sub">this week</span>
-        </div>
+        <div class="stat-value loading-skeleton" id="stat-devices"></div>
+        <div class="stat-delta" id="stat-devices-delta" style="display:none"></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">High confidence</div>
-        <div class="stat-value" id="stat-confidence">91.2%</div>
-        <div class="stat-delta flat">
-          —
-          <span class="delta-sub">stable</span>
-        </div>
+        <div class="stat-value loading-skeleton" id="stat-confidence"></div>
+        <div class="stat-delta flat" id="stat-confidence-delta" style="display:none">—<span class="delta-sub">stable</span></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Avg duration</div>
-        <div class="stat-value" id="stat-duration">1.4s</div>
-        <div class="stat-delta up">
-          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          −120ms
-          <span class="delta-sub">vs prior 7d</span>
-        </div>
+        <div class="stat-value loading-skeleton" id="stat-duration"></div>
+        <div class="stat-delta" id="stat-duration-delta" style="display:none"></div>
       </div>
     </div>
 
@@ -698,40 +678,7 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
         <text x="0" y="98"  font-family="DM Mono,monospace" font-size="11" fill="#CCC">100</text>
         <text x="0" y="138" font-family="DM Mono,monospace" font-size="11" fill="#CCC">25</text>
 
-        <!-- Bars — high confidence (dark) + low (light) stacked -->
-        <!-- Day 1: Apr 5 -->
-        <rect x="80"  y="72"  width="72" height="68" rx="3" fill="#111"/>
-        <rect x="80"  y="62"  width="72" height="10" rx="3" fill="#DDD"/>
-        <text x="116" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 5</text>
-
-        <!-- Day 2: Apr 6 -->
-        <rect x="196" y="55"  width="72" height="85" rx="3" fill="#111"/>
-        <rect x="196" y="44"  width="72" height="11" rx="3" fill="#DDD"/>
-        <text x="232" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 6</text>
-
-        <!-- Day 3: Apr 7 -->
-        <rect x="312" y="80"  width="72" height="60" rx="3" fill="#111"/>
-        <rect x="312" y="72"  width="72" height="8"  rx="3" fill="#DDD"/>
-        <text x="348" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 7</text>
-
-        <!-- Day 4: Apr 8 -->
-        <rect x="428" y="48"  width="72" height="92" rx="3" fill="#111"/>
-        <rect x="428" y="36"  width="72" height="12" rx="3" fill="#DDD"/>
-        <text x="464" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 8</text>
-
-        <!-- Day 5: Apr 9 -->
-        <rect x="544" y="60"  width="72" height="80" rx="3" fill="#111"/>
-        <rect x="544" y="50"  width="72" height="10" rx="3" fill="#DDD"/>
-        <text x="580" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 9</text>
-
-        <!-- Day 6: Apr 10 -->
-        <rect x="660" y="40"  width="72" height="100" rx="3" fill="#111"/>
-        <rect x="660" y="28"  width="72" height="12"  rx="3" fill="#DDD"/>
-        <text x="696" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 10</text>
-
-        <!-- Day 7: Apr 11 (today, partial) -->
-        <rect x="776" y="88"  width="72" height="52" rx="3" fill="#CCC" opacity="0.5"/>
-        <text x="812" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Today</text>
+        <g id="chart-bars"></g>
       </svg>
     </div>
 
@@ -740,70 +687,30 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
       <div class="conf-card">
         <div class="conf-title">Confidence breakdown</div>
 
-        <div class="conf-bar-row">
+        <div class="conf-bar-row" id="conf-row-high" style="display:none">
           <div class="conf-bar-header">
             <span class="conf-bar-label">High</span>
-            <span class="conf-bar-pct">91.2%</span>
+            <span class="conf-bar-pct" id="conf-pct-high">—</span>
           </div>
-          <div class="conf-track"><div class="conf-fill high" style="width:91.2%"></div></div>
-          <div class="conf-count">1,171 verifications</div>
+          <div class="conf-track"><div class="conf-fill high" id="conf-fill-high" style="width:0%"></div></div>
+          <div class="conf-count" id="conf-count-high"></div>
         </div>
 
-        <div class="conf-bar-row">
+        <div class="conf-bar-row" id="conf-row-other" style="display:none">
           <div class="conf-bar-header">
-            <span class="conf-bar-label">Medium</span>
-            <span class="conf-bar-pct">6.8%</span>
+            <span class="conf-bar-label">Med / Low</span>
+            <span class="conf-bar-pct" id="conf-pct-other">—</span>
           </div>
-          <div class="conf-track"><div class="conf-fill med" style="width:6.8%"></div></div>
-          <div class="conf-count">87 verifications · simulator likely</div>
+          <div class="conf-track"><div class="conf-fill med" id="conf-fill-other" style="width:0%"></div></div>
+          <div class="conf-count" id="conf-count-other"></div>
         </div>
 
-        <div class="conf-bar-row">
-          <div class="conf-bar-header">
-            <span class="conf-bar-label">Low</span>
-            <span class="conf-bar-pct">2.0%</span>
-          </div>
-          <div class="conf-track"><div class="conf-fill low" style="width:2%"></div></div>
-          <div class="conf-count">26 verifications · fallback triggered</div>
-        </div>
+        <div id="conf-empty" style="color:var(--ink-3);font-size:12px;padding:8px 0;">No data yet.</div>
       </div>
 
-      <div class="platform-card">
+      <div class="platform-card" id="platform-card">
         <div class="platform-title">Platform split</div>
-
-        <div class="platform-row">
-          <div class="platform-label">iOS</div>
-          <div class="platform-track"><div class="platform-fill ios" style="width:68%"></div></div>
-          <div class="platform-pct">68%</div>
-        </div>
-
-        <div class="platform-row">
-          <div class="platform-label">Android</div>
-          <div class="platform-track"><div class="platform-fill android" style="width:32%"></div></div>
-          <div class="platform-pct">32%</div>
-        </div>
-
-        <div style="border-top:1px solid var(--border); margin-top:16px; padding-top:16px;">
-          <div style="font-size:11px; color:var(--ink-3); margin-bottom:10px; font-weight:500; letter-spacing:0.5px;">BIOMETRIC METHOD</div>
-          <div style="display:flex; flex-direction:column; gap:7px;">
-            <div style="display:flex; justify-content:space-between; font-size:12px;">
-              <span style="color:var(--ink-2)">Face ID</span>
-              <span style="font-family:var(--mono); font-size:11px; color:var(--ink-3)">54%</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:12px;">
-              <span style="color:var(--ink-2)">Touch ID</span>
-              <span style="font-family:var(--mono); font-size:11px; color:var(--ink-3)">14%</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:12px;">
-              <span style="color:var(--ink-2)">Android biometric</span>
-              <span style="font-family:var(--mono); font-size:11px; color:var(--ink-3)">29%</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:12px;">
-              <span style="color:var(--ink-2)">None</span>
-              <span style="font-family:var(--mono); font-size:11px; color:var(--ink-3)">3%</span>
-            </div>
-          </div>
-        </div>
+        <div id="platform-content" style="color:var(--ink-3);font-size:12px;padding:8px 0;">No data yet.</div>
       </div>
     </div>
 
@@ -821,11 +728,11 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
       </svg>
 
       <div class="network-eyebrow">Device reputation network</div>
-      <div class="network-value">2.8×</div>
+      <div class="network-value" id="network-ratio">—</div>
       <div class="network-label">avg verifications per device · 90 days</div>
       <div class="network-sub">
         <div class="network-sub-item">
-          <div class="network-sub-val">248</div>
+          <div class="network-sub-val" id="network-devices">—</div>
           <div class="network-sub-label">network devices</div>
         </div>
         <div class="network-sub-item">
@@ -843,7 +750,7 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     <div class="log-card">
       <div class="log-header">
         <div class="log-title">Recent verifications</div>
-        <a class="log-link" href="#">View all →</a>
+        <a class="log-link" href="/verifications">View all →</a>
       </div>
       <table class="log-table">
         <thead>
@@ -855,42 +762,8 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
             <th>Time</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td class="device-id-cell">dvc_01HZXK9M4P3R</td>
-            <td><span class="conf-badge high"><span class="conf-badge-dot"></span>high</span></td>
-            <td class="platform-cell">iOS · Face ID</td>
-            <td class="dur-cell">1.2s</td>
-            <td class="time-cell">2 min ago</td>
-          </tr>
-          <tr>
-            <td class="device-id-cell">dvc_02KAYLN5Q4S9</td>
-            <td><span class="conf-badge high"><span class="conf-badge-dot"></span>high</span></td>
-            <td class="platform-cell">Android · biometric</td>
-            <td class="dur-cell">1.8s</td>
-            <td class="time-cell">6 min ago</td>
-          </tr>
-          <tr>
-            <td class="device-id-cell">dvc_03LBZMO6R5T0</td>
-            <td><span class="conf-badge med"><span class="conf-badge-dot"></span>medium</span></td>
-            <td class="platform-cell">iOS · simulator</td>
-            <td class="dur-cell">0.9s</td>
-            <td class="time-cell">14 min ago</td>
-          </tr>
-          <tr>
-            <td class="device-id-cell">dvc_04MCAPN7S6U1</td>
-            <td><span class="conf-badge high"><span class="conf-badge-dot"></span>high</span></td>
-            <td class="platform-cell">iOS · Touch ID</td>
-            <td class="dur-cell">1.4s</td>
-            <td class="time-cell">22 min ago</td>
-          </tr>
-          <tr>
-            <td class="device-id-cell">dvc_05NDBQO8T7V2</td>
-            <td><span class="conf-badge low"><span class="conf-badge-dot"></span>low</span></td>
-            <td class="platform-cell">Android · none</td>
-            <td class="dur-cell">2.1s</td>
-            <td class="time-cell">31 min ago</td>
-          </tr>
+        <tbody id="log-tbody">
+          <tr><td colspan="5" style="padding:20px;text-align:center;color:var(--ink-4);">Loading…</td></tr>
         </tbody>
       </table>
     </div>
@@ -917,24 +790,73 @@ function formatTime(isoString) {
 
 function formatPlatform(p) {
   if (!p) return '—';
-  return p.charAt(0).toUpperCase() + p.slice(1);
+  const parts = p.split('_');
+  return parts.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
 }
 
 function renderStats(overview) {
-  const els = {
-    'stat-verifications': (overview.verificationCount ?? 0).toLocaleString(),
-    'stat-devices':       (overview.deviceCount        ?? 0).toLocaleString(),
-    'stat-confidence':    overview.highConfidencePct != null ? `${overview.highConfidencePct.toFixed(1)}%` : '—',
-    'stat-duration':      overview.avgDurationMs      != null ? `${(overview.avgDurationMs / 1000).toFixed(1)}s` : '—',
+  const total = overview.verificationCount ?? 0;
+  const devs  = overview.deviceCount ?? 0;
+  const hpct  = overview.highConfidencePct;
+  const dur   = overview.avgDurationMs;
+
+  const vals = {
+    'stat-verifications': total.toLocaleString(),
+    'stat-devices':       devs.toLocaleString(),
+    'stat-confidence':    hpct != null ? `${hpct.toFixed(1)}%` : '—',
+    'stat-duration':      dur  != null ? `${(dur / 1000).toFixed(1)}s` : '—',
   };
-  for (const [id, val] of Object.entries(els)) {
+  for (const [id, val] of Object.entries(vals)) {
     const el = document.getElementById(id);
     if (el) { el.classList.remove('loading-skeleton'); el.textContent = val; }
+  }
+
+  // Show delta for confidence once we have data
+  if (hpct != null) {
+    const d = document.getElementById('stat-confidence-delta');
+    if (d) d.style.display = '';
+  }
+
+  // Nav counts
+  const nc = document.getElementById('nav-count-verifications');
+  const nd = document.getElementById('nav-count-devices');
+  if (nc && total > 0) nc.textContent = total >= 1000 ? `${(total/1000).toFixed(1)}k` : total;
+  if (nd && devs  > 0) nd.textContent = devs;
+
+  // Confidence breakdown
+  if (hpct != null && total > 0) {
+    const otherPct = 100 - hpct;
+    const highCount  = Math.round(total * hpct / 100);
+    const otherCount = total - highCount;
+
+    document.getElementById('conf-empty').style.display = 'none';
+
+    const rowH = document.getElementById('conf-row-high');
+    rowH.style.display = '';
+    document.getElementById('conf-pct-high').textContent  = `${hpct.toFixed(1)}%`;
+    document.getElementById('conf-fill-high').style.width = `${hpct}%`;
+    document.getElementById('conf-count-high').textContent = `${highCount.toLocaleString()} verifications`;
+
+    if (otherCount > 0) {
+      const rowO = document.getElementById('conf-row-other');
+      rowO.style.display = '';
+      document.getElementById('conf-pct-other').textContent  = `${otherPct.toFixed(1)}%`;
+      document.getElementById('conf-fill-other').style.width = `${otherPct}%`;
+      document.getElementById('conf-count-other').textContent = `${otherCount.toLocaleString()} verifications`;
+    }
+  }
+
+  // Network card
+  const netDevs  = document.getElementById('network-devices');
+  const netRatio = document.getElementById('network-ratio');
+  if (netDevs && devs > 0) netDevs.textContent = devs.toLocaleString();
+  if (netRatio && devs > 0 && total > 0) {
+    netRatio.textContent = `${(total / devs).toFixed(1)}×`;
   }
 }
 
 function renderRecentVerifications(rows) {
-  const tbody = document.querySelector('.log-table tbody');
+  const tbody = document.getElementById('log-tbody');
   if (!tbody) return;
   if (rows.length === 0) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--ink-3);padding:24px;">No verifications yet — run your first one from the onboarding checklist.</td></tr>`;
@@ -944,7 +866,7 @@ function renderRecentVerifications(rows) {
     <tr>
       <td class="device-id-cell">${row.deviceId ?? row.sessionId ?? '—'}</td>
       <td><span class="conf-badge ${confClass(row.confidence)}"><span class="conf-badge-dot"></span>${row.confidence ?? '—'}</span></td>
-      <td class="platform-cell">${formatPlatform(row.platform)}</td>
+      <td class="platform-cell">${formatPlatform(row.platform)}${row.biometric ? ' · ' + row.biometric.replace(/_/g,' ') : ''}</td>
       <td class="dur-cell">${row.durationMs ? `${(row.durationMs / 1000).toFixed(1)}s` : '—'}</td>
       <td class="time-cell">${i === 0 ? '<span class="live-dot"></span>' : ''}${formatTime(row.createdAt)}</td>
     </tr>
@@ -964,6 +886,74 @@ function renderChart(dailyBreakdown) {
   if (!chartCard) return;
   if (!dailyBreakdown || dailyBreakdown.length === 0) {
     chartCard.style.display = 'none';
+    return;
+  }
+
+  const barsEl = document.getElementById('chart-bars');
+  if (!barsEl) return;
+
+  const n      = dailyBreakdown.length;
+  const W      = 900;
+  const H      = 140; // usable height (top 20px reserved)
+  const pad    = 40;  // left label space
+  const barW   = Math.floor((W - pad) / n * 0.55);
+  const gap    = Math.floor((W - pad) / n);
+  const maxVal = Math.max(...dailyBreakdown.map(d => (d.high || 0) + (d.low || 0)), 1);
+
+  // Y-axis labels
+  const yLabels = [maxVal, Math.round(maxVal*0.6), Math.round(maxVal*0.3), 0];
+  let svg = '';
+  yLabels.forEach((v, i) => {
+    const y = 20 + i * 40;
+    svg += `<text x="0" y="${y - 2}" font-family="DM Mono,monospace" font-size="11" fill="#CCC">${v}</text>`;
+  });
+
+  dailyBreakdown.forEach((d, i) => {
+    const total = (d.high || 0) + (d.low || 0);
+    const highH = Math.round((d.high || 0) / maxVal * H);
+    const lowH  = Math.round((d.low  || 0) / maxVal * H);
+    const x     = pad + i * gap + Math.floor((gap - barW) / 2);
+    const isLast = i === n - 1;
+
+    const dateLabel = isLast ? 'Today'
+      : new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    if (highH > 0)
+      svg += `<rect x="${x}" y="${20 + H - highH}" width="${barW}" height="${highH}" rx="3" fill="${isLast ? '#CCC' : '#111'}" opacity="${isLast ? 0.5 : 1}"/>`;
+    if (lowH > 0)
+      svg += `<rect x="${x}" y="${20 + H - highH - lowH}" width="${barW}" height="${lowH}" rx="3" fill="#DDD" opacity="${isLast ? 0.5 : 1}"/>`;
+    if (total === 0)
+      svg += `<rect x="${x}" y="${20 + H - 4}" width="${barW}" height="4" rx="2" fill="#EEE"/>`;
+
+    svg += `<text x="${x + barW/2}" y="175" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">${dateLabel}</text>`;
+  });
+
+  barsEl.innerHTML = svg;
+}
+
+function renderOnboardingBanner(session) {
+  const banner = document.getElementById('onboarding-banner');
+  if (!banner) return;
+  if (session.onboardingComplete) { banner.style.display = 'none'; return; }
+
+  banner.style.display = '';
+  // Simple 3-step progress: account created, keys received, first verification pending
+  const steps = [true, true, false];
+  const done  = steps.filter(Boolean).length;
+  const total = steps.length;
+
+  const circumference = 107;
+  const offset = circumference - (circumference * done / total);
+  const ringFill = document.getElementById('ob-ring-fill');
+  const ringText = document.getElementById('ob-ring-text');
+  if (ringFill) ringFill.setAttribute('stroke-dashoffset', offset);
+  if (ringText) ringText.textContent = `${done}/${total}`;
+
+  const stepsEl = document.getElementById('ob-steps');
+  if (stepsEl) {
+    stepsEl.innerHTML = steps.map((s, i) =>
+      `<div class="ob-step ${s ? 'done' : (i === done ? 'active' : '')}"></div>`
+    ).join('');
   }
 }
 
@@ -1011,6 +1001,7 @@ async function loadDashboard(range = '7d') {
     renderRecentVerifications(verifications.rows ?? []);
     renderUsage(usage);
     renderChart(overview.dailyBreakdown);
+    renderOnboardingBanner(session);
     updatePageSubtitle(usage);
   } catch (err) {
     console.error('Dashboard load failed', err);
