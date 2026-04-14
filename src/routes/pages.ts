@@ -18,4 +18,5 @@ export default async function pageRoutes(fastify: FastifyInstance) {
   fastify.get('/dashboard',     guard, async (_, reply) => reply.sendFile('dashboard.html'))
   fastify.get('/verifications', guard, async (_, reply) => reply.sendFile('verifications.html'))
   fastify.get('/settings',      guard, async (_, reply) => reply.sendFile('settings.html'))
+  fastify.get('/reputation',    guard, async (_, reply) => reply.sendFile('reputation.html'))
 }
