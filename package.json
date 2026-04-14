@@ -8,17 +8,18 @@
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
-    "fastify": "^4",
-    "@fastify/session": "^10",
     "@fastify/cookie": "^9",
-    "@fastify/static": "^7",
     "@fastify/rate-limit": "^9",
-    "resend": "^3",
-    "ioredis": "^5"
+    "@fastify/session": "^10",
+    "@fastify/static": "^7",
+    "connect-redis": "^9.0.0",
+    "fastify": "^4",
+    "ioredis": "^5",
+    "resend": "^3"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@types/node": "^20",
     "tsx": "^4",
-    "@types/node": "^20"
+    "typescript": "^5"
   }
 }

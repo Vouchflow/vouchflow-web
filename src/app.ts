@@ -13,6 +13,33 @@ import webRoutes from './routes/web.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+// Minimal ioredis-compatible session store for @fastify/session
+const SESSION_PREFIX = 'sess:'
+const sessionStore = {
+  async get(sid: string, cb: (err: any, session?: any) => void) {
+    try {
+      const val = await redis.get(SESSION_PREFIX + sid)
+      cb(null, val ? JSON.parse(val) : null)
+    } catch (err) { cb(err) }
+  },
+  async set(sid: string, session: any, cb: (err?: any) => void) {
+    try {
+      const expires = session?.cookie?.expires
+      const ttl = expires
+        ? Math.max(1, Math.floor((new Date(expires).getTime() - Date.now()) / 1000))
+        : 30 * 24 * 60 * 60 // 30 days fallback
+      await redis.set(SESSION_PREFIX + sid, JSON.stringify(session), 'EX', ttl)
+      cb()
+    } catch (err) { cb(err) }
+  },
+  async destroy(sid: string, cb: (err?: any) => void) {
+    try {
+      await redis.del(SESSION_PREFIX + sid)
+      cb()
+    } catch (err) { cb(err) }
+  },
+}
+
 export async function buildApp() {
   const fastify = Fastify({
     logger: true,
@@ -31,6 +58,7 @@ export async function buildApp() {
   await fastify.register(cookie)
   await fastify.register(session, {
     secret: config.sessionSecret,
+    store: sessionStore,
     cookie: {
       secure: config.nodeEnv === 'production',
       httpOnly: true,

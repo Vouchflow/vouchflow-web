@@ -85,4 +85,5 @@ export default async function authRoutes(fastify: FastifyInstance) {
     await request.session.destroy()
     return reply.redirect('/')
   })
+
 }
