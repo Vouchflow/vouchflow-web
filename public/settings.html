@@ -1135,10 +1135,32 @@ function showPartnerForm() {
 function hidePartnerForm() {
   document.getElementById('partner-overlay').style.display = 'none';
 }
-function submitPartner(btn) {
-  btn.textContent = 'Sent ✓';
-  btn.style.background = 'var(--success)';
-  setTimeout(() => { hidePartnerForm(); btn.textContent = 'Send →'; btn.style.background = 'var(--ink)'; }, 1200);
+async function submitPartner(btn) {
+  const inputs = document.querySelectorAll('#partner-overlay input, #partner-overlay select, #partner-overlay textarea');
+  const building = inputs[0]?.value?.trim() ?? '';
+  const volume   = inputs[1]?.value ?? '';
+  const notes    = inputs[2]?.value?.trim() ?? '';
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/web/partner-inquiry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ building, volume, notes }),
+    });
+    if (res.ok) {
+      btn.textContent = 'Sent ✓';
+      btn.style.background = 'var(--success)';
+      setTimeout(() => { hidePartnerForm(); btn.textContent = 'Send →'; btn.style.background = 'var(--ink)'; btn.disabled = false; }, 1500);
+    } else {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  } catch {
+    btn.textContent = 'Try again';
+    btn.disabled = false;
+  }
 }
 document.getElementById('partner-overlay').addEventListener('click', function(e) {
   if (e.target === this) hidePartnerForm();

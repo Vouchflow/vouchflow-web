@@ -3,6 +3,25 @@ import { config } from '../config.js'
 
 const resend = new Resend(config.resendApiKey)
 
+export async function sendPartnerInquiry(
+  fromEmail: string,
+  fields: { building: string; volume: string; notes: string }
+): Promise<void> {
+  await resend.emails.send({
+    from: 'Vouchflow <noreply@vouchflow.dev>',
+    to: 'hello@vouchflow.dev',
+    replyTo: fromEmail,
+    subject: `Design partner inquiry from ${fromEmail}`,
+    text: [
+      `From: ${fromEmail}`,
+      '',
+      `What they're building: ${fields.building || '(not provided)'}`,
+      `Expected monthly verifications: ${fields.volume || '(not provided)'}`,
+      `Notes: ${fields.notes || '(not provided)'}`,
+    ].join('\n'),
+  })
+}
+
 export async function sendMagicLink(email: string, token: string): Promise<void> {
   const url = `${config.webBaseUrl}/auth/verify?token=${token}`
 

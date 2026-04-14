@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { requireSession } from '../middleware/requireSession.js'
+import { sendPartnerInquiry } from '../services/email.js'
 import {
   getOverviewStats,
   getVerifications,
@@ -130,6 +131,25 @@ export default async function webRoutes(fastify: FastifyInstance) {
       return { webhooks: [] }
     }
   })
+
+  // POST /web/partner-inquiry
+  fastify.post<{ Body: { building?: string; volume?: string; notes?: string } }>(
+    '/web/partner-inquiry',
+    async (request, reply) => {
+      const email = request.session.get('email') as string
+      try {
+        await sendPartnerInquiry(email, {
+          building: request.body.building ?? '',
+          volume:   request.body.volume   ?? '',
+          notes:    request.body.notes    ?? '',
+        })
+        return { ok: true }
+      } catch (err) {
+        fastify.log.error({ err, event: 'partner_inquiry_failed' })
+        return reply.status(500).send({ error: 'send_failed' })
+      }
+    }
+  )
 
   // GET /web/keys/reveal — full unmasked keys (session-protected, never logged)
   fastify.get('/web/keys/reveal', async (request) => ({
