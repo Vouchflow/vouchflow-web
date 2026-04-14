@@ -85,6 +85,46 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   cursor: pointer; flex-shrink: 0;
 }
 
+.avatar-wrap {
+  position: relative;
+}
+
+.avatar-menu {
+  display: none;
+  position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  min-width: 180px;
+  z-index: 200;
+  overflow: hidden;
+}
+.avatar-menu.open { display: block; }
+
+.avatar-menu-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.avatar-menu-email {
+  font-size: 11px; color: var(--ink-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.avatar-menu-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px;
+  font-size: 13px; color: var(--ink-2);
+  text-decoration: none; cursor: pointer;
+  background: none; border: none; width: 100%; text-align: left;
+  font-family: var(--sans);
+  transition: background 0.1s;
+}
+.avatar-menu-item:hover { background: var(--ground); color: var(--ink); }
+.avatar-menu-item.danger { color: var(--danger); }
+.avatar-menu-item.danger:hover { background: var(--d-bg); }
+
 .topbar-docs {
   font-size: 12px; color: var(--ink-3); text-decoration: none;
   padding: 6px 10px; border-radius: 5px;
@@ -515,7 +555,24 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   <div class="topbar-right">
     <span class="topbar-org" id="topbar-org"></span>
     <a class="topbar-docs" href="/docs">Docs</a>
-    <div class="avatar" id="topbar-avatar">…</div>
+    <div class="avatar-wrap" id="avatar-wrap">
+      <div class="avatar" id="topbar-avatar" onclick="toggleAvatarMenu()">…</div>
+      <div class="avatar-menu" id="avatar-menu">
+        <div class="avatar-menu-header">
+          <div class="avatar-menu-email" id="avatar-menu-email">—</div>
+        </div>
+        <a class="avatar-menu-item" href="/settings">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="3.5" r="2.2" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 11c0-2.485 2.239-4.5 5-4.5s5 2.015 5 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Account settings
+        </a>
+        <form method="POST" action="/auth/signout">
+          <button class="avatar-menu-item danger" type="submit">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 4.5L11 7m0 0L8.5 9.5M11 7H5M5 2H3a1 1 0 00-1 1v7a1 1 0 001 1h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Sign out
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -994,8 +1051,10 @@ async function loadDashboard(range = '7d') {
 
     const topbarOrg    = document.getElementById('topbar-org');
     const topbarAvatar = document.getElementById('topbar-avatar');
+    const menuEmail    = document.getElementById('avatar-menu-email');
     if (topbarOrg    && session.email) topbarOrg.textContent    = session.email;
     if (topbarAvatar && session.email) topbarAvatar.textContent = session.email[0].toUpperCase();
+    if (menuEmail    && session.email) menuEmail.textContent    = session.email;
 
     renderStats(overview);
     renderRecentVerifications(verifications.rows ?? []);
@@ -1018,6 +1077,17 @@ document.querySelectorAll('.range-btn').forEach(btn => {
     btn.classList.add('active');
     loadDashboard(btn.textContent.trim());
   });
+});
+
+function toggleAvatarMenu() {
+  document.getElementById('avatar-menu').classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('avatar-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('avatar-menu').classList.remove('open');
+  }
 });
 
 function toggleNav() {
