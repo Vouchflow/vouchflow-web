@@ -52,6 +52,32 @@ export async function updateCustomer(
   })
 }
 
+export interface LiveKeyInfo {
+  id:        string
+  scope:     'write' | 'read'
+  createdAt: string
+}
+
+export interface GeneratedLiveKeys {
+  writeKey: { id: string; rawKey: string; scope: 'write'; createdAt: string }
+  readKey:  { id: string; rawKey: string; scope: 'read';  createdAt: string }
+}
+
+export async function generateLiveKeys(customerId: string): Promise<GeneratedLiveKeys> {
+  return apiFetch<GeneratedLiveKeys>(`/v1/customers/${customerId}/live-keys`, {
+    method: 'POST',
+    body: '{}',
+  })
+}
+
+export async function deleteAccount(customerId: string): Promise<void> {
+  await apiFetch<void>(`/v1/customers/${customerId}`, { method: 'DELETE' })
+}
+
+export async function getLiveKeys(customerId: string): Promise<{ keys: LiveKeyInfo[] }> {
+  return apiFetch<{ keys: LiveKeyInfo[] }>(`/v1/customers/${customerId}/live-keys`)
+}
+
 // ── Stats ────────────────────────────────────────────────────────────────────
 
 export interface OverviewStats {

@@ -532,7 +532,14 @@ code {
 
 <!-- TOPBAR -->
 <header class="topbar">
-  <a class="topbar-logo" href="#">
+    <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+<a class="topbar-logo" href="#">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <rect x="3" y="3" width="11" height="11" rx="2.5" stroke="#111" stroke-width="1.8"/>
       <rect x="10" y="10" width="11" height="11" rx="2.5" fill="white" stroke="#111" stroke-width="1.8"/>
@@ -540,20 +547,13 @@ code {
     </svg>
     <span class="logo-word">vouchflow</span>
   </a>
-  <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
-    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
-      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-  </button>
   <div class="topbar-center">
     <div class="env-pill"><span class="env-dot"></span>sandbox</div>
   </div>
   <div class="topbar-right">
-    <span class="topbar-org">acme-corp</span>
+    <span class="topbar-org" id="topbar-org"></span>
     <a class="topbar-docs" href="#">Docs</a>
-    <a class="avatar" href="/settings" style="text-decoration:none">AC</a>
+    <a class="avatar" id="topbar-avatar" href="/settings" style="text-decoration:none">…</a>
   </div>
 </header>
 
@@ -1141,6 +1141,29 @@ async function showPayoffBanner() {
   }
 }
 
+function renderAvatar(el, session) {
+  if (session.avatarUrl) {
+    const img = document.createElement('img');
+    img.src = session.avatarUrl;
+    img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;';
+    img.onerror = () => { el.textContent = initials(session); };
+    el.textContent = '';
+    el.appendChild(img);
+  } else {
+    el.textContent = initials(session);
+  }
+}
+
+function initials(session) {
+  if (session.name) {
+    const parts = session.name.trim().split(/\s+/);
+    return parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : parts[0][0].toUpperCase();
+  }
+  return session.email ? session.email[0].toUpperCase() : '?';
+}
+
 async function loadSession() {
   try {
     const res = await fetch('/web/session', { credentials: 'include' });
@@ -1149,6 +1172,10 @@ async function loadSession() {
       return;
     }
     const session = await res.json();
+    const org = document.getElementById('topbar-org');
+    const av  = document.getElementById('topbar-avatar');
+    if (org) org.textContent = session.orgName || session.email || '';
+    if (av) renderAvatar(av, session);
     if (session.sandboxWriteKey) {
       panelContent.init.html = panelContent.init.html.replace(
         '"vsk_sandbox_4xK9mN2pL8..."',

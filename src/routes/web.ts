@@ -11,6 +11,9 @@ import {
   createWebhook,
   deleteWebhook,
   updateCustomer,
+  generateLiveKeys,
+  getLiveKeys,
+  deleteAccount,
 } from '../services/apiClient.js'
 
 function maskKey(key: string): string {
@@ -30,6 +33,9 @@ export default async function webRoutes(fastify: FastifyInstance) {
     sandboxReadKey:     maskKey(request.session.get('sandboxReadKey')  as string),
     webhookSecret:      maskKey(request.session.get('webhookSecret')   as string),
     onboardingComplete: request.session.get('onboardingComplete'),
+    name:               request.session.get('name'),
+    orgName:            request.session.get('orgName'),
+    avatarUrl:          request.session.get('avatarUrl'),
   }))
 
   // GET /web/overview
@@ -90,7 +96,11 @@ export default async function webRoutes(fastify: FastifyInstance) {
     Body: { orgName?: string; billingEmail?: string; minimumConfidence?: string; networkOptIn?: boolean }
   }>('/web/account', async (request) => {
     const customerId = request.session.get('customerId') as string
-    return updateCustomer(customerId, request.body)
+    const result = await updateCustomer(customerId, request.body)
+    if (request.body.orgName !== undefined) {
+      request.session.set('orgName', request.body.orgName || null)
+    }
+    return result
   })
 
   // POST /web/webhooks
@@ -157,4 +167,40 @@ export default async function webRoutes(fastify: FastifyInstance) {
     sandboxReadKey:  request.session.get('sandboxReadKey')  as string,
     webhookSecret:   request.session.get('webhookSecret')   as string,
   }))
+
+  // POST /web/live-keys — generate live write+read key pair (raw keys returned once)
+  fastify.post('/web/live-keys', async (request, reply) => {
+    const customerId = request.session.get('customerId') as string
+    try {
+      const result = await generateLiveKeys(customerId)
+      return result
+    } catch (err) {
+      fastify.log.error({ err, event: 'live_key_generation_failed' })
+      return reply.status(500).send({ error: 'generation_failed' })
+    }
+  })
+
+  // DELETE /web/account — permanently delete the customer account and all data
+  fastify.delete('/web/account', async (request, reply) => {
+    const customerId = request.session.get('customerId') as string
+    try {
+      await deleteAccount(customerId)
+      await request.session.destroy()
+      return reply.send({ ok: true })
+    } catch (err) {
+      fastify.log.error({ err, event: 'account_deletion_failed' })
+      return reply.status(500).send({ error: 'deletion_failed' })
+    }
+  })
+
+  // GET /web/live-keys — metadata for active live keys (no raw values)
+  fastify.get('/web/live-keys', async (request, reply) => {
+    const customerId = request.session.get('customerId') as string
+    try {
+      return await getLiveKeys(customerId)
+    } catch (err) {
+      fastify.log.error({ err, event: 'live_key_fetch_failed' })
+      return reply.status(500).send({ error: 'fetch_failed' })
+    }
+  })
 }

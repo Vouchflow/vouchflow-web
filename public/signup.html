@@ -21,7 +21,6 @@
   --mono:    'DM Mono', monospace;
   --success: #1A9E5C;
   --danger:  #CC3333;
-  --s-bg:    #EDFAF4;
   --d-bg:    #FEF1F1;
 }
 
@@ -33,7 +32,6 @@ html, body {
   line-height: 1.5;
 }
 
-/* ── LAYOUT: left panel + right form ── */
 .page {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -50,7 +48,6 @@ html, body {
   overflow: hidden;
 }
 
-/* Subtle grid texture */
 .left::before {
   content: '';
   position: absolute; inset: 0;
@@ -130,11 +127,6 @@ html, body {
 
 .right-inner { width: 100%; max-width: 360px; }
 
-/* ── SCREEN STATES ── */
-.screen { display: none; }
-.screen.active { display: block; }
-
-/* ── FORM ── */
 .form-eyebrow {
   font-size: 10px; font-weight: 500; letter-spacing: 2.5px;
   text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px;
@@ -150,197 +142,47 @@ html, body {
   margin-bottom: 32px; line-height: 1.6;
 }
 
-.field { margin-bottom: 14px; }
-
-.field-label {
-  font-size: 11px; font-weight: 500; color: var(--ink-2);
-  letter-spacing: 0.3px; display: block; margin-bottom: 6px;
-}
-
-.field-input {
-  font-family: var(--sans); font-size: 13px; color: var(--ink);
-  background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: 7px; padding: 10px 14px; width: 100%;
-  outline: none; transition: border-color 0.15s;
-}
-.field-input:focus { border-color: var(--ink); }
-.field-input.error { border-color: var(--danger); }
-.field-input::placeholder { color: var(--ink-4); }
-
-.field-error {
-  font-size: 11px; color: var(--danger);
-  margin-top: 5px; display: none;
-}
-.field-error.show { display: block; }
-
-.field-hint {
-  font-size: 11px; color: var(--ink-4); margin-top: 5px; font-weight: 300;
-}
-
-/* Submit button */
-.btn-submit {
-  font-family: var(--sans); font-size: 14px; font-weight: 500;
-  background: var(--ink); color: white; border: none;
-  border-radius: 7px; padding: 12px 20px; width: 100%;
-  cursor: pointer; transition: background 0.15s;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin-top: 8px;
-}
-.btn-submit:hover { background: #2A2A2A; }
-.btn-submit:disabled { background: var(--ink-4); cursor: not-allowed; }
-
-@keyframes spin { to { transform: rotate(360deg); } }
-.btn-spinner {
-  width: 16px; height: 16px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: white;
-  animation: spin 0.7s linear infinite;
-  display: none; flex-shrink: 0;
-}
-
-.divider {
+/* ── OAUTH BUTTONS ── */
+.oauth-btn {
   display: flex; align-items: center; gap: 12px;
-  margin: 20px 0; font-size: 11px; color: var(--ink-4);
+  width: 100%; padding: 13px 18px;
+  border-radius: 8px; border: 1.5px solid var(--border);
+  background: var(--surface); cursor: pointer;
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  color: var(--ink); text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+  margin-bottom: 12px;
 }
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
+
+.oauth-btn:hover {
+  border-color: #BBBBBB;
+  background: var(--ground);
 }
+
+.oauth-btn svg { flex-shrink: 0; }
+
+.oauth-btn-label { flex: 1; text-align: left; }
+
+/* ── ERROR BANNER ── */
+.error-banner {
+  display: none;
+  background: var(--d-bg);
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px; color: #B91C1C;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.error-banner.show { display: block; }
 
 .terms-note {
   font-size: 11px; color: var(--ink-4); text-align: center;
-  line-height: 1.6; margin-top: 16px; font-weight: 300;
+  line-height: 1.6; margin-top: 20px; font-weight: 300;
 }
 .terms-note a { color: var(--ink-3); text-decoration: none; }
 .terms-note a:hover { color: var(--ink); }
 
-/* Rate limit notice */
-.rate-notice {
-  background: var(--ground); border: 1px solid var(--border);
-  border-radius: 7px; padding: 12px 14px;
-  font-size: 11px; color: var(--ink-3); font-weight: 300;
-  line-height: 1.6; margin-bottom: 20px;
-  display: flex; gap: 8px; align-items: flex-start;
-}
-
-/* ── MAGIC LINK SENT ── */
-.sent-icon {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: var(--s-bg); border: 1.5px solid #A8DFC0;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 20px;
-}
-
-.sent-title {
-  font-size: 22px; font-weight: 300; letter-spacing: -0.4px;
-  color: var(--ink); margin-bottom: 8px; text-align: center;
-}
-
-.sent-sub {
-  font-size: 13px; color: var(--ink-3); font-weight: 300;
-  line-height: 1.7; text-align: center; margin-bottom: 28px;
-}
-
-.sent-email-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--ground); border: 1px solid var(--border);
-  border-radius: 20px; padding: 6px 14px;
-  font-family: var(--mono); font-size: 12px; color: var(--ink-2);
-  margin: 0 auto 28px; display: flex; width: fit-content;
-}
-
-.sent-details {
-  background: var(--ground); border: 1px solid var(--border);
-  border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;
-}
-
-.sent-detail-row {
-  display: flex; align-items: flex-start; gap: 10px;
-  font-size: 12px; color: var(--ink-2); padding: 5px 0;
-  font-weight: 300; line-height: 1.5;
-}
-
-.sent-detail-icon {
-  width: 16px; height: 16px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  margin-top: 1px;
-}
-
-.resend-btn {
-  font-family: var(--sans); font-size: 12px;
-  background: none; border: 1px solid var(--border);
-  border-radius: 6px; padding: 8px 16px;
-  color: var(--ink-2); cursor: pointer; width: 100%;
-  transition: all 0.15s;
-}
-.resend-btn:hover { background: var(--ground); color: var(--ink); }
-
-/* ── VERIFIED / KEYS ISSUED ── */
-.keys-issued {
-  text-align: center;
-}
-
-.keys-icon {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: var(--ink); border: none;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 20px;
-}
-
-.keys-title {
-  font-size: 22px; font-weight: 300; letter-spacing: -0.4px;
-  color: var(--ink); margin-bottom: 6px;
-}
-
-.keys-sub {
-  font-size: 13px; color: var(--ink-3); font-weight: 300;
-  line-height: 1.7; margin-bottom: 24px;
-}
-
-.key-block {
-  background: #0F1117; border-radius: 8px;
-  padding: 14px 16px; margin-bottom: 10px;
-  text-align: left; position: relative;
-}
-
-.key-block-label {
-  font-size: 9px; font-weight: 500; letter-spacing: 2px;
-  text-transform: uppercase; color: #3A3D4A;
-  margin-bottom: 6px;
-}
-
-.key-block-value {
-  font-family: var(--mono); font-size: 11px;
-  color: #A8D8B4; word-break: break-all; line-height: 1.6;
-}
-
-.key-copy {
-  position: absolute; top: 10px; right: 10px;
-  font-family: var(--sans); font-size: 10px;
-  background: #1E2028; color: #555B6E;
-  border: 1px solid #2A2D3A; border-radius: 4px;
-  padding: 3px 8px; cursor: pointer; transition: color 0.1s;
-}
-.key-copy:hover { color: #9DA0AC; }
-
-.btn-dashboard {
-  font-family: var(--sans); font-size: 14px; font-weight: 500;
-  background: var(--ink); color: white; border: none;
-  border-radius: 7px; padding: 12px 20px; width: 100%;
-  cursor: pointer; transition: background 0.15s; margin-top: 16px;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-}
-.btn-dashboard:hover { background: #2A2A2A; }
-
-/* Anti-spam notice */
-.spam-notice {
-  display: flex; align-items: flex-start; gap: 8px;
-  background: var(--ground); border: 1px solid var(--border);
-  border-radius: 6px; padding: 10px 12px;
-  font-size: 11px; color: var(--ink-3); font-weight: 300;
-  line-height: 1.55; margin-bottom: 16px;
-}
-
-/* Already have account */
 .signin-link {
   text-align: center; font-size: 12px; color: var(--ink-3);
   margin-top: 20px;
@@ -348,13 +190,9 @@ html, body {
 .signin-link a { color: var(--ink-2); text-decoration: none; font-weight: 500; }
 .signin-link a:hover { color: var(--ink); }
 
-/* Mobile */
 @media (max-width: 768px) {
   .page { grid-template-columns: 1fr; }
-  .left {
-    padding: 32px 28px;
-    min-height: auto;
-  }
+  .left { padding: 32px 28px; min-height: auto; }
   .left-body { margin-bottom: 32px; }
   .left-headline { font-size: 24px; }
   .left-features { display: none; }
@@ -417,78 +255,36 @@ html, body {
   <div class="right">
     <div class="right-inner">
 
-      <!-- SCREEN 1: Signup form -->
-      <div class="screen active" id="screen-signup">
-        <div id="url-error-banner" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;font-size:13px;color:#B91C1C;margin-bottom:16px;"></div>
-        <div class="form-eyebrow">Get started</div>
-        <div class="form-title">Create your account</div>
-        <div class="form-sub">No credit card. No phone number. Just your email.</div>
+      <div class="form-eyebrow">Get started</div>
+      <div class="form-title">Create your account</div>
+      <div class="form-sub">No credit card. No phone number. Continue with your work account.</div>
 
-<div class="field">
-          <label class="field-label" for="email-input">Email</label>
-          <input
-            class="field-input" type="email" id="email-input"
-            placeholder="you@example.com"
-          />
-          <div class="field-error" id="email-error">Please enter a valid email address.</div>
-        </div>
+      <div class="error-banner" id="error-banner"></div>
 
-        <button class="btn-submit" id="signup-btn" onclick="submitSignup()" disabled>
-          <span id="signup-label">Send magic link</span>
-          <span class="btn-spinner" id="signup-spinner"></span>
-        </button>
+      <!-- Google -->
+      <a class="oauth-btn" href="/auth/google">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        <span class="oauth-btn-label">Continue with Google</span>
+      </a>
 
-        <div id="submit-error" style="display:none;font-size:12px;color:var(--danger);margin-top:8px;"></div>
+      <!-- GitHub -->
+      <a class="oauth-btn" href="/auth/github">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+        </svg>
+        <span class="oauth-btn-label">Continue with GitHub</span>
+      </a>
 
-        <div class="terms-note">
-          By signing up you agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>. Your device token data is stored without PII — no names, no emails attached to verifications.
-        </div>
+      <div class="terms-note">
+        By continuing you agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>. Your device token data is stored without PII — no names, no emails attached to verifications.
       </div>
 
-      <!-- SCREEN 2: Magic link sent -->
-      <div class="screen" id="screen-sent">
-        <div class="sent-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M3 8L12 13L21 8" stroke="#1A9E5C" stroke-width="1.6" stroke-linecap="round"/>
-            <rect x="3" y="6" width="18" height="13" rx="2" stroke="#1A9E5C" stroke-width="1.6"/>
-          </svg>
-        </div>
-
-        <div class="sent-title">Check your inbox</div>
-        <div class="sent-sub">We've sent a magic link to</div>
-
-        <div class="sent-email-pill">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2.5" width="10" height="7" rx="1.5" stroke="#999" stroke-width="1.1"/><path d="M1 4l5 3.5L11 4" stroke="#999" stroke-width="1.1" stroke-linecap="round"/></svg>
-          <span id="sent-email-display"></span>
-        </div>
-
-        <div class="sent-details">
-          <div class="sent-detail-row">
-            <span class="sent-detail-icon">
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#CCC" stroke-width="1.1"/><path d="M6.5 4v3l2 1.5" stroke="#CCC" stroke-width="1.1" stroke-linecap="round"/></svg>
-            </span>
-            Link expires in 15 minutes. Click it once — it's single-use.
-          </div>
-          <div class="sent-detail-row">
-            <span class="sent-detail-icon">
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="4" width="11" height="8" rx="1.5" stroke="#CCC" stroke-width="1.1"/><path d="M4 4V3a2.5 2.5 0 015 0v1" stroke="#CCC" stroke-width="1.1" stroke-linecap="round"/></svg>
-            </span>
-            No password. Clicking the link creates your account and issues your API keys immediately.
-          </div>
-          <div class="sent-detail-row">
-            <span class="sent-detail-icon">
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#CCC" stroke-width="1.1"/><path d="M4 6.5l2 2 3-3" stroke="#CCC" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
-            Check your spam folder if it doesn't arrive within 2 minutes.
-          </div>
-        </div>
-
-        <button class="resend-btn" id="resend-btn" onclick="resendLink(this)">Resend link</button>
-
-        <div class="signin-link" style="margin-top:16px;">
-          <a href="#" onclick="showScreen('screen-signup');return false;">← Use a different email</a>
-        </div>
-      </div>
+      <div class="signin-link">Already have an account? <a href="/signup">Sign in</a></div>
 
     </div>
   </div>
@@ -496,122 +292,20 @@ html, body {
 </div>
 
 <script>
-let currentEmail = '';
-
-// Show error if redirected here with ?error= param
 (function() {
   const params = new URLSearchParams(window.location.search);
   const err = params.get('error');
   if (!err) return;
   const messages = {
-    invalid_token: 'That magic link has already been used or has expired. Enter your email below to get a new one.',
-    missing_token: 'No magic link found in the URL. Enter your email below to get a new one.',
-    server_error:  'Something went wrong on our end. Please try again.',
+    oauth_failed:      'Something went wrong with the sign-in. Please try again.',
+    server_error:      'Something went wrong on our end. Please try again.',
+    unverified_email:  'Your Google account does not have a verified email address.',
+    no_github_email:   'Your GitHub account has no public or verified email. Please add one in your GitHub settings and try again.',
   };
-  const banner = document.getElementById('url-error-banner');
-  if (banner) {
-    banner.textContent = messages[err] || 'An error occurred. Please try again.';
-    banner.style.display = 'block';
-  }
+  const banner = document.getElementById('error-banner');
+  banner.textContent = messages[err] || 'An error occurred. Please try again.';
+  banner.classList.add('show');
 })();
-
-function validateEmail(input) {
-  const val = input.value.trim().toLowerCase();
-  const error = document.getElementById('email-error');
-  const btn = document.getElementById('signup-btn');
-
-  if (!val || !val.includes('@')) {
-    input.classList.remove('error');
-    error.classList.remove('show');
-    btn.disabled = true;
-    return;
-  }
-
-  input.classList.remove('error');
-  error.classList.remove('show');
-  btn.disabled = false;
-}
-
-async function submitSignup() {
-  const email = document.getElementById('email-input').value.trim();
-  if (!email) return;
-
-  const btn    = document.getElementById('signup-btn');
-  const label  = document.getElementById('signup-label');
-  const spinner = document.getElementById('signup-spinner');
-  const errEl  = document.getElementById('submit-error');
-
-  btn.disabled = true;
-  label.style.opacity = '0';
-  spinner.style.display = 'block';
-  errEl.style.display = 'none';
-
-  try {
-    const res = await fetch('/auth/magic-link', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-
-    if (res.status === 429) {
-      errEl.textContent = 'Too many requests — you can request 3 magic links per hour.';
-      errEl.style.display = 'block';
-      return;
-    }
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      errEl.textContent = data.error || 'Something went wrong. Please try again.';
-      errEl.style.display = 'block';
-      return;
-    }
-
-    currentEmail = email;
-    document.getElementById('sent-email-display').textContent = email;
-    showScreen('screen-sent');
-  } catch {
-    errEl.textContent = 'Network error. Please check your connection and try again.';
-    errEl.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    label.style.opacity = '1';
-    spinner.style.display = 'none';
-  }
-}
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-async function resendLink(btn) {
-  btn.disabled = true;
-  try {
-    const res = await fetch('/auth/magic-link', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: currentEmail }),
-    });
-    if (res.status === 429) {
-      btn.textContent = 'Rate limited — try later';
-      setTimeout(() => { btn.textContent = 'Resend link'; btn.disabled = false; }, 5000);
-      return;
-    }
-    btn.textContent = 'Sent ✓';
-    setTimeout(() => { btn.textContent = 'Resend link'; btn.disabled = false; }, 3000);
-  } catch {
-    btn.textContent = 'Error — try again';
-    btn.disabled = false;
-  }
-}
-
-// Wire event listener here, after all functions are defined.
-// Do NOT use oninput attribute — Cloudflare Rocket Loader defers scripts into
-// an isolated scope where named functions aren't accessible from inline HTML attributes.
-document.getElementById('email-input').addEventListener('input', function() {
-  validateEmail(this);
-});
-
-// Remove the DOMContentLoaded approach since the script runs after DOM is ready anyway
 </script>
 </body>
 </html>

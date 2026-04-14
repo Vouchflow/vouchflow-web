@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vouchflow — Core Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/docs.css"/>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+  <a class="topbar-logo" href="/">
+    <svg class="logo-mark" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="11" height="11" rx="2.5" stroke="#111" stroke-width="1.8"/>
+      <rect x="10" y="10" width="11" height="11" rx="2.5" fill="white" stroke="#111" stroke-width="1.8"/>
+      <circle cx="15.5" cy="15.5" r="2" fill="#111"/>
+    </svg>
+    <span class="logo-word">vouchflow</span>
+  </a>
+  <div class="topbar-divider"></div>
+  <span class="topbar-section">Documentation</span>
+  <div class="topbar-right">
+    <div class="topbar-search">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.5" stroke="#CCC" stroke-width="1.2"/><line x1="7.5" y1="7.5" x2="10.5" y2="10.5" stroke="#CCC" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Search docs…<kbd>⌘K</kbd>
+    </div>
+    <div id="topbar-auth"><a href="/signup" class="btn-dash" style="text-decoration:none;" id="auth-signin-btn">Sign in</a></div>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+  <nav class="sidenav" id="sidenav">
+    <div class="nav-section">
+      <div class="nav-section-label">Get started</div>
+      <a class="nav-item" href="/docs/introduction"><span class="nav-dot"></span>Introduction</a>
+      <a class="nav-item" href="/docs"><span class="nav-dot"></span>Quickstart</a>
+      <a class="nav-item" href="/docs/introduction#how-it-works"><span class="nav-dot"></span>How it works</a>
+      <a class="nav-item" href="/docs/introduction#sandbox"><span class="nav-dot"></span>Sandbox vs production</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">iOS SDK</div>
+      <a class="nav-item" href="/docs/ios-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item" href="/docs/ios-sdk#init"><span class="nav-dot"></span>Initialisation</a>
+      <a class="nav-item" href="/docs/ios-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item" href="/docs/ios-sdk#verify"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item" href="/docs/ios-sdk#errors"><span class="nav-dot"></span>Error handling</a>
+      <a class="nav-item" href="/docs/ios-sdk#app-attest"><span class="nav-dot"></span>App Attest setup</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Android SDK</div>
+      <a class="nav-item" href="/docs/android-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item" href="/docs/android-sdk#init"><span class="nav-dot"></span>Initialisation</a>
+      <a class="nav-item" href="/docs/android-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item" href="/docs/android-sdk#verify"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item" href="/docs/android-sdk#errors"><span class="nav-dot"></span>Error handling</a>
+      <a class="nav-item" href="/docs/android-sdk#oem"><span class="nav-dot"></span>OEM variance <span class="nav-badge new">note</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Backend</div>
+      <a class="nav-item" href="/docs/backend#auth"><span class="nav-dot"></span>Authentication</a>
+      <a class="nav-item" href="/docs/backend#idempotency"><span class="nav-dot"></span>Idempotency</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">API Reference</div>
+      <a class="nav-item" href="/api-reference#enroll"><span class="nav-dot"></span>POST /v1/enroll</a>
+      <a class="nav-item" href="/api-reference#verify"><span class="nav-dot"></span>POST /v1/verify</a>
+      <a class="nav-item" href="/api-reference#device"><span class="nav-dot"></span>GET /v1/device</a>
+      <a class="nav-item" href="/api-reference#reputation"><span class="nav-dot"></span>POST /v1/reputation</a>
+      <a class="nav-item" href="/api-reference#errors"><span class="nav-dot"></span>Errors</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Concepts</div>
+      <a class="nav-item active" href="/docs/concepts#confidence"><span class="nav-dot"></span>Confidence levels</a>
+      <a class="nav-item active" href="/docs/concepts#device-lifecycle"><span class="nav-dot"></span>Device lifecycle</a>
+      <a class="nav-item active" href="/docs/concepts#reputation"><span class="nav-dot"></span>Device reputation</a>
+      <a class="nav-item active" href="/docs/concepts#network"><span class="nav-dot"></span>Network graph</a>
+      <a class="nav-item active" href="/docs/concepts#privacy"><span class="nav-dot"></span>Privacy model</a>
+      <a class="nav-item active" href="/docs/concepts#fallback"><span class="nav-dot"></span>Fallback handling</a>
+      <a class="nav-item active" href="/docs/concepts#keys"><span class="nav-dot"></span>API key types</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Guides</div>
+      <a class="nav-item" href="/docs/guides#sms-otp"><span class="nav-dot"></span>Replacing SMS OTP</a>
+      <a class="nav-item" href="/docs/guides#signup"><span class="nav-dot"></span>Signup flow integration</a>
+      <a class="nav-item" href="/docs/guides#low-confidence"><span class="nav-dot"></span>Handling low confidence</a>
+      <a class="nav-item" href="/docs/guides#production"><span class="nav-dot"></span>Going to production</a>
+      <a class="nav-item" href="/docs/guides#gdpr"><span class="nav-dot"></span>GDPR compliance</a>
+    </div>
+    <div class="nav-app-footer">
+      <div class="nav-section-label">App</div>
+      <a class="nav-app-item" href="/dashboard">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-app-item" href="/settings">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+      <a class="nav-app-item" href="/">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1.5L1.5 6v6.5h4V9h3v3.5h4V6L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Home
+      </a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <article class="content">
+
+      <div class="page-eyebrow">Concepts</div>
+      <h1 class="page-title">Core concepts</h1>
+      <p class="page-lead">Vouchflow combines cryptographic device attestation, biometric proof, and cross-app history into a single trust signal. This page explains the model in depth so you can make good decisions about thresholds, fallback, and how Vouchflow fits into your risk stack.</p>
+
+      <!-- ─── CONFIDENCE ─────────────────────────────────────────────── -->
+      <h2 class="section-anchor" id="confidence">Confidence levels</h2>
+      <p>Every verification result includes a <code>confidence</code> field with one of three values. Confidence is a <em>ceiling</em>, not a score — it represents the highest trust level a session can support given all available signals. Each factor either preserves or lowers the ceiling; nothing raises it above what the hardware supports.</p>
+
+      <table>
+        <thead><tr><th>Level</th><th>What it means</th><th>Typical cause</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>high</code></td>
+            <td>Cryptographic attestation verified by Apple or Google. Biometric presented. Secure Enclave or StrongBox key used. The strongest signal Vouchflow can produce.</td>
+            <td>Normal operation on a modern iPhone or Play Protect–certified Android device with biometric enrolled.</td>
+          </tr>
+          <tr>
+            <td><code>medium</code></td>
+            <td>Device is real and the key is hardware-backed, but attestation was not independently verified, or biometric was skipped by the user.</td>
+            <td>Simulator build, OEM device without Play Services, user dismissed the biometric prompt.</td>
+          </tr>
+          <tr>
+            <td><code>low</code></td>
+            <td>Cryptographic path could not complete. Email OTP fallback was used. The user proved access to an email address, not ownership of a specific device.</td>
+            <td>No biometric enrolled on the device, Secure Enclave unavailable, repeated biometric failures triggering fallback.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 class="section-anchor" id="confidence-factors">What shifts confidence</h2>
+      <p>The factors below are evaluated in order. Any factor that applies caps the confidence at that level — later factors cannot raise it back up.</p>
+
+      <table>
+        <thead><tr><th>Factor</th><th>Effect on ceiling</th></tr></thead>
+        <tbody>
+          <tr><td>Attestation verified by Apple or Google</td><td>Required for <code>high</code>. Without it, ceiling is <code>medium</code>.</td></tr>
+          <tr><td>Biometric accepted</td><td>Required for <code>high</code>. Skipping biometric caps at <code>medium</code>.</td></tr>
+          <tr><td>Secure Enclave / StrongBox key confirmed</td><td>Strongly correlated with <code>high</code>. Software-only keys cap at <code>medium</code>.</td></tr>
+          <tr><td>Active anomaly flag on device</td><td>May reduce by one level regardless of attestation result.</td></tr>
+          <tr><td>Email OTP fallback used</td><td>Always results in <code>low</code>. Overrides all other factors.</td></tr>
+        </tbody>
+      </table>
+
+      <h2 class="section-anchor" id="minimum-confidence">Enforcing a minimum</h2>
+      <p>Pass <code>minimumConfidence</code> when calling <code>verify()</code> to gate a flow on a specific level. If the device cannot meet the bar, the SDK throws <code>MinimumConfidenceUnmet</code> rather than returning a low-confidence result that your backend might not check.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Swift</span><button class="code-copy">Copy</button></div>
+        <pre><span class="c">// Gate a fund transfer on high confidence only</span>
+<span class="k">do</span><span class="t"> {</span>
+    <span class="k">let</span><span class="t"> result = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">verify</span><span class="t">(</span>
+        <span class="n">context</span><span class="t">: .</span><span class="n">sensitiveAction</span><span class="t">,</span>
+        <span class="n">minimumConfidence</span><span class="t">: .</span><span class="n">high</span>
+    <span class="t">)</span>
+    <span class="f">proceedWithTransfer</span><span class="t">(result)</span>
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">minimumConfidenceUnmet</span><span class="t"> {</span>
+    <span class="f">showStepUp</span><span class="t">()</span>  <span class="c">// prompt user for an alternative second factor</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Kotlin</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">try</span><span class="t"> {</span>
+    <span class="k">val</span><span class="t"> result = Vouchflow.verify(</span>
+        <span class="n">context</span><span class="t"> = VerificationContext.SENSITIVE_ACTION,</span>
+        <span class="n">minimumConfidence</span><span class="t"> = Confidence.HIGH</span>
+    <span class="t">)</span>
+    <span class="f">proceedWithTransfer</span><span class="t">(result)</span>
+<span class="t">} </span><span class="k">catch</span><span class="t"> (e: MinimumConfidenceUnmetException) {</span>
+    <span class="f">showStepUp</span><span class="t">()</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <div class="callout">
+        <strong>Set minimum confidence at the action level, not the app level.</strong>
+        Use <code>.high</code> for fund transfers, password changes, and account-takeover recovery. Use <code>.medium</code> or omit it for standard logins. A blanket <code>.high</code> requirement blocks legitimate users on OEM Android devices that lack Play Protect certification, and users who have not enrolled biometric.
+      </div>
+
+      <h2 class="section-anchor" id="confidence-decisions">Acting on confidence</h2>
+      <p>Confidence is an input to your risk decision, not the decision itself. The following is a starting point; tune based on your own chargeback and fraud rates.</p>
+
+      <table>
+        <thead><tr><th>Confidence</th><th>Recommended response</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>high</code></td>
+            <td>Proceed. A real device with a hardware-backed key that passed biometric. Treat it the same as a hardware security key second factor.</td>
+          </tr>
+          <tr>
+            <td><code>medium</code></td>
+            <td>Proceed for standard actions. Consider reducing session lifetime, requiring step-up for high-value actions, and logging for pattern review.</td>
+          </tr>
+          <tr>
+            <td><code>low</code></td>
+            <td>Apply additional friction for sensitive actions. Review <code>fallbackUsed</code> signals. Do not automatically block — fallback is a legitimate path for real users on constrained devices.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <hr/>
+
+      <!-- ─── DEVICE LIFECYCLE ───────────────────────────────────────── -->
+      <h2 class="section-anchor" id="device-lifecycle">Device lifecycle</h2>
+      <p>A device moves through a predictable lifecycle from first contact to potential retirement. Understanding this helps you interpret <code>signals.keychainPersistent</code>, <code>deviceHasPriorVerifications</code>, and anomaly flags correctly.</p>
+
+      <ol class="steps">
+        <li class="step">
+          <div class="step-body">
+            <div class="step-title">First verification — automatic enrollment</div>
+            <div class="step-desc">On the first call to <code>verify()</code>, the SDK generates an EC secp256r1 keypair in the Secure Enclave (iOS) or StrongBox/TEE (Android), obtains an attestation assertion from Apple or Google, and registers the device with Vouchflow via <code>POST /v1/enroll</code>. A <code>device_token</code> (prefixed <code>dvt_</code>) is returned and stored in the keychain or Android Keystore. The result contains <code>signals.keychainPersistent = false</code> because no prior token existed.</div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-body">
+            <div class="step-title">Subsequent verifications</div>
+            <div class="step-desc">The SDK retrieves the stored <code>device_token</code>, requests a fresh challenge from <code>POST /v1/verify</code>, signs it with the persisted Secure Enclave key, and submits the signature. No new keypair is generated. The result contains <code>signals.keychainPersistent = true</code>. The device accumulates history that feeds into the reputation score and network graph.</div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-body">
+            <div class="step-title">App reinstall or keychain loss</div>
+            <div class="step-desc">If the app is deleted and reinstalled, or the keychain is cleared (factory reset, MDM wipe), the stored <code>device_token</code> is lost. The next <code>verify()</code> call triggers re-enrollment and generates a new token. The new token has no prior history. The old token remains in Vouchflow's records but will never be used again. Call <code>DELETE /v1/device/{token}</code> to clean it up if you track tokens server-side.</div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-body">
+            <div class="step-title">Device retirement</div>
+            <div class="step-desc">To permanently remove a device from a user's account — on account deletion, user request, or confirmed fraud — call <code>DELETE /v1/device/{device_token}</code> with a read-scoped key. This removes the device record and all associated verification history. The action is immediate and irreversible.</div>
+          </div>
+        </li>
+      </ol>
+
+      <div class="callout warning">
+        <strong>New tokens are not inherently suspicious.</strong>
+        App reinstalls are normal. A new <code>device_token</code> means the device has no prior history in your app, not that it is fraudulent. Look at the full picture: a new token with strong attestation and <code>crossAppHistory: true</code> is a very different signal from a new token with no attestation, a disposable email in the fallback path, and a velocity anomaly.
+      </div>
+
+      <hr/>
+
+      <!-- ─── REPUTATION ─────────────────────────────────────────────── -->
+      <h2 class="section-anchor" id="reputation">Device reputation</h2>
+      <p>Each device tracked by Vouchflow accumulates a reputation profile. You can query it server-side with a read-scoped key — this is intended for risk evaluation at sign-in or before sensitive actions, not for inline verification (reputation is updated asynchronously).</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">HTTP</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">GET</span><span class="t"> /v1/device/{device_token}/reputation</span>
+<span class="n">Authorization</span><span class="t">: Bearer vsk_live_read_••••••••••••••••••••</span></pre>
+      </div>
+
+      <h2 class="section-anchor" id="risk-score">Risk score</h2>
+      <p>The <code>risk_score</code> is an integer from 0 to 100. It is additive — each applicable factor contributes a fixed number of points. The score is recomputed asynchronously after each verification. Scores above <strong>50</strong> warrant additional scrutiny; above <strong>80</strong> indicate a high-risk device that should be blocked from sensitive actions.</p>
+
+      <table>
+        <thead><tr><th>Factor</th><th>Points</th><th>Interpretation</th></tr></thead>
+        <tbody>
+          <tr><td>Device age &lt; 7 days</td><td>+20</td><td>Very new devices are statistically over-represented in fraud patterns.</td></tr>
+          <tr><td>Attestation never verified</td><td>+15</td><td>Without Apple/Google attestation, the hardware claim cannot be independently confirmed.</td></tr>
+          <tr><td>Single-app device, age &lt; 30 days</td><td>+10</td><td>Devices seen in only one app with a short history lack cross-app corroboration.</td></tr>
+          <tr><td>Velocity anomaly (&gt;5 enrollments / 7 days)</td><td>+30</td><td>Associated with device farms, test automation at scale, or credential-stuffing infrastructure.</td></tr>
+          <tr><td>Reinstall anomaly (&gt;3 reinstalls / 30 days)</td><td>+25</td><td>Frequent reinstalls may indicate deliberate attempts to reset device history and evade reputation scoring.</td></tr>
+          <tr><td>Confidence degradation</td><td>+20</td><td>A device with a prior history of high confidence that now consistently returns low confidence. May indicate device transfer, hardware failure, or compromise.</td></tr>
+        </tbody>
+      </table>
+
+      <h2 class="section-anchor" id="anomaly-flags">Anomaly flags</h2>
+      <p>The <code>anomaly_flags</code> array contains identifiers for active anomaly conditions. Flags are binary — present or absent. They are useful for building specific decision logic beyond the aggregate risk score.</p>
+
+      <table>
+        <thead><tr><th>Flag</th><th>Meaning</th><th>Suggested response</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>velocity_anomaly</code></td>
+            <td>Unusually high enrollment rate across the Vouchflow network for this device fingerprint.</td>
+            <td>Block enrollment from this device. Require human review before re-enabling.</td>
+          </tr>
+          <tr>
+            <td><code>reinstall_anomaly</code></td>
+            <td>Frequent app reinstalls in a short window, consistent with deliberate history-clearing behaviour.</td>
+            <td>Require a step-up verification (email confirmation, support contact) before re-enrolling.</td>
+          </tr>
+          <tr>
+            <td><code>confidence_degradation</code></td>
+            <td>A device with a strong verification history is now consistently returning low confidence. Biometric may have been removed, or device may have changed hands.</td>
+            <td>Trigger an account re-verification flow. Notify the account holder out-of-band.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <hr/>
+
+      <!-- ─── NETWORK GRAPH ──────────────────────────────────────────── -->
+      <h2 class="section-anchor" id="network">Network graph</h2>
+      <p>Device reputation improves with cross-app verification history. A device that has been seen across multiple Vouchflow-integrated apps carries stronger trust than one seen only once in a single app. The network graph aggregates those signals without sharing user identity between customers.</p>
+
+      <h2 class="section-anchor" id="network-how">How it works</h2>
+      <p>When a device verifies, Vouchflow records a network event keyed by <code>SHA-256(public_key)</code>. This fingerprint is consistent across all customers that have seen the device, so aggregate counts accumulate over time. The raw public key is never shared between customers. The only cross-customer signals available are:</p>
+      <ul>
+        <li>Total verification count across all apps on the network</li>
+        <li>Number of distinct customer apps that have seen the device</li>
+        <li>Platform (<code>ios</code> or <code>android</code>) and approximate device age</li>
+        <li>Whether attestation has ever been verified for this fingerprint, in any app</li>
+      </ul>
+
+      <p>These are surfaced in the verification result as <code>signals.networkVerifications</code> (cumulative count) and <code>signals.crossAppHistory</code> (boolean — has the device verified in at least one other Vouchflow-integrated app).</p>
+
+      <div class="callout">
+        <strong>Network participation is per customer account, not per device.</strong>
+        Your account is either a network participant or it is not — you cannot selectively share specific devices. Non-participating customers still receive <code>networkVerifications</code> counts for their own app, but their devices do not contribute to or appear in cross-app signals for other customers. Participation is configured in your account settings.
+      </div>
+
+      <h2 class="section-anchor" id="network-signals">Using network signals in decisions</h2>
+      <p>Network signals are most useful as a trust booster for otherwise thin sessions — for example, a device re-enrolling after a reinstall. A device with <code>networkVerifications &gt; 50</code>, <code>crossAppHistory: true</code>, and a <code>risk_score</code> below 20 has demonstrated consistent behaviour across the ecosystem and is very unlikely to be fraudulent even if its in-app history is short.</p>
+
+      <hr/>
+
+      <!-- ─── PRIVACY ────────────────────────────────────────────────── -->
+      <h2 class="section-anchor" id="privacy">Privacy model</h2>
+      <p>Vouchflow is designed to provide device trust signals without building user profiles. The data model reflects this constraint at every layer — Vouchflow knows about devices, not users.</p>
+
+      <h2 class="section-anchor" id="what-is-stored">What is stored</h2>
+
+      <table>
+        <thead><tr><th>Data</th><th>How stored</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Device public key</td>
+            <td>SHA-256 fingerprint only — the key itself is discarded server-side after enrollment</td>
+            <td>Cross-app deduplication in the network graph</td>
+          </tr>
+          <tr>
+            <td>Enrollment timestamp</td>
+            <td>Exact UTC timestamp</td>
+            <td>Device age calculation for the risk score</td>
+          </tr>
+          <tr>
+            <td>Verification outcome</td>
+            <td>Confidence level and boolean flags per session</td>
+            <td>Anomaly detection and reputation scoring</td>
+          </tr>
+          <tr>
+            <td>User email (fallback)</td>
+            <td>Never stored — used only for OTP delivery and immediately discarded</td>
+            <td>Delivers the OTP; not retained</td>
+          </tr>
+          <tr>
+            <td>Email hash (fallback)</td>
+            <td>SHA-256 of submitted email</td>
+            <td>Rate-limiting OTP requests per email address, not user identification</td>
+          </tr>
+          <tr>
+            <td>IP address (fallback)</td>
+            <td>Held in memory for the duration of the OTP session, then discarded</td>
+            <td>Verifies OTP was submitted from the same network as the initiation request</td>
+          </tr>
+          <tr>
+            <td>Biometric data</td>
+            <td>Never transmitted or stored by Vouchflow</td>
+            <td>Evaluated entirely on-device by the OS; only a pass/fail result reaches the SDK</td>
+          </tr>
+          <tr>
+            <td>Device model and OS version</td>
+            <td>Platform string only (<code>ios</code> or <code>android</code>) — no model, OS version, or hardware identifiers</td>
+            <td>OEM variance handling</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Device tokens (<code>dvt_…</code>) are random identifiers. They carry no user identity on their own — they are opaque handles that let your backend correlate verifications from the same device without Vouchflow knowing which of your users owns it.</p>
+
+      <h2 class="section-anchor" id="data-retention">Data retention</h2>
+      <p>Verification session records are retained for <strong>90 days</strong>. Device records and reputation data persist until explicitly deleted. To remove a device and all associated history:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">HTTP</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">DELETE</span><span class="t"> /v1/device/{device_token}</span>
+<span class="n">Authorization</span><span class="t">: Bearer vsk_live_read_••••••••••••••••••••</span></pre>
+      </div>
+
+      <p>Deletion is permanent and immediate. The device re-enrolls as new on next use, with no prior history.</p>
+
+      <div class="callout">
+        <strong>GDPR and right to erasure.</strong>
+        Because Vouchflow stores no user identity, a deletion request for a user maps to deleting the device tokens associated with that user in your own database, then calling <code>DELETE /v1/device/{token}</code> for each one. Maintain a mapping of user ID → device tokens server-side. See the <a href="/docs/guides#gdpr">GDPR compliance guide</a> for a complete walkthrough.
+      </div>
+
+      <hr/>
+
+      <!-- ─── FALLBACK ───────────────────────────────────────────────── -->
+      <h2 class="section-anchor" id="fallback">Fallback handling</h2>
+      <p>When a device cannot complete cryptographic verification — no biometric enrolled, repeated authentication failures, attestation unavailable — Vouchflow offers an email OTP fallback. Fallback always produces <code>confidence: low</code>. It is a deliberately degraded path, not an equivalent alternative to primary verification.</p>
+
+      <h2 class="section-anchor" id="fallback-flow">How fallback works</h2>
+      <ol class="steps">
+        <li class="step">
+          <div class="step-body">
+            <div class="step-title">Initiate fallback</div>
+            <div class="step-desc">Call <code>requestFallback(sessionId:email:reason:)</code> (iOS) or <code>requestFallback(sessionId, email, reason)</code> (Android). The SDK sends the email address to Vouchflow, which delivers a 6-digit OTP and immediately discards the address. A SHA-256 hash of the email is retained only for rate-limiting.</div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-body">
+            <div class="step-title">User enters OTP</div>
+            <div class="step-desc">The OTP is valid for <strong>5 minutes</strong>. Rate limits: 3 initiations per device per 24 hours, 5 per email hash per hour, 10 per IP per hour. After 5 incorrect entries the OTP is invalidated and the user must initiate fallback again.</div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-body">
+            <div class="step-title">Submit and complete</div>
+            <div class="step-desc">Call <code>submitFallbackOtp(sessionId:otp:)</code>. On success the session completes and returns a result with <code>confidence: .low</code>, <code>fallbackUsed: true</code>, and a set of additional risk signals described below.</div>
+          </div>
+        </li>
+      </ol>
+
+      <h2 class="section-anchor" id="fallback-signals">Fallback signals</h2>
+      <p>A fallback result includes additional fields that give you context to make a better risk decision despite the lower confidence level:</p>
+
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>What it tells you</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>ipConsistent</code></td>
+            <td><code>Bool</code></td>
+            <td>OTP was submitted from the same IP address as session initiation. Inconsistency may indicate OTP forwarding or a man-in-the-middle scenario.</td>
+          </tr>
+          <tr>
+            <td><code>disposableEmailDomain</code></td>
+            <td><code>Bool</code></td>
+            <td>The email domain is on a known disposable-provider list. Legitimate users rarely use throwaway email for account verification.</td>
+          </tr>
+          <tr>
+            <td><code>deviceHasPriorVerifications</code></td>
+            <td><code>Bool</code></td>
+            <td>This device token has previously completed primary-path (non-fallback) verifications. A device with prior history that suddenly needs fallback is much less suspicious than a brand-new device going straight to the fallback path.</td>
+          </tr>
+          <tr>
+            <td><code>otpAttempts</code></td>
+            <td><code>Int</code></td>
+            <td>Number of incorrect OTP entries before success. More than 1–2 attempts may indicate the code was shared, guessed, or intercepted rather than read directly from email.</td>
+          </tr>
+          <tr>
+            <td><code>timeToCompleteSeconds</code></td>
+            <td><code>Int</code></td>
+            <td>Seconds between OTP delivery and successful submission. Very fast completions (&lt;10s) may indicate the OTP was pre-staged or auto-filled by an attacker.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout warning">
+        <strong>Do not block users on fallback alone.</strong>
+        A user with no biometric enrolled on an older phone is a real user. Combine fallback signals with your own account context before deciding to add friction. Only a combination of <code>disposableEmailDomain: true</code>, <code>deviceHasPriorVerifications: false</code>, a high <code>risk_score</code>, <em>and</em> <code>otpAttempts &gt; 2</code> justifies blocking outright.
+      </div>
+
+      <hr/>
+
+      <!-- ─── KEYS ───────────────────────────────────────────────────── -->
+      <h2 class="section-anchor" id="keys">API key types</h2>
+      <p>Vouchflow issues four key types. Each has a distinct prefix, scope, and environment — never mix them up, and never embed a read or live key in a client application.</p>
+
+      <table>
+        <thead><tr><th>Prefix</th><th>Environment</th><th>Scope</th><th>Use it for</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>vsk_sandbox_</code></td>
+            <td>Sandbox</td>
+            <td>Write</td>
+            <td>SDK configuration during development. Authenticates <code>POST /v1/enroll</code> and <code>POST /v1/verify</code> in sandbox. Pass to the SDK in your app — sandbox keys have no effect in production and cannot be used to access real data.</td>
+          </tr>
+          <tr>
+            <td><code>vsk_sandbox_read_</code></td>
+            <td>Sandbox</td>
+            <td>Read</td>
+            <td>Server-side calls during development: <code>GET /v1/device/{token}/reputation</code>, <code>DELETE /v1/device/{token}</code>. Keep server-side only — do not embed in a client app.</td>
+          </tr>
+          <tr>
+            <td><code>vsk_live_</code></td>
+            <td>Production</td>
+            <td>Write</td>
+            <td>SDK configuration in production builds. Authenticates production enrollment and verification. Inject via CI/CD at build time — never commit to source control.</td>
+          </tr>
+          <tr>
+            <td><code>vsk_live_read_</code></td>
+            <td>Production</td>
+            <td>Read</td>
+            <td>Server-side calls in production: reputation queries, device deletion. Store in a server environment variable. Never expose in a client app or public repository.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 class="section-anchor" id="key-rotation">Key rotation</h2>
+      <p>When you rotate live keys in the dashboard, your existing keys are marked deprecated but remain valid for <strong>14 days</strong>. During the overlap both old and new keys authenticate successfully. This gives deployed apps time to roll out an updated build before the old key stops working.</p>
+
+      <p>Vouchflow sends the <code>Vouchflow-Key-Deprecated: true</code> response header on any request authenticated with a deprecated key. If your server calls Vouchflow using the read key, watch for this header and update your environment variable before the 14-day window closes.</p>
+
+      <div class="callout warning">
+        <strong>Sandbox keys cannot be rotated.</strong>
+        Sandbox keys are fixed per account. If a sandbox key is compromised it can only be used to generate sandbox verifications, which have no effect on production data. Contact support if you need a sandbox key replaced.
+      </div>
+
+      <div class="page-nav">
+        <a class="page-nav-card" href="/api-reference">
+          <div class="page-nav-dir">← Previous</div>
+          <div class="page-nav-title">API Reference</div>
+        </a>
+        <a class="page-nav-card next" href="/docs/guides">
+          <div class="page-nav-dir">Next →</div>
+          <div class="page-nav-title">Guides</div>
+        </a>
+      </div>
+
+    </article>
+
+    <aside class="toc">
+      <div class="toc-label">On this page</div>
+      <a class="toc-item" href="#confidence">Confidence levels</a>
+      <a class="toc-item sub" href="#confidence-factors">What shifts confidence</a>
+      <a class="toc-item sub" href="#minimum-confidence">Enforcing a minimum</a>
+      <a class="toc-item sub" href="#confidence-decisions">Acting on confidence</a>
+      <a class="toc-item" href="#device-lifecycle">Device lifecycle</a>
+      <a class="toc-item" href="#reputation">Device reputation</a>
+      <a class="toc-item sub" href="#risk-score">Risk score</a>
+      <a class="toc-item sub" href="#anomaly-flags">Anomaly flags</a>
+      <a class="toc-item" href="#network">Network graph</a>
+      <a class="toc-item sub" href="#network-signals">Using network signals</a>
+      <a class="toc-item" href="#privacy">Privacy model</a>
+      <a class="toc-item sub" href="#what-is-stored">What is stored</a>
+      <a class="toc-item sub" href="#data-retention">Data retention</a>
+      <a class="toc-item" href="#fallback">Fallback handling</a>
+      <a class="toc-item sub" href="#fallback-signals">Fallback signals</a>
+      <a class="toc-item" href="#keys">API key types</a>
+      <a class="toc-item sub" href="#key-rotation">Key rotation</a>
+    </aside>
+  </main>
+</div>
+
+<script>
+document.querySelectorAll('.code-copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).catch(() => {});
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+});
+function toggleNav() {
+  const nav = document.getElementById('sidenav');
+  const overlay = document.getElementById('nav-overlay');
+  nav.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      const nav = document.getElementById('sidenav');
+      if (nav.classList.contains('open')) toggleNav();
+    }
+  });
+});
+</script>
+<script>
+(async function initDocsAuth() {
+  try {
+    const res = await fetch("/web/me", { credentials: "include" });
+    const me = res.ok ? await res.json() : null;
+    const authEl = document.getElementById("topbar-auth");
+    if (!authEl) return;
+    if (!me) {
+      authEl.innerHTML = '<a href="/signup" class="btn-dash" style="text-decoration:none;">Sign in</a>';
+      return;
+    }
+    const initials = me.name
+      ? me.name.trim().split(/\s+/).map(p => p[0]).slice(0,2).join("").toUpperCase()
+      : (me.email ? me.email[0].toUpperCase() : "?");
+    authEl.innerHTML = `<div class="docs-avatar-wrap" id="docs-avatar-wrap"><div class="docs-avatar" id="docs-avatar" onclick="toggleDocsMenu()">${initials}</div><div class="docs-avatar-menu" id="docs-avatar-menu"><div class="docs-avatar-menu-header">${me.email || ""}</div><a class="docs-avatar-item" href="/dashboard"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>Dashboard</a><a class="docs-avatar-item" href="/settings"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Settings</a><button class="docs-avatar-item danger" onclick="docsSignOut()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 4.5L11 7m0 0L8.5 9.5M11 7H5M5 2H3a1 1 0 00-1 1v7a1 1 0 001 1h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Sign out</button></div></div>`;
+    if (me.avatarUrl) {
+      const av = document.getElementById("docs-avatar");
+      const img = document.createElement("img");
+      img.src = me.avatarUrl;
+      img.style.cssText = "width:100%;height:100%;border-radius:50%;object-fit:cover;";
+      img.onerror = () => { av.textContent = initials; };
+      av.textContent = "";
+      av.appendChild(img);
+    }
+    document.addEventListener("click", e => {
+      const wrap = document.getElementById("docs-avatar-wrap");
+      if (wrap && !wrap.contains(e.target)) document.getElementById("docs-avatar-menu")?.classList.remove("open");
+    });
+  } catch {}
+})();
+function toggleDocsMenu() { document.getElementById("docs-avatar-menu")?.classList.toggle("open"); }
+async function docsSignOut() { await fetch("/auth/signout", { method: "POST", credentials: "include" }); window.location.href = "/"; }
+</script>
+</body>
+</html>

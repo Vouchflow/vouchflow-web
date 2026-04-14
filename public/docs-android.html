@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vouchflow — Android SDK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/docs.css"/>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+  <a class="topbar-logo" href="/">
+    <svg class="logo-mark" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="11" height="11" rx="2.5" stroke="#111" stroke-width="1.8"/>
+      <rect x="10" y="10" width="11" height="11" rx="2.5" fill="white" stroke="#111" stroke-width="1.8"/>
+      <circle cx="15.5" cy="15.5" r="2" fill="#111"/>
+    </svg>
+    <span class="logo-word">vouchflow</span>
+  </a>
+  <div class="topbar-divider"></div>
+  <span class="topbar-section">Documentation</span>
+  <div class="topbar-right">
+    <div class="topbar-search">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.5" stroke="#CCC" stroke-width="1.2"/><line x1="7.5" y1="7.5" x2="10.5" y2="10.5" stroke="#CCC" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Search docs…<kbd>⌘K</kbd>
+    </div>
+    <div id="topbar-auth"><a href="/signup" class="btn-dash" style="text-decoration:none;" id="auth-signin-btn">Sign in</a></div>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+  <nav class="sidenav" id="sidenav">
+    <div class="nav-section">
+      <div class="nav-section-label">Get started</div>
+      <a class="nav-item" href="/docs/introduction"><span class="nav-dot"></span>Introduction</a>
+      <a class="nav-item" href="/docs"><span class="nav-dot"></span>Quickstart</a>
+      <a class="nav-item" href="/docs/introduction#how-it-works"><span class="nav-dot"></span>How it works</a>
+      <a class="nav-item" href="/docs/introduction#sandbox"><span class="nav-dot"></span>Sandbox vs production</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">iOS SDK</div>
+      <a class="nav-item" href="/docs/ios-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item" href="/docs/ios-sdk#init"><span class="nav-dot"></span>Initialisation</a>
+      <a class="nav-item" href="/docs/ios-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item" href="/docs/ios-sdk#verify"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item" href="/docs/ios-sdk#errors"><span class="nav-dot"></span>Error handling</a>
+      <a class="nav-item" href="/docs/ios-sdk#app-attest"><span class="nav-dot"></span>App Attest setup</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Android SDK</div>
+      <a class="nav-item active" href="/docs/android-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item active" href="/docs/android-sdk#init"><span class="nav-dot"></span>Initialisation</a>
+      <a class="nav-item active" href="/docs/android-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item active" href="/docs/android-sdk#verify"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item active" href="/docs/android-sdk#errors"><span class="nav-dot"></span>Error handling</a>
+      <a class="nav-item active" href="/docs/android-sdk#oem"><span class="nav-dot"></span>OEM variance <span class="nav-badge new">note</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Backend</div>
+      <a class="nav-item" href="/docs/backend#auth"><span class="nav-dot"></span>Authentication</a>
+      <a class="nav-item" href="/docs/backend#idempotency"><span class="nav-dot"></span>Idempotency</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">API Reference</div>
+      <a class="nav-item" href="/api-reference#enroll"><span class="nav-dot"></span>POST /v1/enroll</a>
+      <a class="nav-item" href="/api-reference#verify"><span class="nav-dot"></span>POST /v1/verify</a>
+      <a class="nav-item" href="/api-reference#device"><span class="nav-dot"></span>GET /v1/device</a>
+      <a class="nav-item" href="/api-reference#reputation"><span class="nav-dot"></span>POST /v1/reputation</a>
+      <a class="nav-item" href="/api-reference#errors"><span class="nav-dot"></span>Errors</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Concepts</div>
+      <a class="nav-item" href="/docs/concepts#confidence"><span class="nav-dot"></span>Confidence levels</a>
+      <a class="nav-item" href="/docs/concepts#reputation"><span class="nav-dot"></span>Device reputation</a>
+      <a class="nav-item" href="/docs/concepts#network"><span class="nav-dot"></span>Network graph</a>
+      <a class="nav-item" href="/docs/concepts#privacy"><span class="nav-dot"></span>Privacy model</a>
+      <a class="nav-item" href="/docs/concepts#fallback"><span class="nav-dot"></span>Fallback handling</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Guides</div>
+      <a class="nav-item" href="/docs/guides#sms-otp"><span class="nav-dot"></span>Replacing SMS OTP</a>
+      <a class="nav-item" href="/docs/guides#signup"><span class="nav-dot"></span>Signup flow integration</a>
+      <a class="nav-item" href="/docs/guides#low-confidence"><span class="nav-dot"></span>Handling low confidence</a>
+      <a class="nav-item" href="/docs/guides#production"><span class="nav-dot"></span>Going to production</a>
+      <a class="nav-item" href="/docs/guides#gdpr"><span class="nav-dot"></span>GDPR compliance</a>
+    </div>
+    <div class="nav-app-footer">
+      <div class="nav-section-label">App</div>
+      <a class="nav-app-item" href="/dashboard">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-app-item" href="/settings">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+      <a class="nav-app-item" href="/">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1.5L1.5 6v6.5h4V9h3v3.5h4V6L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Home
+      </a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <article class="content">
+
+      <div class="page-eyebrow">Android SDK</div>
+      <h1 class="page-title">Android SDK reference</h1>
+      <p class="page-lead">The Android SDK integrates Play Integrity attestation, hardware-backed key management, and biometric presentation into a single coroutine-based call. Requires Android API 28+ (Android 9) and Google Play Services.</p>
+
+      <!-- INSTALLATION -->
+      <h2 class="section-anchor" id="install">Installation</h2>
+      <p>Add the Maven repository and dependency to your project. The SDK is distributed via GitHub Packages under <code>com.vouchflow.sdk</code>.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">settings.gradle.kts</span><button class="code-copy">Copy</button></div>
+        <pre><span class="f">dependencyResolutionManagement</span><span class="t"> {</span>
+  <span class="f">repositories</span><span class="t"> {</span>
+    <span class="t">google()</span>
+    <span class="t">mavenCentral()</span>
+    <span class="f">maven</span><span class="t"> {</span>
+      <span class="n">url</span><span class="t"> = uri(</span><span class="s">"https://maven.pkg.github.com/Vouchflow/android-sdk"</span><span class="t">)</span>
+      <span class="f">credentials</span><span class="t"> {</span>
+        <span class="n">username</span><span class="t"> = providers.</span><span class="f">gradleProperty</span><span class="t">(</span><span class="s">"gpr.user"</span><span class="t">).</span><span class="f">orNull</span>
+        <span class="n">password</span><span class="t"> = providers.</span><span class="f">gradleProperty</span><span class="t">(</span><span class="s">"gpr.key"</span><span class="t">).</span><span class="f">orNull</span>
+      <span class="t">}</span>
+    <span class="t">}</span>
+  <span class="t">}</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">build.gradle.kts (app)</span><button class="code-copy">Copy</button></div>
+        <pre><span class="f">dependencies</span><span class="t"> {</span>
+  <span class="f">implementation</span><span class="t">(</span><span class="s">"com.vouchflow.sdk:sdk:1.0.0"</span><span class="t">)</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p>Add a <code>gradle.properties</code> entry (or CI secret) with your GitHub PAT for Packages access:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">~/.gradle/gradle.properties</span><button class="code-copy">Copy</button></div>
+        <pre><span class="n">gpr.user</span><span class="t">=your-github-username</span>
+<span class="n">gpr.key</span><span class="t">=ghp_...</span></pre>
+      </div>
+
+      <p><strong>Required manifest permissions</strong> (added automatically via manifest merger):</p>
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">AndroidManifest.xml</span><button class="code-copy">Copy</button></div>
+        <pre><span class="t">&lt;uses-permission android:name=</span><span class="s">"android.permission.INTERNET"</span><span class="t"> /&gt;</span>
+<span class="t">&lt;uses-permission android:name=</span><span class="s">"android.permission.USE_BIOMETRIC"</span><span class="t"> /&gt;</span>
+<span class="t">&lt;uses-permission android:name=</span><span class="s">"android.permission.GET_ACCOUNTS"</span><span class="t"> /&gt;</span></pre>
+      </div>
+
+      <div class="callout">
+        <strong>ProGuard / R8</strong>
+        The SDK ships with a bundled consumer ProGuard rules file. No additional configuration is needed.
+      </div>
+
+      <hr/>
+
+      <!-- INITIALISATION -->
+      <h2 class="section-anchor" id="init">Initialisation</h2>
+      <p>Call <code>Vouchflow.configure(VouchflowConfig(...))</code> once before any call to <code>verify()</code>. The best place is <code>Application.onCreate()</code>.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Kotlin — Application class</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">import</span> <span class="t">com.vouchflow.sdk.Vouchflow</span>
+<span class="k">import</span> <span class="t">com.vouchflow.sdk.VouchflowConfig</span>
+<span class="k">import</span> <span class="t">com.vouchflow.sdk.VouchflowEnvironment</span>
+
+<span class="k">class</span> <span class="t">MyApp : Application() {</span>
+  <span class="k">override fun</span> <span class="f">onCreate</span><span class="t">() {</span>
+    <span class="k">super</span><span class="t">.</span><span class="f">onCreate</span><span class="t">()</span>
+    <span class="t">Vouchflow.</span><span class="f">configure</span><span class="t">(VouchflowConfig(</span>
+      <span class="n">apiKey</span><span class="t">      = </span><span class="s">"vsk_sandbox_••••••••••••••••"</span><span class="t">,</span>
+      <span class="n">customerId</span>  <span class="t">= </span><span class="s">"cust_..."</span><span class="t">,</span>
+      <span class="n">environment</span> <span class="t">= VouchflowEnvironment.SANDBOX</span>   <span class="c">// PRODUCTION in release</span>
+    <span class="t">))</span>
+  <span class="t">}</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p><code>VouchflowConfig</code> parameters:</p>
+      <table>
+        <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>apiKey</code></td><td><code>String</code></td><td>Yes</td><td>Write-scoped key from the dashboard. Must start with <code>vsk_</code>.</td></tr>
+          <tr><td><code>customerId</code></td><td><code>String</code></td><td>Yes</td><td>Your customer ID from the dashboard.</td></tr>
+          <tr><td><code>environment</code></td><td><code>VouchflowEnvironment</code></td><td>No</td><td><code>PRODUCTION</code> (default) or <code>SANDBOX</code>.</td></tr>
+          <tr><td><code>leafCertificatePin</code></td><td><code>String</code></td><td>No</td><td>SHA-256 pin for the API leaf certificate. Rotates every 60 days.</td></tr>
+          <tr><td><code>intermediateCertificatePin</code></td><td><code>String</code></td><td>No</td><td>SHA-256 pin for ISRG Root X1 (effectively permanent).</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout warning">
+        <strong>Certificate pinning in release builds</strong>
+        Omitting the pin placeholders in release builds disables pinning entirely. We recommend supplying both pins in production and rotating <code>leafCertificatePin</code> before each Let's Encrypt renewal (every 60 days). See <a href="/docs/guides#production">Going to production</a>.
+      </div>
+
+      <hr/>
+
+      <!-- ENROLLMENT -->
+      <h2 class="section-anchor" id="enrollment">Enrollment</h2>
+      <p>Like iOS, enrollment on Android is automatic. On the first <code>verify()</code> call, the SDK:</p>
+      <ol>
+        <li>Generates an EC secp256r1 keypair backed by StrongBox (if available) or TEE</li>
+        <li>Obtains a Play Integrity token attesting the app and device state</li>
+        <li>Registers the keypair with the Vouchflow backend (<code>POST /v1/enroll</code>)</li>
+        <li>Stores the resulting <code>device_token</code> in Android AccountManager under the <code>com.vouchflow.sdk</code> account type — this survives app uninstalls on most devices</li>
+      </ol>
+
+      <div class="callout">
+        <strong>AccountManager persistence</strong>
+        Unlike the iOS keychain, AccountManager tokens can survive app uninstall on Android. The SDK queries for an existing account before enrolling. If an account is found from a previous install, the device token is reused and <code>signals.persistentToken</code> is <code>true</code>.
+      </div>
+
+      <p>If Play Integrity is unavailable (e.g. device without Google Play Services), enrollment still succeeds but <code>attestation_verified</code> is <code>false</code> and confidence is capped at <code>medium</code>. <code>VouchflowError.AttestationUnavailable</code> is not thrown in this case; it is surfaced as a result signal.</p>
+
+      <hr/>
+
+      <!-- VERIFICATION -->
+      <h2 class="section-anchor" id="verify">Verification</h2>
+      <p>Call <code>Vouchflow.shared.verify(activity, context)</code>. The <code>activity</code> parameter is required for the biometric prompt — pass the calling <code>ComponentActivity</code>.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Kotlin</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">import</span> <span class="t">com.vouchflow.sdk.*</span>
+
+<span class="c">// In a ViewModel or coroutine scope:</span>
+<span class="k">try</span><span class="t"> {</span>
+  <span class="k">val</span><span class="t"> result = Vouchflow.shared.</span><span class="f">verify</span><span class="t">(</span>
+    <span class="n">activity</span><span class="t"> = requireActivity(),       </span><span class="c">// ComponentActivity</span>
+    <span class="n">context</span><span class="t">  = VerificationContext.LOGIN  </span><span class="c">// SIGNUP · LOGIN · SENSITIVE_ACTION</span>
+  <span class="t">)</span>
+
+  <span class="c">// result.verified            — Boolean</span>
+  <span class="c">// result.confidence          — Confidence.HIGH / MEDIUM / LOW</span>
+  <span class="c">// result.deviceToken         — opaque String</span>
+  <span class="c">// result.deviceAgeDays       — Int</span>
+  <span class="c">// result.networkVerifications — Int</span>
+  <span class="c">// result.signals             — VouchflowSignals</span>
+  <span class="f">proceedWithLogin</span><span class="t">()</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> (e: VouchflowError) {</span>
+  <span class="f">handleError</span><span class="t">(e)</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p>To require a minimum confidence level:</p>
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Kotlin — with minimum confidence</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">val</span><span class="t"> result = Vouchflow.shared.</span><span class="f">verify</span><span class="t">(</span>
+  <span class="n">activity</span>          <span class="t">= requireActivity(),</span>
+  <span class="n">context</span>           <span class="t">= VerificationContext.SENSITIVE_ACTION,</span>
+  <span class="n">minimumConfidence</span> <span class="t">= Confidence.HIGH</span>
+<span class="t">)</span></pre>
+      </div>
+
+      <hr/>
+
+      <!-- ERROR HANDLING -->
+      <h2 class="section-anchor" id="errors">Error handling</h2>
+      <p>All SDK errors are subclasses of <code>VouchflowError</code> (a sealed class). Handle the cases relevant to your UX; let others propagate to your global handler.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Kotlin — full error handling</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">try</span><span class="t"> {</span>
+  <span class="k">val</span><span class="t"> result = Vouchflow.shared.</span><span class="f">verify</span><span class="t">(requireActivity(), VerificationContext.LOGIN)</span>
+  <span class="f">proceed</span><span class="t">(result)</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> (e: VouchflowError.BiometricCancelled) {</span>
+  <span class="f">showRetryPrompt</span><span class="t">()</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> (e: VouchflowError.BiometricFailed) {</span>
+  <span class="k">val</span><span class="t"> fb = Vouchflow.shared.</span><span class="f">requestFallback</span><span class="t">(</span>
+    <span class="n">sessionId</span> <span class="t">= e.sessionId,</span>
+    <span class="n">email</span>     <span class="t">= currentUser.email,</span>
+    <span class="n">reason</span>    <span class="t">= FallbackReason.BIOMETRIC_FAILED</span>
+  <span class="t">)</span>
+  <span class="f">showOTPInput</span><span class="t">(fb.expiresAt)</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> (e: VouchflowError.MinimumConfidenceUnmet) {</span>
+  <span class="f">showDeviceNotSupportedMessage</span><span class="t">()</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> (e: VouchflowError.NetworkUnavailable) {</span>
+  <span class="f">showOfflineError</span><span class="t">()</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> (e: VouchflowError) {</span>
+  <span class="f">logError</span><span class="t">(e)</span>
+  <span class="f">showGenericError</span><span class="t">()</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <table>
+        <thead><tr><th>Error class</th><th>Description</th><th>Recommended action</th></tr></thead>
+        <tbody>
+          <tr><td><code>NotConfigured</code></td><td><code>configure()</code> not called</td><td>Fix at init</td></tr>
+          <tr><td><code>InvalidApiKey</code></td><td>Key doesn't start with <code>vsk_</code></td><td>Fix at init</td></tr>
+          <tr><td><code>BiometricUnavailable</code></td><td>No biometric enrolled or no hardware</td><td>Offer fallback</td></tr>
+          <tr><td><code>BiometricCancelled(sessionId)</code></td><td>User dismissed the prompt</td><td>Offer retry or cancel</td></tr>
+          <tr><td><code>BiometricFailed(sessionId)</code></td><td>Wrong biometric, lockout, or hardware error</td><td>Offer fallback</td></tr>
+          <tr><td><code>MinimumConfidenceUnmet</code></td><td>Device cannot meet threshold</td><td>Block or degrade</td></tr>
+          <tr><td><code>AttestationUnavailable</code></td><td>No Google Play Services</td><td>Confidence capped at <code>medium</code></td></tr>
+          <tr><td><code>AccountStoreAccessDenied</code></td><td>Cannot read/write AccountManager</td><td>Log; enrollment retried next call</td></tr>
+          <tr><td><code>EnrollmentFailed(cause)</code></td><td>Enrollment failed</td><td>Usually transient; log it</td></tr>
+          <tr><td><code>PinningFailure</code></td><td>TLS certificate pin mismatch</td><td>Log; possible MITM — do not proceed</td></tr>
+          <tr><td><code>NetworkUnavailable</code></td><td>No internet connection</td><td>Surface offline state</td></tr>
+          <tr><td><code>ServerError(statusCode, code, message)</code></td><td>API error</td><td>Log; degrade gracefully</td></tr>
+        </tbody>
+      </table>
+
+      <hr/>
+
+      <!-- OEM VARIANCE -->
+      <h2 class="section-anchor" id="oem">OEM variance</h2>
+      <p>Android's fragmented hardware ecosystem means biometric and attestation behaviour varies significantly across manufacturers. The SDK handles most variance internally, but the following are known issues worth being aware of.</p>
+
+      <table>
+        <thead><tr><th>OEM / Device</th><th>Issue</th><th>SDK behaviour</th></tr></thead>
+        <tbody>
+          <tr><td>Samsung (Exynos chips)</td><td>StrongBox may report availability but fail key generation under load</td><td>SDK falls back to TEE automatically; <code>signals.attestationVerified</code> may be <code>false</code></td></tr>
+          <tr><td>Huawei (HMS devices)</td><td>No Google Play Services; Play Integrity unavailable</td><td><code>attestation_verified: false</code>, confidence capped at <code>medium</code></td></tr>
+          <tr><td>Xiaomi (MIUI)</td><td>AccountManager access restricted in some MIUI versions</td><td><code>AccountStoreAccessDenied</code> thrown; device token stored in shared preferences as fallback</td></tr>
+          <tr><td>Various</td><td>Biometric hardware reports enrolled but fails to prompt</td><td><code>BiometricFailed</code> thrown after 3 consecutive failures; fallback offered</td></tr>
+          <tr><td>Android emulator</td><td>No Play Integrity, no StrongBox</td><td>Sandbox only: returns <code>confidence: medium</code>. Production: <code>attestation_verified: false</code></td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout warning">
+        <strong>Test on representative hardware</strong>
+        We strongly recommend testing on at least one Samsung, one Pixel, and one Xiaomi device before going to production. The Android CTS does not guarantee consistent biometric or keystore behaviour across OEMs.
+      </div>
+
+      <div class="page-nav">
+        <a class="page-nav-card" href="/docs/ios-sdk">
+          <div class="page-nav-dir">← Previous</div>
+          <div class="page-nav-title">iOS SDK</div>
+        </a>
+        <a class="page-nav-card next" href="/docs/backend">
+          <div class="page-nav-dir">Next →</div>
+          <div class="page-nav-title">Backend</div>
+        </a>
+      </div>
+
+    </article>
+
+    <aside class="toc">
+      <div class="toc-label">On this page</div>
+      <a class="toc-item" href="#install">Installation</a>
+      <a class="toc-item" href="#init">Initialisation</a>
+      <a class="toc-item" href="#enrollment">Enrollment</a>
+      <a class="toc-item" href="#verify">Verification</a>
+      <a class="toc-item" href="#errors">Error handling</a>
+      <a class="toc-item" href="#oem">OEM variance</a>
+    </aside>
+  </main>
+</div>
+
+<script>
+document.querySelectorAll('.code-copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+});
+function toggleNav() {
+  const nav = document.getElementById('sidenav');
+  const overlay = document.getElementById('nav-overlay');
+  nav.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      const nav = document.getElementById('sidenav');
+      if (nav.classList.contains('open')) toggleNav();
+    }
+  });
+});
+</script>
+<script>
+(async function initDocsAuth() {
+  try {
+    const res = await fetch("/web/me", { credentials: "include" });
+    const me = res.ok ? await res.json() : null;
+    const authEl = document.getElementById("topbar-auth");
+    if (!authEl) return;
+    if (!me) {
+      authEl.innerHTML = "<a href="/signup" class="btn-dash" style="text-decoration:none;">Sign in</a>";
+      return;
+    }
+    const initials = me.name
+      ? me.name.trim().split(/\s+/).map(p => p[0]).slice(0,2).join("").toUpperCase()
+      : (me.email ? me.email[0].toUpperCase() : "?");
+    authEl.innerHTML = `<div class="docs-avatar-wrap" id="docs-avatar-wrap"><div class="docs-avatar" id="docs-avatar" onclick="toggleDocsMenu()">${initials}</div><div class="docs-avatar-menu" id="docs-avatar-menu"><div class="docs-avatar-menu-header">${me.email || ""}</div><a class="docs-avatar-item" href="/dashboard"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>Dashboard</a><a class="docs-avatar-item" href="/settings"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Settings</a><button class="docs-avatar-item danger" onclick="docsSignOut()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 4.5L11 7m0 0L8.5 9.5M11 7H5M5 2H3a1 1 0 00-1 1v7a1 1 0 001 1h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Sign out</button></div></div>`;
+    if (me.avatarUrl) {
+      const av = document.getElementById("docs-avatar");
+      const img = document.createElement("img");
+      img.src = me.avatarUrl;
+      img.style.cssText = "width:100%;height:100%;border-radius:50%;object-fit:cover;";
+      img.onerror = () => { av.textContent = initials; };
+      av.textContent = "";
+      av.appendChild(img);
+    }
+    document.addEventListener("click", e => {
+      const wrap = document.getElementById("docs-avatar-wrap");
+      if (wrap && !wrap.contains(e.target)) document.getElementById("docs-avatar-menu")?.classList.remove("open");
+    });
+  } catch {}
+})();
+function toggleDocsMenu() { document.getElementById("docs-avatar-menu")?.classList.toggle("open"); }
+async function docsSignOut() { await fetch("/auth/signout", { method: "POST", credentials: "include" }); window.location.href = "/"; }
+</script>
+</body>
+</html>

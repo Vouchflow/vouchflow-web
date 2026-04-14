@@ -9,5 +9,8 @@ declare module 'fastify' {
     webhookSecret: string
     createdAt: string
     onboardingComplete: boolean
+    name: string
+    orgName: string | null
+    avatarUrl: string | null
   }
 }

@@ -459,6 +459,7 @@ pre {
   .param-req     { width: auto; font-size: 10px; padding-right: 0; padding-top: 0; }
   .param-req:empty { display: none; }
   .param-desc    { display: block; width: 100%; margin-top: 6px; padding-right: 0; }
+  .param-desc code { white-space: normal; }
   .error-table   { width: 100%; table-layout: fixed; }
   .page-header   { padding: 28px 16px 24px; }
   .base-url      { flex-wrap: wrap; }
@@ -478,7 +479,14 @@ pre {
 
 <!-- TOPBAR -->
 <header class="topbar">
-  <a class="topbar-logo" href="/">
+    <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+<a class="topbar-logo" href="/">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
       <rect x="3" y="3" width="11" height="11" rx="2.5" stroke="#111" stroke-width="1.8"/>
       <rect x="10" y="10" width="11" height="11" rx="2.5" fill="white" stroke="#111" stroke-width="1.8"/>
@@ -486,13 +494,6 @@ pre {
     </svg>
     <span class="logo-word">vouchflow</span>
   </a>
-  <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
-    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
-      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-  </button>
   <div class="topbar-divider"></div>
   <span class="topbar-section">API Reference</span>
   <div class="topbar-right">

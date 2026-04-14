@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@fastify/cookie": "^9",
+    "@fastify/oauth2": "^7.9.0",
     "@fastify/rate-limit": "^9",
     "@fastify/session": "^10",
     "@fastify/static": "^7",

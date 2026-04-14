@@ -81,6 +81,18 @@ export async function buildApp() {
   await fastify.register(pageRoutes)
   await fastify.register(webRoutes)
 
+  // GET /web/me — unauthenticated session peek for public pages (docs topbar, landing page)
+  fastify.get('/web/me', async (request) => {
+    const customerId = request.session.get('customerId')
+    if (!customerId) return null
+    return {
+      name:      request.session.get('name'),
+      orgName:   request.session.get('orgName'),
+      avatarUrl: request.session.get('avatarUrl'),
+      email:     request.session.get('email'),
+    }
+  })
+
   // Health
   fastify.get('/health', { config: { rateLimit: false } }, async () => ({ status: 'ok' }))
 

@@ -59,7 +59,16 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
 .topbar-org { font-size: 12px; color: var(--ink-3); }
 .topbar-docs { font-size: 12px; color: var(--ink-3); text-decoration: none; padding: 6px 10px; border-radius: 5px; }
 .topbar-docs:hover { background: var(--ground); color: var(--ink); }
-.avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: white; font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: white; font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.avatar-wrap { position: relative; }
+.avatar-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.10); min-width: 180px; z-index: 200; overflow: hidden; }
+.avatar-menu.open { display: block; }
+.avatar-menu-header { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); }
+.avatar-menu-email { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.avatar-menu-item { display: flex; align-items: center; gap: 8px; padding: 9px 14px; font-size: 13px; color: var(--ink-2); text-decoration: none; cursor: pointer; background: none; border: none; width: 100%; text-align: left; font-family: var(--sans); transition: background 0.1s; }
+.avatar-menu-item:hover { background: var(--ground); color: var(--ink); }
+.avatar-menu-item.danger { color: var(--danger); }
+.avatar-menu-item.danger:hover { background: #FEF1F1; }
 
 /* ── LAYOUT ── */
 .layout { display: flex; padding-top: var(--top-h); height: 100vh; overflow: hidden; }
@@ -487,7 +496,14 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
 <body>
 
 <header class="topbar">
-  <a class="topbar-logo" href="#">
+    <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+<a class="topbar-logo" href="/">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <rect x="3" y="3" width="11" height="11" rx="2.5" stroke="#111" stroke-width="1.8"/>
       <rect x="10" y="10" width="11" height="11" rx="2.5" fill="white" stroke="#111" stroke-width="1.8"/>
@@ -495,13 +511,6 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     </svg>
     <span class="logo-word">vouchflow</span>
   </a>
-  <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
-    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
-      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-  </button>
   <div class="topbar-center">
     <div class="env-pill"><span class="env-dot"></span>sandbox</div>
     <div style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.5px;border-radius:4px;padding:3px 8px;background:#F0F0F0;color:var(--ink-3);border:1px solid var(--border);">beta</div>
@@ -509,7 +518,22 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   <div class="topbar-right">
     <span class="topbar-org" id="topbar-org"></span>
     <a class="topbar-docs" href="/docs">Docs</a>
-    <a class="avatar" id="topbar-avatar" href="/settings" style="text-decoration:none">…</a>
+    <div class="avatar-wrap" id="avatar-wrap">
+      <div class="avatar" id="topbar-avatar" onclick="toggleAvatarMenu()">…</div>
+      <div class="avatar-menu" id="avatar-menu">
+        <div class="avatar-menu-header">
+          <div class="avatar-menu-email" id="avatar-menu-email">—</div>
+        </div>
+        <a class="avatar-menu-item" href="/dashboard">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/><rect x="7" y="1" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="7" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/><rect x="7" y="7" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1.3"/></svg>
+          Dashboard
+        </a>
+        <button class="avatar-menu-item danger" onclick="signOut()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 4.5L11 7m0 0L8.5 9.5M11 7H5M5 2H3a1 1 0 00-1 1v7a1 1 0 001 1h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sign out
+        </button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -526,12 +550,10 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     <a class="nav-item" href="/verifications">
       <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 4V3a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
       Verifications
-      <span class="nav-count">1.2k</span>
     </a>
     <a class="nav-item" href="/verifications">
       <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
       Devices
-      <span class="nav-count">248</span>
     </a>
     <div class="nav-section-label">Configure</div>
     <a class="nav-item active" href="/settings">
@@ -542,6 +564,19 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     <a class="nav-item" href="/reputation">
       <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="2.5" cy="3.5" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11.5" cy="3.5" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="12" r="1.5" stroke="currentColor" stroke-width="1.2"/><line x1="3.5" y1="4.8" x2="6" y2="6.2" stroke="currentColor" stroke-width="1.2"/><line x1="10.5" y1="4.8" x2="8" y2="6.2" stroke="currentColor" stroke-width="1.2"/><line x1="7" y1="9" x2="7" y2="10.5" stroke="currentColor" stroke-width="1.2"/></svg></span>
       Reputation
+    </a>
+    <div class="nav-section-label">Resources</div>
+    <a class="nav-item" href="/docs">
+      <span class="nav-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 4h6M4 7h6M4 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </span>
+      Documentation
+    </a>
+    <a class="nav-item" href="/">
+      <span class="nav-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5L1.5 6v6.5h4V9h3v3.5h4V6L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </span>
+      Home
     </a>
     <div class="sidenav-footer">
       <div class="usage-label"><span>Sandbox usage</span><strong>3,412 / 10k</strong></div>
@@ -598,30 +633,36 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
           </div>
           <div class="section-footer">
             <span class="section-footer-note">Sandbox keys are prefixed <code style="font-family:var(--mono);font-size:10px;background:#eee;padding:1px 5px;border-radius:3px;">vsk_sandbox_</code></span>
-            <button class="btn btn-secondary btn-sm">+ Generate new sandbox key</button>
           </div>
         </div>
 
         <!-- Live Keys -->
-        <div class="section">
+        <div class="section" id="live-keys-section">
           <div class="section-header">
             <div class="section-title">Live keys</div>
-            <div class="section-sub">For production. Verifications are billed and contribute to the network graph.</div>
+            <div class="section-sub">For production. SDK calls authenticated with a live key are billed and contribute to the network graph.</div>
           </div>
           <div class="section-body">
-            <div class="key-row">
+            <div class="key-row" id="live-key-write-row">
               <span class="key-env live">live</span>
               <span class="key-scope">write</span>
-              <span class="key-value">vsk_live_••••••••••••••••••••••••••••••••</span>
-              <span class="key-created">Not activated</span>
-              <div class="key-actions">
-                <button class="btn btn-primary btn-sm">Activate</button>
+              <span class="key-value" id="live-write-key-value">vsk_live_••••••••••••••••••••••••••••••••</span>
+              <span class="key-created" id="live-write-key-created">Not activated</span>
+              <div class="key-actions" id="live-write-key-actions">
+                <button class="btn btn-primary btn-sm" id="btn-activate-live">Activate</button>
               </div>
+            </div>
+            <div class="key-row" id="live-key-read-row" style="display:none">
+              <span class="key-env live">live</span>
+              <span class="key-scope">read</span>
+              <span class="key-value" id="live-read-key-value">vsk_live_read_••••••••••••••••••••••••••••••••</span>
+              <span class="key-created" id="live-read-key-created"></span>
+              <div class="key-actions"></div>
             </div>
           </div>
           <div class="section-footer">
-            <span class="section-footer-note">Activating a live key triggers a confirmation. Switching to production billing is irreversible for the current period.</span>
-            <button class="btn btn-secondary btn-sm" style="opacity:0.4;cursor:not-allowed">+ Generate new live key</button>
+            <span class="section-footer-note" id="live-keys-footer-note">Activate to generate your live API keys. During beta all billing is waived.</span>
+            <button class="btn btn-secondary btn-sm" id="btn-rotate-live" style="display:none">+ Rotate live keys</button>
           </div>
         </div>
 
@@ -668,50 +709,6 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
             <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px 14px;font-size:12px;color:rgba(255,255,255,0.6);">
               <span style="color:white;font-weight:500;">All</span> &nbsp;Confidence signals
             </div>
-          </div>
-        </div>
-
-        <!-- Design partner CTA -->
-        <div class="section">
-          <div class="section-header">
-            <div class="section-title">Become a design partner</div>
-            <div class="section-sub">Lock in founding pricing before billing launches. First 10 customers get free access in exchange for volume commitment and feedback.</div>
-          </div>
-          <div class="section-body">
-            <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
-              <div style="flex:1;min-width:200px;">
-                <div style="font-size:12px;color:var(--ink-2);margin-bottom:14px;font-weight:300;line-height:1.65;">
-                  Design partners get:<br/>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:8px;">
-                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);">
-                    <span style="width:16px;height:16px;border-radius:50%;background:var(--s-bg);border:1px solid #B8E8CC;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--success);flex-shrink:0;">✓</span>
-                    Free access for the duration of beta
-                  </div>
-                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);">
-                    <span style="width:16px;height:16px;border-radius:50%;background:var(--s-bg);border:1px solid #B8E8CC;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--success);flex-shrink:0;">✓</span>
-                    Founding rate locked in at launch
-                  </div>
-                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);">
-                    <span style="width:16px;height:16px;border-radius:50%;background:var(--s-bg);border:1px solid #B8E8CC;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--success);flex-shrink:0;">✓</span>
-                    Direct line to the founding team
-                  </div>
-                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);">
-                    <span style="width:16px;height:16px;border-radius:50%;background:var(--s-bg);border:1px solid #B8E8CC;display:flex;align-items:center;justify-content:justify;font-size:9px;color:var(--success);flex-shrink:0;">✓</span>
-                    Early access to reputation signals
-                  </div>
-                </div>
-              </div>
-              <div style="flex-shrink:0;background:var(--ground);border:1px solid var(--border);border-radius:8px;padding:16px 20px;min-width:180px;">
-                <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-4);margin-bottom:6px;">Spots remaining</div>
-                <div style="font-size:32px;font-weight:300;letter-spacing:-1px;color:var(--ink);line-height:1;">7</div>
-                <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">of 10 design partners</div>
-              </div>
-            </div>
-          </div>
-          <div class="section-footer">
-            <span class="section-footer-note">No commitment required to express interest.</span>
-            <button class="btn btn-primary btn-sm" onclick="showPartnerForm()">Apply as design partner →</button>
           </div>
         </div>
 
@@ -819,14 +816,15 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
           <div class="section-body">
             <div class="toggle-row">
               <div class="toggle-info">
-                <div class="toggle-label">Opt into Vouchflow Network</div>
-                <div class="toggle-desc">Devices enrolled with <code style="font-family:var(--mono);font-size:11px;background:#f0f0ec;padding:1px 4px;border-radius:3px;">network_opt_in: true</code> contribute verification history to the shared graph. You receive better signal and reduced base rates above 500k verifications/month. Requires appropriate user consent in your app.</div>
+                <div class="toggle-label">Opt out of Vouchflow Network</div>
+                <div class="toggle-desc">By default, devices contribute verification history to the shared reputation graph, giving you better confidence signals at scale. Enable this to exclude your app's devices from the network. Requires user consent in your app to participate.</div>
               </div>
-              <button class="toggle" onclick="this.classList.toggle('on')"></button>
+              <button class="toggle" id="network-toggle" onclick="this.classList.toggle('on')"></button>
             </div>
           </div>
           <div class="section-footer">
-            <span class="section-footer-note">See <a href="#" style="color:var(--ink-2)">privacy model →</a> for what data is shared and how it is anonymised.</span>
+            <span class="section-footer-note">See <a href="/docs/concepts#privacy" style="color:var(--ink-2)">privacy model →</a> for what data is shared and how it is anonymised.</span>
+            <button class="btn btn-primary btn-sm" id="btn-save-network">Save</button>
           </div>
         </div>
 
@@ -861,10 +859,10 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
           <div class="section-body">
             <div class="toggle-row" style="border:none;padding-bottom:0">
               <div class="toggle-info">
-                <div class="toggle-label" style="color:var(--danger)">Delete organisation</div>
+                <div class="toggle-label" style="color:var(--danger)">Delete account</div>
                 <div class="toggle-desc">Permanently deletes all devices, verifications, and API keys. Cannot be undone.</div>
               </div>
-              <button class="btn btn-danger">Delete organisation</button>
+              <button class="btn btn-danger" id="btn-delete-account">Delete account</button>
             </div>
           </div>
         </div>
@@ -873,6 +871,33 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
 
     </div>
   </main>
+</div>
+
+<!-- Live key reveal modal -->
+<div id="live-key-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;" onclick="if(event.target===this)closeLiveKeyModal()">
+  <div style="background:white;border-radius:12px;padding:32px;width:min(540px,94vw);box-shadow:0 20px 60px rgba(0,0,0,0.25);position:relative;">
+    <div style="font-size:16px;font-weight:600;margin-bottom:6px;">Live API keys generated</div>
+    <div style="font-size:13px;color:#CC3333;font-weight:500;margin-bottom:20px;display:flex;align-items:center;gap:6px;">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#CC3333" stroke-width="1.3"/><rect x="6.3" y="3.5" width="1.4" height="4.5" rx="0.7" fill="#CC3333"/><rect x="6.3" y="9.5" width="1.4" height="1.4" rx="0.7" fill="#CC3333"/></svg>
+      Copy these now — they won't be shown again.
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">Write key</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <code id="modal-write-key" style="flex:1;font-size:12px;font-family:var(--mono);background:#f5f5f5;padding:10px 12px;border-radius:6px;word-break:break-all;"></code>
+        <button class="btn btn-secondary btn-sm" onclick="copyModalKey('modal-write-key',this)">Copy</button>
+      </div>
+    </div>
+    <div style="margin-bottom:24px;">
+      <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">Read key</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <code id="modal-read-key" style="flex:1;font-size:12px;font-family:var(--mono);background:#f5f5f5;padding:10px 12px;border-radius:6px;word-break:break-all;"></code>
+        <button class="btn btn-secondary btn-sm" onclick="copyModalKey('modal-read-key',this)">Copy</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#888;margin-bottom:20px;">Store these in your server's environment variables. Never commit live keys to source control. If you lose them, you can rotate to generate new ones.</div>
+    <button class="btn btn-primary" style="width:100%" onclick="closeLiveKeyModal()">I've saved my keys</button>
+  </div>
 </div>
 
 <script>
@@ -974,12 +999,54 @@ function renderKeys(session) {
   });
 }
 
+function renderAvatar(el, session) {
+  if (session.avatarUrl) {
+    const img = document.createElement('img');
+    img.src = session.avatarUrl;
+    img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;';
+    img.onerror = () => { el.textContent = initials(session); };
+    el.textContent = '';
+    el.appendChild(img);
+  } else {
+    el.textContent = initials(session);
+  }
+}
+
+function initials(session) {
+  if (session.name) {
+    const parts = session.name.trim().split(/\s+/);
+    return parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : parts[0][0].toUpperCase();
+  }
+  return session.email ? session.email[0].toUpperCase() : '?';
+}
+
+function toggleAvatarMenu() {
+  document.getElementById('avatar-menu').classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('avatar-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    const menu = document.getElementById('avatar-menu');
+    if (menu) menu.classList.remove('open');
+  }
+});
+
+async function signOut() {
+  await fetch('/auth/signout', { method: 'POST', credentials: 'include' });
+  window.location.href = '/';
+}
+
 function renderAccount(session, usage, overview) {
   // Topbar
-  const topbarOrg = document.getElementById('topbar-org');
-  const topbarAv  = document.getElementById('topbar-avatar');
-  if (topbarOrg && session.email) topbarOrg.textContent = session.email;
-  if (topbarAv  && session.email) topbarAv.textContent  = session.email[0].toUpperCase();
+  const topbarOrg   = document.getElementById('topbar-org');
+  const topbarAv    = document.getElementById('topbar-avatar');
+  const menuEmail   = document.getElementById('avatar-menu-email');
+  if (topbarOrg)  topbarOrg.textContent  = session.orgName || session.email || '';
+  if (menuEmail && session.email) menuEmail.textContent = session.email;
+  if (topbarAv) renderAvatar(topbarAv, session);
 
   // Account fields — org name was never collected, show email as fallback label
   const orgInput   = document.getElementById('input-org-name');
@@ -1008,6 +1075,97 @@ function renderAccount(session, usage, overview) {
   }
 }
 
+function renderLiveKeys(keys) {
+  const writeRow    = document.getElementById('live-key-write-row');
+  const readRow     = document.getElementById('live-key-read-row');
+  const writeVal    = document.getElementById('live-write-key-value');
+  const readVal     = document.getElementById('live-read-key-value');
+  const writeCreated = document.getElementById('live-write-key-created');
+  const readCreated  = document.getElementById('live-read-key-created');
+  const writeActions = document.getElementById('live-write-key-actions');
+  const footerNote   = document.getElementById('live-keys-footer-note');
+  const btnRotate    = document.getElementById('btn-rotate-live');
+  const btnActivate  = document.getElementById('btn-activate-live');
+
+  const writeKey = keys.find(k => k.scope === 'write');
+  const readKey  = keys.find(k => k.scope === 'read');
+
+  if (writeKey) {
+    if (writeVal)    writeVal.textContent    = 'vsk_live_••••••••••••••••••••••••••••••••';
+    if (writeCreated) writeCreated.textContent = 'Created ' + new Date(writeKey.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (writeActions) writeActions.innerHTML = '';
+    if (footerNote)   footerNote.textContent = 'Live mode is active. Rotate to deprecate the current keys — a 14-day overlap gives your apps time to update.';
+    if (btnRotate)    btnRotate.style.display = '';
+    if (btnActivate)  btnActivate.style.display = 'none';
+  }
+
+  if (readKey && readRow) {
+    readRow.style.display = '';
+    if (readVal)    readVal.textContent    = 'vsk_live_read_••••••••••••••••••••••••••••••••';
+    if (readCreated) readCreated.textContent = 'Created ' + new Date(readKey.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+}
+
+function showLiveKeyModal(writeRaw, readRaw) {
+  document.getElementById('modal-write-key').textContent = writeRaw;
+  document.getElementById('modal-read-key').textContent  = readRaw;
+  const modal = document.getElementById('live-key-modal');
+  modal.style.display = 'flex';
+}
+
+function closeLiveKeyModal() {
+  document.getElementById('live-key-modal').style.display = 'none';
+}
+
+async function copyModalKey(id, btn) {
+  const text = document.getElementById(id)?.textContent?.trim();
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  } catch {
+    btn.textContent = 'Copy';
+  }
+}
+
+async function generateLiveKeys(isRotation) {
+  const btn = isRotation ? document.getElementById('btn-rotate-live') : document.getElementById('btn-activate-live');
+  if (isRotation) {
+    const confirmed = window.confirm('Rotate live keys?\n\nYour current live keys will be deprecated with a 14-day overlap. During the overlap period both old and new keys work, giving your apps time to update.');
+    if (!confirmed) return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = isRotation ? 'Rotating…' : 'Activating…'; }
+  try {
+    const res = await fetch('/web/live-keys', { method: 'POST', credentials: 'include' });
+    if (!res.ok) { showToast('Failed to generate live keys — try again', true); return; }
+    const { writeKey, readKey } = await res.json();
+    renderLiveKeys([
+      { id: writeKey.id, scope: 'write', createdAt: writeKey.createdAt },
+      { id: readKey.id,  scope: 'read',  createdAt: readKey.createdAt  },
+    ]);
+    showLiveKeyModal(writeKey.rawKey, readKey.rawKey);
+  } catch {
+    showToast('Network error — try again', true);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = isRotation ? '+ Rotate live keys' : 'Activate';
+    }
+  }
+}
+
+async function loadLiveKeys() {
+  try {
+    const res = await fetch('/web/live-keys', { credentials: 'include' });
+    if (!res.ok) return;
+    const { keys } = await res.json();
+    if (keys && keys.length > 0) renderLiveKeys(keys);
+  } catch {
+    // silently ignore — UI shows "Not activated" by default
+  }
+}
+
 async function loadSettings() {
   try {
     const [sessionRes, usageRes, overviewRes] = await Promise.all([
@@ -1024,6 +1182,7 @@ async function loadSettings() {
     const overview = overviewRes.ok ? await overviewRes.json() : {};
     renderKeys(session);
     renderAccount(session, usage, overview);
+    loadLiveKeys();
   } catch (err) {
     console.error('Failed to load settings', err);
   }
@@ -1061,6 +1220,52 @@ document.getElementById('btn-save-confidence').addEventListener('click', async (
     else showToast('Failed to save — try again', true);
   } catch {
     showToast('Network error', true);
+  }
+});
+
+document.getElementById('btn-save-network').addEventListener('click', async () => {
+  // Toggle ON = opted out → networkOptIn: false; Toggle OFF = participating → networkOptIn: true
+  const optedOut = document.getElementById('network-toggle')?.classList.contains('on');
+  try {
+    const res = await fetch('/web/account', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ networkOptIn: !optedOut }),
+    });
+    if (res.ok) showToast('Network preference saved');
+    else showToast('Failed to save — try again', true);
+  } catch {
+    showToast('Network error', true);
+  }
+});
+
+document.getElementById('btn-activate-live').addEventListener('click', () => generateLiveKeys(false));
+document.getElementById('btn-rotate-live').addEventListener('click',   () => generateLiveKeys(true));
+
+document.getElementById('btn-delete-account').addEventListener('click', async () => {
+  const first = window.confirm(
+    'Delete your account?\n\nThis permanently deletes all devices, verifications, and API keys. This cannot be undone.'
+  );
+  if (!first) return;
+  const second = window.confirm('Are you absolutely sure? All your data will be permanently deleted and cannot be recovered.');
+  if (!second) return;
+  const btn = document.getElementById('btn-delete-account');
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+  try {
+    const res = await fetch('/web/account', { method: 'DELETE', credentials: 'include' });
+    if (res.ok) {
+      window.location.href = '/';
+    } else {
+      showToast('Deletion failed — please contact support@vouchflow.dev', true);
+      btn.disabled = false;
+      btn.textContent = 'Delete account';
+    }
+  } catch {
+    showToast('Network error — please try again', true);
+    btn.disabled = false;
+    btn.textContent = 'Delete account';
   }
 });
 

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vouchflow — iOS SDK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/docs.css"/>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+  <a class="topbar-logo" href="/">
+    <svg class="logo-mark" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="11" height="11" rx="2.5" stroke="#111" stroke-width="1.8"/>
+      <rect x="10" y="10" width="11" height="11" rx="2.5" fill="white" stroke="#111" stroke-width="1.8"/>
+      <circle cx="15.5" cy="15.5" r="2" fill="#111"/>
+    </svg>
+    <span class="logo-word">vouchflow</span>
+  </a>
+  <div class="topbar-divider"></div>
+  <span class="topbar-section">Documentation</span>
+  <div class="topbar-right">
+    <div class="topbar-search">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.5" stroke="#CCC" stroke-width="1.2"/><line x1="7.5" y1="7.5" x2="10.5" y2="10.5" stroke="#CCC" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Search docs…<kbd>⌘K</kbd>
+    </div>
+    <div id="topbar-auth"><a href="/signup" class="btn-dash" style="text-decoration:none;" id="auth-signin-btn">Sign in</a></div>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+  <nav class="sidenav" id="sidenav">
+    <div class="nav-section">
+      <div class="nav-section-label">Get started</div>
+      <a class="nav-item" href="/docs/introduction"><span class="nav-dot"></span>Introduction</a>
+      <a class="nav-item" href="/docs"><span class="nav-dot"></span>Quickstart</a>
+      <a class="nav-item" href="/docs/introduction#how-it-works"><span class="nav-dot"></span>How it works</a>
+      <a class="nav-item" href="/docs/introduction#sandbox"><span class="nav-dot"></span>Sandbox vs production</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">iOS SDK</div>
+      <a class="nav-item active" href="/docs/ios-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item active" href="/docs/ios-sdk#init"><span class="nav-dot"></span>Initialisation</a>
+      <a class="nav-item active" href="/docs/ios-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item active" href="/docs/ios-sdk#verify"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item active" href="/docs/ios-sdk#errors"><span class="nav-dot"></span>Error handling</a>
+      <a class="nav-item active" href="/docs/ios-sdk#app-attest"><span class="nav-dot"></span>App Attest setup</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Android SDK</div>
+      <a class="nav-item" href="/docs/android-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item" href="/docs/android-sdk#init"><span class="nav-dot"></span>Initialisation</a>
+      <a class="nav-item" href="/docs/android-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item" href="/docs/android-sdk#verify"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item" href="/docs/android-sdk#errors"><span class="nav-dot"></span>Error handling</a>
+      <a class="nav-item" href="/docs/android-sdk#oem"><span class="nav-dot"></span>OEM variance <span class="nav-badge new">note</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Backend</div>
+      <a class="nav-item" href="/docs/backend#auth"><span class="nav-dot"></span>Authentication</a>
+      <a class="nav-item" href="/docs/backend#idempotency"><span class="nav-dot"></span>Idempotency</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">API Reference</div>
+      <a class="nav-item" href="/api-reference#enroll"><span class="nav-dot"></span>POST /v1/enroll</a>
+      <a class="nav-item" href="/api-reference#verify"><span class="nav-dot"></span>POST /v1/verify</a>
+      <a class="nav-item" href="/api-reference#device"><span class="nav-dot"></span>GET /v1/device</a>
+      <a class="nav-item" href="/api-reference#reputation"><span class="nav-dot"></span>POST /v1/reputation</a>
+      <a class="nav-item" href="/api-reference#errors"><span class="nav-dot"></span>Errors</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Concepts</div>
+      <a class="nav-item" href="/docs/concepts#confidence"><span class="nav-dot"></span>Confidence levels</a>
+      <a class="nav-item" href="/docs/concepts#reputation"><span class="nav-dot"></span>Device reputation</a>
+      <a class="nav-item" href="/docs/concepts#network"><span class="nav-dot"></span>Network graph</a>
+      <a class="nav-item" href="/docs/concepts#privacy"><span class="nav-dot"></span>Privacy model</a>
+      <a class="nav-item" href="/docs/concepts#fallback"><span class="nav-dot"></span>Fallback handling</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Guides</div>
+      <a class="nav-item" href="/docs/guides#sms-otp"><span class="nav-dot"></span>Replacing SMS OTP</a>
+      <a class="nav-item" href="/docs/guides#signup"><span class="nav-dot"></span>Signup flow integration</a>
+      <a class="nav-item" href="/docs/guides#low-confidence"><span class="nav-dot"></span>Handling low confidence</a>
+      <a class="nav-item" href="/docs/guides#production"><span class="nav-dot"></span>Going to production</a>
+      <a class="nav-item" href="/docs/guides#gdpr"><span class="nav-dot"></span>GDPR compliance</a>
+    </div>
+    <div class="nav-app-footer">
+      <div class="nav-section-label">App</div>
+      <a class="nav-app-item" href="/dashboard">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-app-item" href="/settings">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+      <a class="nav-app-item" href="/">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1.5L1.5 6v6.5h4V9h3v3.5h4V6L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Home
+      </a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <article class="content">
+
+      <div class="page-eyebrow">iOS SDK</div>
+      <h1 class="page-title">iOS SDK reference</h1>
+      <p class="page-lead">The iOS SDK wraps App Attest, Secure Enclave key management, and the Vouchflow verification protocol into a single async call. Requires iOS 15+, Xcode 15+, Swift 5.9+.</p>
+
+      <!-- INSTALLATION -->
+      <h2 class="section-anchor" id="install">Installation</h2>
+      <p>Add the package via Swift Package Manager. In Xcode, go to <strong>File → Add Package Dependencies</strong> and enter the repository URL, or add it directly to <code>Package.swift</code>:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Package.swift</span><button class="code-copy">Copy</button></div>
+        <pre><span class="t">dependencies: [</span>
+    <span class="t">.</span><span class="f">package</span><span class="t">(</span>
+        <span class="n">url</span><span class="t">: </span><span class="s">"https://github.com/Vouchflow/ios-sdk"</span><span class="t">,</span>
+        <span class="n">from</span><span class="t">: </span><span class="s">"1.0.0"</span>
+    <span class="t">)</span>
+<span class="t">]</span></pre>
+      </div>
+
+      <p>Then add <code>VouchflowSDK</code> as a dependency of your target.</p>
+
+      <div class="callout warning">
+        <strong>App Attest entitlement required</strong>
+        Before calling <code>enroll()</code> or <code>verify()</code> on a physical device, add the App Attest capability to your app target. See <a href="#app-attest">App Attest setup</a> below. Without it, the SDK will throw <code>AttestationUnavailable</code> and confidence will be capped at <code>medium</code>.
+      </div>
+
+      <hr/>
+
+      <!-- INITIALISATION -->
+      <h2 class="section-anchor" id="init">Initialisation</h2>
+      <p>Call <code>Vouchflow.configure(_:)</code> once at app launch, before any call to <code>verify()</code>. The SDK is safe to configure in a background thread.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Swift — App entry point</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">import</span> <span class="t">VouchflowSDK</span>
+
+<span class="t">@main </span><span class="k">struct</span><span class="t"> MyApp: App {</span>
+  <span class="k">init</span><span class="t">() {</span>
+    <span class="k">try</span><span class="t">? Vouchflow.</span><span class="f">configure</span><span class="t">(VouchflowConfig(</span>
+      <span class="n">apiKey</span><span class="t">:       </span><span class="s">"vsk_sandbox_••••••••••••••••"</span><span class="t">,</span>
+      <span class="n">customerId</span><span class="t">:   </span><span class="s">"cust_..."</span><span class="t">,</span>
+      <span class="n">environment</span><span class="t">: .</span><span class="n">sandbox</span>   <span class="c">// .production in release builds</span>
+    <span class="t">))</span>
+  <span class="t">}</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p><code>VouchflowConfig</code> parameters:</p>
+      <table>
+        <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>apiKey</code></td><td><code>String</code></td><td>Yes</td><td>Write-scoped key from the dashboard. Must start with <code>vsk_</code>.</td></tr>
+          <tr><td><code>customerId</code></td><td><code>String</code></td><td>Yes</td><td>Your customer ID, displayed in the dashboard.</td></tr>
+          <tr><td><code>environment</code></td><td><code>VouchflowEnvironment</code></td><td>No</td><td>Defaults to <code>.production</code>. Use <code>.sandbox</code> during development.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <strong>UIKit</strong>
+        For UIKit apps, call <code>Vouchflow.configure(_:)</code> in <code>application(_:didFinishLaunchingWithOptions:)</code>.
+      </div>
+
+      <hr/>
+
+      <!-- ENROLLMENT -->
+      <h2 class="section-anchor" id="enrollment">Enrollment</h2>
+      <p>Enrollment is fully automatic — you never call it directly. On the first <code>verify()</code> call for a given device, the SDK:</p>
+      <ol>
+        <li>Generates an EC secp256r1 keypair in the Secure Enclave</li>
+        <li>Obtains an App Attest assertion for the public key</li>
+        <li>Registers the keypair with the Vouchflow backend (<code>POST /v1/enroll</code>)</li>
+        <li>Stores the resulting <code>device_token</code> in the iOS keychain, marked <code>kSecAttrAccessibleAfterFirstUnlock</code></li>
+      </ol>
+
+      <p>Subsequent calls to <code>verify()</code> skip enrollment and go straight to the challenge-response flow. The SDK detects keychain loss (e.g. after device wipe) and re-enrolls automatically, producing a new device token.</p>
+
+      <div class="callout">
+        <strong>Keychain persistence</strong>
+        The device token is stored with <code>kSecAttrSynchronizable = false</code> so it does not sync to iCloud. If the app is deleted and reinstalled, the token is also deleted; re-enrollment produces a new token with no prior history, which is surfaced in the result as <code>signals.keychainPersistent = false</code>.
+      </div>
+
+      <hr/>
+
+      <!-- VERIFICATION -->
+      <h2 class="section-anchor" id="verify">Verification</h2>
+      <p>Call <code>Vouchflow.shared.verify(context:)</code> at any point where you need a device trust signal. The method is async/await and handles enrollment, biometric prompt, challenge signing, and result parsing internally.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Swift</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">do</span><span class="t"> {</span>
+  <span class="k">let</span><span class="t"> result = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">verify</span><span class="t">(</span>
+    <span class="n">context</span><span class="t">: .</span><span class="n">login</span>  <span class="c">// .signup · .login · .sensitiveAction</span>
+  <span class="t">)</span>
+
+  <span class="c">// result.verified    — Bool</span>
+  <span class="c">// result.confidence  — .high / .medium / .low</span>
+  <span class="c">// result.deviceToken — opaque string; pass to your server if needed</span>
+  <span class="c">// result.signals     — VouchflowSignals (see below)</span>
+  <span class="f">proceedWithLogin</span><span class="t">()</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> {</span>
+  <span class="f">handleVerificationError</span><span class="t">(error)</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p><strong>VouchflowResult fields:</strong></p>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>verified</code></td><td><code>Bool</code></td><td>Whether the verification completed successfully.</td></tr>
+          <tr><td><code>confidence</code></td><td><code>Confidence</code></td><td><code>.high</code>, <code>.medium</code>, or <code>.low</code>.</td></tr>
+          <tr><td><code>deviceToken</code></td><td><code>String</code></td><td>Stable opaque token for this device. Pass to your server to query reputation via <code>GET /v1/device/{token}/reputation</code>.</td></tr>
+          <tr><td><code>deviceAgeDays</code></td><td><code>Int</code></td><td>Days since first enrollment.</td></tr>
+          <tr><td><code>networkVerifications</code></td><td><code>Int</code></td><td>Total verifications observed across the Vouchflow network for this device.</td></tr>
+          <tr><td><code>signals.keychainPersistent</code></td><td><code>Bool</code></td><td><code>true</code> if the device token survived an app reinstall.</td></tr>
+          <tr><td><code>signals.biometricUsed</code></td><td><code>Bool</code></td><td><code>true</code> if Face ID / Touch ID was presented.</td></tr>
+          <tr><td><code>signals.crossAppHistory</code></td><td><code>Bool</code></td><td><code>true</code> if this device has verified in another Vouchflow-integrated app.</td></tr>
+          <tr><td><code>signals.attestationVerified</code></td><td><code>Bool</code></td><td><code>true</code> if App Attest assertion was validated by Apple.</td></tr>
+          <tr><td><code>signals.anomalyFlags</code></td><td><code>[String]</code></td><td>Active anomaly flags, if any (e.g. <code>velocity_anomaly</code>).</td></tr>
+          <tr><td><code>fallbackUsed</code></td><td><code>Bool</code></td><td><code>true</code> if email OTP fallback was used.</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>VerificationContext values:</strong></p>
+      <table>
+        <thead><tr><th>Value</th><th>Use when</th></tr></thead>
+        <tbody>
+          <tr><td><code>.signup</code></td><td>New account creation</td></tr>
+          <tr><td><code>.login</code></td><td>Standard authentication</td></tr>
+          <tr><td><code>.sensitiveAction</code></td><td>High-value in-session actions (transfers, password change, etc.)</td></tr>
+        </tbody>
+      </table>
+
+      <p>To require a minimum confidence level, pass <code>minimumConfidence</code>. If the device cannot meet it, the call throws <code>VouchflowError.minimumConfidenceUnmet</code>:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Swift — with minimum confidence</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">let</span><span class="t"> result = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">verify</span><span class="t">(</span>
+  <span class="n">context</span><span class="t">:           .</span><span class="n">sensitiveAction</span><span class="t">,</span>
+  <span class="n">minimumConfidence</span><span class="t">: .</span><span class="n">high</span>
+<span class="t">)</span></pre>
+      </div>
+
+      <hr/>
+
+      <!-- ERROR HANDLING -->
+      <h2 class="section-anchor" id="errors">Error handling</h2>
+      <p>All errors thrown by <code>verify()</code> conform to <code>VouchflowError</code>. Handle the cases you care about; let others propagate or fall to a generic handler.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Swift — full error handling</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">do</span><span class="t"> {</span>
+  <span class="k">let</span><span class="t"> result = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">verify</span><span class="t">(context: .</span><span class="n">login</span><span class="t">)</span>
+  <span class="f">proceed</span><span class="t">(result)</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricCancelled</span><span class="t">(</span><span class="k">let</span><span class="t"> sessionId) {</span>
+  <span class="c">// User dismissed the biometric prompt. Offer retry.</span>
+  <span class="f">showRetryPrompt</span><span class="t">()</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricFailed</span><span class="t">(</span><span class="k">let</span><span class="t"> sessionId) {</span>
+  <span class="c">// Wrong biometric, lockout, or hardware error. Offer fallback.</span>
+  <span class="k">let</span><span class="t"> fb = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">requestFallback</span><span class="t">(</span>
+    <span class="n">sessionId</span><span class="t">: sessionId,</span>
+    <span class="n">email</span><span class="t">: currentUser.email,</span>
+    <span class="n">reason</span><span class="t">: .</span><span class="n">biometricFailed</span>
+  <span class="t">)</span>
+  <span class="f">showOTPInput</span><span class="t">(expiresAt: fb.expiresAt)</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricUnavailable</span><span class="t"> {</span>
+  <span class="c">// No biometric enrolled or no hardware. Proceed to fallback directly.</span>
+  <span class="k">let</span><span class="t"> fb = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">requestFallback</span><span class="t">(</span>
+    <span class="n">sessionId</span><span class="t">: currentSessionId,</span>
+    <span class="n">email</span><span class="t">: currentUser.email,</span>
+    <span class="n">reason</span><span class="t">: .</span><span class="n">biometricUnavailable</span>
+  <span class="t">)</span>
+  <span class="f">showOTPInput</span><span class="t">(expiresAt: fb.expiresAt)</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">minimumConfidenceUnmet</span><span class="t"> {</span>
+  <span class="c">// Device cannot reach the required confidence threshold.</span>
+  <span class="f">showDeviceNotSupportedMessage</span><span class="t">()</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">networkUnavailable</span><span class="t"> {</span>
+  <span class="c">// No internet. Surface a retry prompt.</span>
+  <span class="f">showOfflineError</span><span class="t">()</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> {</span>
+  <span class="c">// Unexpected error — log and fail gracefully.</span>
+  <span class="f">logError</span><span class="t">(error)</span>
+  <span class="f">showGenericError</span><span class="t">()</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p><strong>All VouchflowError cases:</strong></p>
+      <table>
+        <thead><tr><th>Case</th><th>Description</th><th>Recommended action</th></tr></thead>
+        <tbody>
+          <tr><td><code>notConfigured</code></td><td><code>Vouchflow.configure()</code> was not called</td><td>Fix at init — should not reach users</td></tr>
+          <tr><td><code>invalidApiKey</code></td><td>Key does not start with <code>vsk_</code></td><td>Fix at init</td></tr>
+          <tr><td><code>biometricUnavailable</code></td><td>No biometric enrolled or no hardware</td><td>Offer fallback</td></tr>
+          <tr><td><code>biometricCancelled(sessionId)</code></td><td>User dismissed the prompt</td><td>Offer retry or cancel</td></tr>
+          <tr><td><code>biometricFailed(sessionId)</code></td><td>Wrong biometric, lockout, or hardware error</td><td>Offer fallback</td></tr>
+          <tr><td><code>minimumConfidenceUnmet</code></td><td>Device cannot meet the requested threshold</td><td>Block or degrade gracefully</td></tr>
+          <tr><td><code>enrollmentFailed(cause:)</code></td><td>Enrollment failed; retried next call</td><td>Usually transient; log it</td></tr>
+          <tr><td><code>attestationUnavailable</code></td><td>App Attest entitlement missing or device unsupported</td><td>Confidence capped at <code>medium</code></td></tr>
+          <tr><td><code>sessionExpiredRepeatedly</code></td><td>Session expired twice in a row (auto-retry failed)</td><td>Show generic error, ask to retry later</td></tr>
+          <tr><td><code>networkUnavailable</code></td><td>No internet connection</td><td>Surface offline state</td></tr>
+          <tr><td><code>serverError(statusCode:code:message:)</code></td><td>API returned a non-2xx response</td><td>Log; degrade gracefully</td></tr>
+        </tbody>
+      </table>
+
+      <h2 class="section-anchor" id="fallback">Fallback flow</h2>
+      <p>When biometric fails or is unavailable, call <code>requestFallback(sessionId:email:reason:)</code> to trigger an email OTP. After the user enters the code, call <code>submitFallbackOtp(sessionId:otp:)</code>.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Swift — OTP submission</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">let</span><span class="t"> fbResult = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">submitFallbackOtp</span><span class="t">(</span>
+  <span class="n">sessionId</span><span class="t">: fallback.fallbackSessionId,</span>
+  <span class="n">otp</span><span class="t">: userEnteredCode</span>
+<span class="t">)</span>
+<span class="c">// fbResult.confidence is always .low</span>
+<span class="c">// fbResult.verified is true if OTP matched</span></pre>
+      </div>
+
+      <hr/>
+
+      <!-- APP ATTEST SETUP -->
+      <h2 class="section-anchor" id="app-attest">App Attest setup</h2>
+      <p>App Attest is required for <code>confidence: .high</code> in production. Without it, attestation is skipped and confidence is capped at <code>.medium</code>.</p>
+
+      <ol class="steps">
+        <li class="step">
+          <div class="step-body">
+            <div class="step-title">Add the capability in Xcode</div>
+            <div class="step-desc">Select your app target → <strong>Signing &amp; Capabilities</strong> → click <strong>+</strong> → search for <strong>App Attest</strong> → add it. This adds the entitlement automatically.</div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-body">
+            <div class="step-title">Verify the entitlement is present</div>
+            <div class="step-desc">Open your <code>.entitlements</code> file and confirm <code>com.apple.developer.devicecheck.appattest-environment</code> is set to <code>production</code> for release builds and <code>development</code> for debug builds.</div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-body">
+            <div class="step-title">Test on a physical device</div>
+            <div class="step-desc">App Attest requires iOS 15+ and a physical device. On the simulator, the SDK skips attestation and returns <code>confidence: .medium</code> — this is correct behaviour in sandbox. In production builds, test on real hardware before shipping.</div>
+          </div>
+        </li>
+      </ol>
+
+      <div class="callout">
+        <strong>Entitlement file example</strong>
+      </div>
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">XML — MyApp.entitlements</span><button class="code-copy">Copy</button></div>
+        <pre><span class="t">&lt;key&gt;com.apple.developer.devicecheck.appattest-environment&lt;/key&gt;</span>
+<span class="s">&lt;string&gt;production&lt;/string&gt;</span></pre>
+      </div>
+
+      <div class="callout warning">
+        <strong>Development vs production key</strong>
+        Use <code>development</code> in debug/simulator builds and <code>production</code> in App Store / TestFlight builds. Mismatching the entitlement value will cause attestation to fail silently and confidence will be capped at <code>medium</code>.
+      </div>
+
+      <div class="page-nav">
+        <a class="page-nav-card" href="/docs">
+          <div class="page-nav-dir">← Previous</div>
+          <div class="page-nav-title">Quickstart</div>
+        </a>
+        <a class="page-nav-card next" href="/docs/android-sdk">
+          <div class="page-nav-dir">Next →</div>
+          <div class="page-nav-title">Android SDK</div>
+        </a>
+      </div>
+
+    </article>
+
+    <aside class="toc">
+      <div class="toc-label">On this page</div>
+      <a class="toc-item" href="#install">Installation</a>
+      <a class="toc-item" href="#init">Initialisation</a>
+      <a class="toc-item" href="#enrollment">Enrollment</a>
+      <a class="toc-item" href="#verify">Verification</a>
+      <a class="toc-item sub" href="#fallback">Fallback flow</a>
+      <a class="toc-item" href="#errors">Error handling</a>
+      <a class="toc-item" href="#app-attest">App Attest setup</a>
+    </aside>
+  </main>
+</div>
+
+<script>
+document.querySelectorAll('.code-copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+});
+function toggleNav() {
+  const nav = document.getElementById('sidenav');
+  const overlay = document.getElementById('nav-overlay');
+  nav.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      const nav = document.getElementById('sidenav');
+      if (nav.classList.contains('open')) toggleNav();
+    }
+  });
+});
+</script>
+<script>
+(async function initDocsAuth() {
+  try {
+    const res = await fetch("/web/me", { credentials: "include" });
+    const me = res.ok ? await res.json() : null;
+    const authEl = document.getElementById("topbar-auth");
+    if (!authEl) return;
+    if (!me) {
+      authEl.innerHTML = "<a href="/signup" class="btn-dash" style="text-decoration:none;">Sign in</a>";
+      return;
+    }
+    const initials = me.name
+      ? me.name.trim().split(/\s+/).map(p => p[0]).slice(0,2).join("").toUpperCase()
+      : (me.email ? me.email[0].toUpperCase() : "?");
+    authEl.innerHTML = `<div class="docs-avatar-wrap" id="docs-avatar-wrap"><div class="docs-avatar" id="docs-avatar" onclick="toggleDocsMenu()">${initials}</div><div class="docs-avatar-menu" id="docs-avatar-menu"><div class="docs-avatar-menu-header">${me.email || ""}</div><a class="docs-avatar-item" href="/dashboard"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>Dashboard</a><a class="docs-avatar-item" href="/settings"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Settings</a><button class="docs-avatar-item danger" onclick="docsSignOut()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 4.5L11 7m0 0L8.5 9.5M11 7H5M5 2H3a1 1 0 00-1 1v7a1 1 0 001 1h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Sign out</button></div></div>`;
+    if (me.avatarUrl) {
+      const av = document.getElementById("docs-avatar");
+      const img = document.createElement("img");
+      img.src = me.avatarUrl;
+      img.style.cssText = "width:100%;height:100%;border-radius:50%;object-fit:cover;";
+      img.onerror = () => { av.textContent = initials; };
+      av.textContent = "";
+      av.appendChild(img);
+    }
+    document.addEventListener("click", e => {
+      const wrap = document.getElementById("docs-avatar-wrap");
+      if (wrap && !wrap.contains(e.target)) document.getElementById("docs-avatar-menu")?.classList.remove("open");
+    });
+  } catch {}
+})();
+function toggleDocsMenu() { document.getElementById("docs-avatar-menu")?.classList.toggle("open"); }
+async function docsSignOut() { await fetch("/auth/signout", { method: "POST", credentials: "include" }); window.location.href = "/"; }
+</script>
+</body>
+</html>
