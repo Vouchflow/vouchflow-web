@@ -507,9 +507,9 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     <div style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.5px;border-radius:4px;padding:3px 8px;background:#F0F0F0;color:var(--ink-3);border:1px solid var(--border);">beta</div>
   </div>
   <div class="topbar-right">
-    <span class="topbar-org">acme-corp</span>
-    <a class="topbar-docs" href="#">Docs</a>
-    <a class="avatar" href="/settings" style="text-decoration:none">AC</a>
+    <span class="topbar-org" id="topbar-org"></span>
+    <a class="topbar-docs" href="/docs">Docs</a>
+    <a class="avatar" id="topbar-avatar" href="/settings" style="text-decoration:none">…</a>
   </div>
 </header>
 
@@ -560,7 +560,6 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     <!-- TABS -->
     <div class="settings-tabs">
       <button class="settings-tab active" onclick="switchTab('api-keys')">API Keys</button>
-      <button class="settings-tab" onclick="switchTab('webhooks')">Webhooks</button>
       <button class="settings-tab" onclick="switchTab('billing')">Billing</button>
       <button class="settings-tab" onclick="switchTab('account')">Account</button>
     </div>
@@ -585,23 +584,19 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
             <div class="key-row">
               <span class="key-env sandbox">sandbox</span>
               <span class="key-scope">write</span>
-              <span class="key-value">vsk_sandbox_4xK9mN2pL8qR7tW3yH6jD1cF5vB0zA</span>
-              <span class="key-created">Created Apr 1</span>
+              <span class="key-value">••••••••••••••••••••••••••••••••</span>
               <div class="key-actions">
                 <button class="btn btn-secondary btn-sm" onclick="revealKey(this)">Reveal</button>
                 <button class="btn btn-secondary btn-sm" onclick="copyKey(this)">Copy</button>
-                <button class="btn btn-danger btn-sm">Revoke</button>
               </div>
             </div>
             <div class="key-row">
               <span class="key-env sandbox">sandbox</span>
               <span class="key-scope">read</span>
-              <span class="key-value">vsk_sandbox_read_8nM3kP6rL1qT4wY9jH2cD5vB7zA</span>
-              <span class="key-created">Created Apr 1</span>
+              <span class="key-value">••••••••••••••••••••••••••••••••</span>
               <div class="key-actions">
                 <button class="btn btn-secondary btn-sm" onclick="revealKey(this)">Reveal</button>
                 <button class="btn btn-secondary btn-sm" onclick="copyKey(this)">Copy</button>
-                <button class="btn btn-danger btn-sm">Revoke</button>
               </div>
             </div>
           </div>
@@ -643,92 +638,15 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
           <div class="section-body">
             <div class="key-row">
               <span class="key-scope" style="width:auto">signing secret</span>
-              <span class="key-value">whsec_••••••••••••••••••••••••••••••••</span>
-              <span class="key-created">Created Apr 1</span>
+              <span class="key-value">••••••••••••••••••••••••••••••••</span>
               <div class="key-actions">
                 <button class="btn btn-secondary btn-sm" onclick="revealKey(this)">Reveal</button>
                 <button class="btn btn-secondary btn-sm" onclick="copyKey(this)">Copy</button>
-                <button class="btn btn-danger btn-sm">Rotate</button>
               </div>
             </div>
           </div>
           <div class="section-footer">
             <span class="section-footer-note">See <a href="#" style="color:var(--ink-2)">webhook signature verification →</a></span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ── WEBHOOKS ── -->
-      <div class="panel" id="panel-webhooks">
-
-        <div class="section">
-          <div class="section-header">
-            <div class="section-title">Webhook endpoints</div>
-            <div class="section-sub">Vouchflow sends signed POST requests to your endpoints on verification events.</div>
-          </div>
-          <div class="section-body">
-            <div class="webhook-row">
-              <span class="webhook-status-dot active"></span>
-              <span class="webhook-url">https://log.vouchflow.dev/sandbox/acme-corp</span>
-              <span class="webhook-events">all events</span>
-              <span class="webhook-last">Last: 2 min ago</span>
-              <div class="key-actions">
-                <button class="btn btn-secondary btn-sm">Edit</button>
-                <button class="btn btn-danger btn-sm">Delete</button>
-              </div>
-            </div>
-            <div class="webhook-row">
-              <span class="webhook-status-dot inactive"></span>
-              <span class="webhook-url">https://api.acme-corp.com/webhooks/vouchflow</span>
-              <span class="webhook-events">verification.completed</span>
-              <span class="webhook-last">Never</span>
-              <div class="key-actions">
-                <button class="btn btn-secondary btn-sm">Edit</button>
-                <button class="btn btn-danger btn-sm">Delete</button>
-              </div>
-            </div>
-          </div>
-          <div class="section-footer">
-            <span class="section-footer-note">The first endpoint is Vouchflow-hosted — useful for testing without a receiver.</span>
-            <button class="btn btn-secondary btn-sm">+ Add endpoint</button>
-          </div>
-        </div>
-
-        <div class="section">
-          <div class="section-header">
-            <div class="section-title">Events</div>
-            <div class="section-sub">Choose which events are sent to each endpoint.</div>
-          </div>
-          <div class="section-body">
-            <div class="toggle-row">
-              <div class="toggle-info">
-                <div class="toggle-label">verification.completed</div>
-                <div class="toggle-desc">Fired on every verification attempt — verified, degraded, or failed.</div>
-              </div>
-              <button class="toggle on" onclick="this.classList.toggle('on')"></button>
-            </div>
-            <div class="toggle-row">
-              <div class="toggle-info">
-                <div class="toggle-label">verification.degraded</div>
-                <div class="toggle-desc">Fired when confidence is low and a fallback was triggered.</div>
-              </div>
-              <button class="toggle on" onclick="this.classList.toggle('on')"></button>
-            </div>
-            <div class="toggle-row">
-              <div class="toggle-info">
-                <div class="toggle-label">device.enrolled</div>
-                <div class="toggle-desc">Fired when a new device keypair is registered for the first time.</div>
-              </div>
-              <button class="toggle on" onclick="this.classList.toggle('on')"></button>
-            </div>
-            <div class="toggle-row">
-              <div class="toggle-info">
-                <div class="toggle-label">device.anomaly_detected</div>
-                <div class="toggle-desc">Fired when an anomaly flag is raised on a device — reinstall, attestation downgrade, rapid spread.</div>
-              </div>
-              <button class="toggle" onclick="this.classList.toggle('on')"></button>
-            </div>
           </div>
         </div>
 
@@ -805,18 +723,18 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
         <div class="section">
           <div class="section-header">
             <div class="section-title">Usage this period</div>
-            <div class="section-sub">Apr 1 – Apr 11, 2026 · sandbox · no billing active</div>
+            <div class="section-sub" id="billing-period">sandbox · no billing active</div>
           </div>
           <div class="section-body">
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:4px;">
               <div style="background:var(--ground);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
                 <div style="font-size:9.5px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-4);margin-bottom:6px;">Verifications</div>
-                <div style="font-size:22px;font-weight:300;letter-spacing:-0.5px;color:var(--ink);">3,412</div>
+                <div style="font-size:22px;font-weight:300;letter-spacing:-0.5px;color:var(--ink);" id="billing-verifications">—</div>
                 <div style="font-size:10.5px;color:var(--success);margin-top:3px;">$0.00 &nbsp;·&nbsp; beta</div>
               </div>
               <div style="background:var(--ground);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
                 <div style="font-size:9.5px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-4);margin-bottom:6px;">Devices</div>
-                <div style="font-size:22px;font-weight:300;letter-spacing:-0.5px;color:var(--ink);">248</div>
+                <div style="font-size:22px;font-weight:300;letter-spacing:-0.5px;color:var(--ink);" id="billing-devices">—</div>
                 <div style="font-size:10.5px;color:var(--success);margin-top:3px;">$0.00 &nbsp;·&nbsp; beta</div>
               </div>
               <div style="background:var(--ground);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
@@ -886,21 +804,14 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
             <div class="section-sub">Shown in the dashboard and on invoices.</div>
           </div>
           <div class="section-body">
-            <div class="field-row">
-              <div class="field">
-                <label class="field-label">Organisation name</label>
-                <input class="field-input" id="input-org-name" type="text" value="Acme Corp"/>
-              </div>
-              <div class="field">
-                <label class="field-label">Slug</label>
-                <input class="field-input mono" type="text" value="acme-corp" readonly style="background:var(--ground);color:var(--ink-3)"/>
-                <div class="field-hint">Used in sandbox log URLs. Cannot be changed.</div>
-              </div>
+            <div class="field">
+              <label class="field-label">Organisation name</label>
+              <input class="field-input" id="input-org-name" type="text" placeholder="e.g. Acme Corp"/>
             </div>
             <div class="field">
               <label class="field-label">Billing email</label>
-              <input class="field-input" id="input-billing-email" type="email" value="billing@acme-corp.com"/>
-              <div class="field-hint">Invoices are sent here. Separate from your login email.</div>
+              <input class="field-input" id="input-billing-email" type="email" placeholder="billing@yourcompany.com"/>
+              <div class="field-hint">Invoices are sent here when billing launches. Separate from your login email.</div>
             </div>
           </div>
           <div class="section-footer">
@@ -976,7 +887,7 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
 <script>
 function switchTab(tab) {
   document.querySelectorAll('.settings-tab').forEach((t, i) => {
-    const tabs = ['api-keys', 'webhooks', 'billing', 'account'];
+    const tabs = ['api-keys', 'billing', 'account'];
     t.classList.toggle('active', tabs[i] === tab);
   });
   document.querySelectorAll('.panel').forEach(p => {
@@ -984,9 +895,22 @@ function switchTab(tab) {
   });
 }
 
-function copyKey(btn) {
-  btn.textContent = 'Copied';
-  setTimeout(() => btn.textContent = 'Copy', 1500);
+async function copyKey(btn) {
+  const row = btn.closest('.key-row');
+  const val = row.querySelector('.key-value');
+  const text = val?.textContent?.trim();
+  if (!text || text.includes('•')) {
+    // Reveal first, then copy
+    await revealKey(row.querySelector('[onclick*="revealKey"]'));
+    return copyKey(btn);
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  } catch {
+    btn.textContent = 'Copy';
+  }
 }
 
 function showToast(message, isError = false) {
@@ -1059,71 +983,56 @@ function renderKeys(session) {
   });
 }
 
-function renderAccount(session, usage) {
+function renderAccount(session, usage, overview) {
+  // Topbar
+  const topbarOrg = document.getElementById('topbar-org');
+  const topbarAv  = document.getElementById('topbar-avatar');
+  if (topbarOrg && session.email) topbarOrg.textContent = session.email;
+  if (topbarAv  && session.email) topbarAv.textContent  = session.email[0].toUpperCase();
+
+  // Account fields — org name was never collected, show email as fallback label
   const orgInput   = document.getElementById('input-org-name');
   const emailInput = document.getElementById('input-billing-email');
-  if (orgInput)   orgInput.value   = session.orgName      ?? orgInput.value;
-  if (emailInput) emailInput.value = session.billingEmail ?? session.email ?? emailInput.value;
+  if (orgInput)   orgInput.value   = session.orgName ?? '';
+  if (emailInput) emailInput.value = session.billingEmail ?? session.email ?? '';
 
+  // Sidenav usage
   const count = usage?.verificationCount ?? 0;
   const usageStrong = document.querySelector('.usage-label strong');
   const usageSub    = document.querySelector('.usage-sub');
   if (usageStrong) usageStrong.textContent = `${count.toLocaleString()} / ∞`;
   if (usageSub)    usageSub.textContent    = 'Beta · unlimited · no billing';
-}
 
-async function loadWebhooks() {
-  try {
-    const res = await fetch('/web/webhooks', { credentials: 'include' });
-    const data = await res.json();
-    const webhooks = data.webhooks ?? [];
-    if (webhooks.length === 0) return;
-
-    const container = document.querySelector('#panel-webhooks .section-body');
-    if (!container) return;
-
-    container.innerHTML = webhooks.map(wh => `
-      <div class="webhook-row">
-        <span class="webhook-status-dot ${wh.status === 'active' ? 'active' : 'inactive'}"></span>
-        <span class="webhook-url">${wh.url ?? '—'}</span>
-        <span class="webhook-events">${Array.isArray(wh.events) ? wh.events.join(', ') : (wh.events ?? 'all events')}</span>
-        <span class="webhook-last">${formatRelativeTime(wh.lastDelivery)}</span>
-        <div class="key-actions">
-          <button class="btn btn-danger btn-sm" onclick="deleteWebhook('${wh.webhookId}', this)">Delete</button>
-        </div>
-      </div>
-    `).join('');
-  } catch (err) {
-    console.error('Failed to load webhooks', err);
-  }
-}
-
-async function deleteWebhook(webhookId, btn) {
-  if (!confirm('Delete this webhook endpoint?')) return;
-  try {
-    await fetch(`/web/webhooks/${webhookId}`, { method: 'DELETE', credentials: 'include' });
-    btn.closest('.webhook-row').remove();
-    showToast('Webhook deleted');
-  } catch {
-    showToast('Failed to delete webhook', true);
+  // Billing panel usage stats
+  const billingV = document.getElementById('billing-verifications');
+  const billingD = document.getElementById('billing-devices');
+  const billingP = document.getElementById('billing-period');
+  if (billingV) billingV.textContent = count.toLocaleString();
+  if (billingD && overview) billingD.textContent = (overview.deviceCount ?? 0).toLocaleString();
+  if (billingP && usage?.periodStart && usage?.periodEnd) {
+    const fmt = { month: 'short', day: 'numeric', year: 'numeric' };
+    const start = new Date(usage.periodStart).toLocaleDateString('en-US', fmt);
+    const end   = new Date(usage.periodEnd).toLocaleDateString('en-US', fmt);
+    billingP.textContent = `${start} – ${end} · sandbox · no billing active`;
   }
 }
 
 async function loadSettings() {
   try {
-    const [sessionRes, usageRes] = await Promise.all([
-      fetch('/web/session', { credentials: 'include' }),
-      fetch('/web/usage',   { credentials: 'include' }),
+    const [sessionRes, usageRes, overviewRes] = await Promise.all([
+      fetch('/web/session',  { credentials: 'include' }),
+      fetch('/web/usage',    { credentials: 'include' }),
+      fetch('/web/overview', { credentials: 'include' }),
     ]);
     if (sessionRes.redirected || sessionRes.status === 401) {
       window.location.href = '/signup';
       return;
     }
-    const session = await sessionRes.json();
-    const usage   = usageRes.ok ? await usageRes.json() : {};
+    const session  = await sessionRes.json();
+    const usage    = usageRes.ok    ? await usageRes.json()    : {};
+    const overview = overviewRes.ok ? await overviewRes.json() : {};
     renderKeys(session);
-    renderAccount(session, usage);
-    loadWebhooks();
+    renderAccount(session, usage, overview);
   } catch (err) {
     console.error('Failed to load settings', err);
   }
@@ -1164,13 +1073,6 @@ document.getElementById('btn-save-confidence').addEventListener('click', async (
   }
 });
 
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', e => {
-    e.preventDefault();
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
-  });
-});
 
 function toggleNav() {
   const nav = document.getElementById('sidenav');
