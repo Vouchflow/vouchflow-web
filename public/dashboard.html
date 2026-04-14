@@ -1,5 +1,1051 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><title>Vouchflow</title></head>
-<body><p>dashboard</p></body>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vouchflow — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:     #111111;
+  --ink-2:   #555555;
+  --ink-3:   #999999;
+  --ink-4:   #CCCCCC;
+  --surface: #FFFFFF;
+  --ground:  #F4F4F1;
+  --ground-2:#EEEEE9;
+  --border:  #E4E4DF;
+  --sans:    'DM Sans', sans-serif;
+  --mono:    'DM Mono', monospace;
+  --nav-w:   220px;
+  --top-h:   54px;
+  --success: #1A9E5C;
+  --warn:    #C87D20;
+  --danger:  #CC3333;
+  --s-bg:    #EDFAF4;
+  --w-bg:    #FFF8EE;
+  --d-bg:    #FEF1F1;
+}
+
+html, body { height: 100%; background: var(--ground); }
+body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height: 1.5; }
+
+/* ── TOPBAR ── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--top-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 20px 0 0;
+  z-index: 100;
+}
+
+.topbar-logo {
+  width: var(--nav-w); flex-shrink: 0;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 20px; text-decoration: none;
+  border-right: 1px solid var(--border); height: 100%;
+}
+
+.logo-word { font-size: 15px; font-weight: 500; color: var(--ink); letter-spacing: -0.3px; }
+
+.topbar-center {
+  flex: 1; display: flex; align-items: center;
+  gap: 6px; padding: 0 20px;
+}
+
+.env-pill {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.5px; border-radius: 4px; padding: 3px 8px;
+  display: flex; align-items: center; gap: 5px; cursor: pointer;
+}
+.env-pill.sandbox { background: #FFF8EE; color: var(--warn); border: 1px solid #F0DEB8; }
+.env-pill.live    { background: var(--s-bg); color: var(--success); border: 1px solid #B8E8CC; }
+.env-dot { width: 6px; height: 6px; border-radius: 50%; }
+.env-pill.sandbox .env-dot { background: var(--warn); }
+.env-pill.live    .env-dot { background: var(--success); }
+
+.topbar-right {
+  display: flex; align-items: center; gap: 12px; margin-left: auto;
+}
+
+.topbar-org {
+  font-size: 12px; color: var(--ink-3); font-weight: 400;
+}
+
+.avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--ink); color: white;
+  font-size: 11px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+
+.topbar-docs {
+  font-size: 12px; color: var(--ink-3); text-decoration: none;
+  padding: 6px 10px; border-radius: 5px;
+  transition: background 0.1s;
+}
+.topbar-docs:hover { background: var(--ground); color: var(--ink); }
+
+/* ── LAYOUT ── */
+.layout { display: flex; padding-top: var(--top-h); min-height: 100vh; }
+
+/* ── SIDENAV ── */
+.sidenav {
+  width: var(--nav-w); position: fixed;
+  top: var(--top-h); bottom: 0; left: 0;
+  background: var(--surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 16px 0 24px; overflow-y: auto;
+}
+.sidenav::-webkit-scrollbar { display: none; }
+
+.nav-section-label {
+  font-size: 9.5px; font-weight: 500; letter-spacing: 2px;
+  color: var(--ink-4); text-transform: uppercase;
+  padding: 14px 16px 6px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 16px; font-size: 13px; font-weight: 400;
+  color: var(--ink-2); cursor: pointer; text-decoration: none;
+  transition: background 0.1s, color 0.1s; position: relative;
+  border-radius: 0;
+}
+.nav-item:hover { background: var(--ground); color: var(--ink); }
+.nav-item.active {
+  color: var(--ink); font-weight: 500; background: var(--ground);
+}
+.nav-item.active::before {
+  content: ''; position: absolute; left: 0; top: 5px; bottom: 5px;
+  width: 2px; background: var(--ink); border-radius: 0 2px 2px 0;
+}
+
+.nav-icon {
+  width: 16px; height: 16px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.4;
+}
+.nav-item.active .nav-icon,
+.nav-item:hover .nav-icon { opacity: 1; }
+
+.nav-count {
+  margin-left: auto; font-family: var(--mono); font-size: 10px;
+  color: var(--ink-4); background: var(--ground);
+  border-radius: 3px; padding: 1px 6px;
+}
+
+.sidenav-footer {
+  margin-top: auto; padding: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.usage-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; color: var(--ink-3); margin-bottom: 6px;
+}
+.usage-label strong { color: var(--ink); font-weight: 500; font-size: 11px; }
+
+.usage-track {
+  height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 8px;
+}
+.usage-fill {
+  height: 100%; background: var(--ink); border-radius: 2px; width: 34%;
+}
+
+.usage-sub { font-size: 10.5px; color: var(--ink-4); }
+
+/* ── MAIN ── */
+.main { margin-left: var(--nav-w); flex: 1; padding: 32px 36px 60px; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; margin-bottom: 28px;
+}
+
+.page-title { font-size: 20px; font-weight: 400; letter-spacing: -0.3px; color: var(--ink); }
+.page-sub   { font-size: 12px; color: var(--ink-3); margin-top: 2px; font-weight: 300; }
+
+.header-right { display: flex; align-items: center; gap: 8px; }
+
+.range-selector {
+  display: flex; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+}
+.range-btn {
+  font-family: var(--sans); font-size: 11px; font-weight: 400;
+  color: var(--ink-3); background: none; border: none;
+  padding: 6px 12px; cursor: pointer; transition: all 0.1s;
+  border-right: 1px solid var(--border);
+}
+.range-btn:last-child { border-right: none; }
+.range-btn.active { background: var(--ink); color: white; font-weight: 500; }
+
+.btn-export {
+  font-family: var(--sans); font-size: 11px; font-weight: 400;
+  color: var(--ink-2); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 12px; cursor: pointer;
+}
+
+/* ── STAT CARDS ── */
+.stat-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px 20px 16px;
+}
+
+.stat-label {
+  font-size: 10.5px; font-weight: 500; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px;
+}
+
+.stat-value {
+  font-size: 28px; font-weight: 300; letter-spacing: -1px;
+  color: var(--ink); line-height: 1; margin-bottom: 8px;
+}
+
+.stat-delta {
+  font-size: 11px; font-weight: 400; display: flex;
+  align-items: center; gap: 4px;
+}
+.stat-delta.up   { color: var(--success); }
+.stat-delta.down { color: var(--danger); }
+.stat-delta.flat { color: var(--ink-3); }
+.delta-sub { color: var(--ink-3); margin-left: 2px; }
+
+/* ── CHART CARD ── */
+.chart-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 24px; margin-bottom: 24px;
+}
+
+.chart-header {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 24px;
+}
+
+.chart-title {
+  font-size: 13px; font-weight: 500; color: var(--ink);
+}
+.chart-sub { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+
+.chart-legend {
+  display: flex; gap: 16px;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--ink-3);
+}
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* SVG chart */
+.chart-area { width: 100%; overflow: visible; }
+
+/* ── TWO COL ROW ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.two-col-wide { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 24px; }
+
+/* ── CONFIDENCE BREAKDOWN ── */
+.conf-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 24px;
+}
+.conf-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 20px; }
+
+.conf-bar-row { margin-bottom: 14px; }
+.conf-bar-header {
+  display: flex; justify-content: space-between;
+  font-size: 12px; margin-bottom: 5px;
+}
+.conf-bar-label { font-weight: 500; color: var(--ink); }
+.conf-bar-pct   { color: var(--ink-3); font-family: var(--mono); font-size: 11px; }
+
+.conf-track {
+  height: 6px; background: var(--ground);
+  border-radius: 3px; overflow: hidden;
+}
+.conf-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.conf-fill.high { background: var(--success); }
+.conf-fill.med  { background: var(--warn); }
+.conf-fill.low  { background: var(--danger); }
+
+.conf-count { font-size: 10.5px; color: var(--ink-4); margin-top: 3px; }
+
+/* ── PLATFORM SPLIT ── */
+.platform-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 24px;
+}
+.platform-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 20px; }
+
+.platform-row {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+}
+.platform-label { font-size: 12px; font-weight: 500; color: var(--ink); width: 56px; flex-shrink: 0; }
+.platform-track { flex: 1; height: 6px; background: var(--ground); border-radius: 3px; overflow: hidden; }
+.platform-fill  { height: 100%; border-radius: 3px; }
+.platform-fill.ios     { background: var(--ink); }
+.platform-fill.android { background: var(--ink-3); }
+.platform-pct { font-family: var(--mono); font-size: 11px; color: var(--ink-3); width: 32px; text-align: right; flex-shrink: 0; }
+
+/* ── NETWORK CARD ── */
+.network-card {
+  background: var(--ink); border-radius: 10px;
+  padding: 24px; margin-bottom: 24px; position: relative; overflow: hidden;
+}
+
+.network-bg {
+  position: absolute; right: -20px; top: -20px;
+  width: 200px; height: 200px; opacity: 0.04;
+}
+
+.network-eyebrow {
+  font-size: 9.5px; font-weight: 500; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,0.35);
+  margin-bottom: 8px;
+}
+.network-value {
+  font-size: 40px; font-weight: 300; letter-spacing: -2px;
+  color: white; line-height: 1; margin-bottom: 6px;
+}
+.network-label {
+  font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 300;
+  margin-bottom: 20px;
+}
+.network-sub {
+  display: flex; gap: 24px;
+}
+.network-sub-item { }
+.network-sub-val {
+  font-size: 16px; font-weight: 400; color: white;
+  letter-spacing: -0.5px; margin-bottom: 2px;
+}
+.network-sub-label {
+  font-size: 10.5px; color: rgba(255,255,255,0.35); font-weight: 300;
+}
+
+/* ── RECENT VERIFICATIONS ── */
+.log-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; margin-bottom: 24px;
+}
+
+.log-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px; border-bottom: 1px solid var(--border);
+}
+.log-title { font-size: 13px; font-weight: 500; color: var(--ink); }
+.log-link  {
+  font-size: 11px; color: var(--ink-3); text-decoration: none;
+  padding: 4px 8px; border: 1px solid var(--border); border-radius: 5px;
+  transition: all 0.1s;
+}
+.log-link:hover { color: var(--ink); border-color: var(--ink-3); }
+
+.log-table { width: 100%; border-collapse: collapse; }
+.log-table th {
+  text-align: left; font-size: 9.5px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--ink-4); padding: 10px 20px;
+  border-bottom: 1px solid var(--border); background: var(--ground);
+}
+.log-table td {
+  padding: 12px 20px; border-bottom: 1px solid var(--border);
+  font-size: 12px; vertical-align: middle;
+}
+.log-table tr:last-child td { border-bottom: none; }
+.log-table tr:hover td { background: var(--ground); }
+
+.conf-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 500; letter-spacing: 0.3px;
+  border-radius: 4px; padding: 2px 7px;
+}
+.conf-badge.high { background: var(--s-bg); color: var(--success); }
+.conf-badge.med  { background: var(--w-bg); color: var(--warn); }
+.conf-badge.low  { background: var(--d-bg); color: var(--danger); }
+.conf-badge-dot  { width: 5px; height: 5px; border-radius: 50%; }
+.conf-badge.high .conf-badge-dot { background: var(--success); }
+.conf-badge.med  .conf-badge-dot { background: var(--warn); }
+.conf-badge.low  .conf-badge-dot { background: var(--danger); }
+
+.device-id-cell {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-2);
+}
+.time-cell { color: var(--ink-3); font-size: 11px; }
+.platform-cell { color: var(--ink-2); }
+.dur-cell { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+
+/* ── ONBOARDING BANNER ── */
+.onboarding-banner {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px 24px;
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px;
+}
+
+.ob-progress { flex-shrink: 0; }
+.ob-text { flex: 1; }
+.ob-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+.ob-sub   { font-size: 11px; color: var(--ink-3); font-weight: 300; }
+
+.ob-steps { display: flex; gap: 4px; margin-top: 10px; }
+.ob-step  {
+  height: 3px; flex: 1; border-radius: 2px; background: var(--border);
+  transition: background 0.3s;
+}
+.ob-step.done { background: var(--ink); }
+.ob-step.active { background: var(--ink-3); }
+
+.ob-cta {
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  color: var(--ink); background: var(--ground);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 7px 14px; cursor: pointer; white-space: nowrap;
+  text-decoration: none;
+}
+
+/* Progress ring */
+.progress-ring-text {
+  font-family: var(--mono); font-size: 11px;
+  font-weight: 500; fill: var(--ink);
+  dominant-baseline: middle; text-anchor: middle;
+}
+
+/* ── MOBILE ── */
+.hamburger {
+  display: none;
+  background: none; border: none; cursor: pointer;
+  padding: 8px; margin-left: 8px; color: var(--ink);
+  flex-shrink: 0;
+}
+.nav-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 90;
+}
+
+@media (max-width: 768px) {
+  .hamburger { display: flex; align-items: center; justify-content: center; }
+
+  .sidenav {
+    transform: translateX(-100%);
+    transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+    z-index: 95;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+  }
+  .sidenav.open { transform: translateX(0); }
+  .nav-overlay.open { display: block; }
+
+  .main { margin-left: 0 !important; width: 100%; }
+
+  .topbar-org  { display: none; }
+  .topbar-docs { display: none; }
+  .topbar-logo { width: auto; padding: 0 16px; border-right: none; }
+
+  /* Dashboard specific */
+  .main { padding: 20px 16px 40px !important; }
+  .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .two-col, .two-col-wide { grid-template-columns: 1fr; }
+  .page-header { flex-direction: column; gap: 12px; }
+  .header-right { width: 100%; justify-content: space-between; }
+  .network-card { padding: 20px 16px; }
+  .network-value { font-size: 32px; }
+  .log-table th:nth-child(4),
+  .log-table td:nth-child(4) { display: none; }
+  .onboarding-banner { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .ob-cta { width: 100%; text-align: center; }
+  .chart-card { overflow-x: auto; }
+
+}
+.loading-skeleton {
+  background: linear-gradient(90deg, var(--ground) 25%, var(--border) 50%, var(--ground) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 4px;
+  color: transparent !important;
+  pointer-events: none;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="topbar-logo" href="#">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="11" height="11" rx="2.5" stroke="#111" stroke-width="1.8"/>
+      <rect x="10" y="10" width="11" height="11" rx="2.5" fill="white" stroke="#111" stroke-width="1.8"/>
+      <circle cx="15.5" cy="15.5" r="2" fill="#111"/>
+    </svg>
+    <span class="logo-word">vouchflow</span>
+  </a>
+  <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+  <div class="topbar-center">
+    <div class="env-pill sandbox">
+      <span class="env-dot"></span>sandbox
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-org" id="topbar-org"></span>
+    <a class="topbar-docs" href="/docs">Docs</a>
+    <div class="avatar" id="topbar-avatar">…</div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDENAV -->
+  <div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+  <nav class="sidenav" id="sidenav">
+    <div class="nav-section-label">Monitor</div>
+    <a class="nav-item active" href="#">
+      <span class="nav-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+      </span>
+      Overview
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 4V3a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </span>
+      Verifications
+      <span class="nav-count">1.2k</span>
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </span>
+      Devices
+      <span class="nav-count">248</span>
+    </a>
+
+    <div class="nav-section-label">Configure</div>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.4"/></svg>
+      </span>
+      Webhooks
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 7h2M8 7h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </span>
+      API Keys
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </span>
+      Settings
+    </a>
+
+    <div class="nav-section-label">Network</div>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="2.5" cy="3.5" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11.5" cy="3.5" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="12" r="1.5" stroke="currentColor" stroke-width="1.2"/><line x1="3.5" y1="4.8" x2="6" y2="6.2" stroke="currentColor" stroke-width="1.2"/><line x1="10.5" y1="4.8" x2="8" y2="6.2" stroke="currentColor" stroke-width="1.2"/><line x1="7" y1="9" x2="7" y2="10.5" stroke="currentColor" stroke-width="1.2"/></svg>
+      </span>
+      Reputation
+    </a>
+
+    <!-- Usage footer -->
+    <div class="sidenav-footer">
+      <div class="usage-label">
+        <span>Sandbox usage</span>
+        <strong>3,412 / 10k</strong>
+      </div>
+      <div class="usage-track"><div class="usage-fill"></div></div>
+      <div class="usage-sub">Free tier · resets monthly</div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ONBOARDING BANNER -->
+    <div class="onboarding-banner">
+      <svg width="40" height="40" viewBox="0 0 40 40">
+        <circle cx="20" cy="20" r="17" fill="none" stroke="#E4E4DF" stroke-width="3"/>
+        <circle cx="20" cy="20" r="17" fill="none" stroke="#111" stroke-width="3"
+          stroke-dasharray="107" stroke-dashoffset="27"
+          stroke-linecap="round" transform="rotate(-90 20 20)"/>
+        <text x="20" y="20" class="progress-ring-text">3/4</text>
+      </svg>
+      <div class="ob-text">
+        <div class="ob-title">Complete your setup</div>
+        <div class="ob-sub">One step left before you're ready to go live.</div>
+        <div class="ob-steps">
+          <div class="ob-step done"></div>
+          <div class="ob-step done"></div>
+          <div class="ob-step done"></div>
+          <div class="ob-step active"></div>
+        </div>
+      </div>
+      <a class="ob-cta" href="#">Configure webhooks →</a>
+    </div>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Overview</div>
+        <div class="page-sub">Apr 4 – Apr 11, 2026 · sandbox</div>
+      </div>
+      <div class="header-right">
+        <div class="range-selector">
+          <button class="range-btn">24h</button>
+          <button class="range-btn active">7d</button>
+          <button class="range-btn">30d</button>
+        </div>
+        <button class="btn-export">Export CSV</button>
+      </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Verifications</div>
+        <div class="stat-value" id="stat-verifications">1,284</div>
+        <div class="stat-delta up">
+          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          +18%
+          <span class="delta-sub">vs prior 7d</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Enrolled devices</div>
+        <div class="stat-value" id="stat-devices">248</div>
+        <div class="stat-delta up">
+          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          +34
+          <span class="delta-sub">this week</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">High confidence</div>
+        <div class="stat-value" id="stat-confidence">91.2%</div>
+        <div class="stat-delta flat">
+          —
+          <span class="delta-sub">stable</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg duration</div>
+        <div class="stat-value" id="stat-duration">1.4s</div>
+        <div class="stat-delta up">
+          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          −120ms
+          <span class="delta-sub">vs prior 7d</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Verifications over time</div>
+          <div class="chart-sub">Daily count, last 7 days</div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--ink)"></div>
+            High confidence
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--ink-4)"></div>
+            Medium / Low
+          </div>
+        </div>
+      </div>
+
+      <!-- SVG Bar Chart -->
+      <svg class="chart-area" height="160" viewBox="0 0 900 160" preserveAspectRatio="none">
+        <!-- Y grid lines -->
+        <line x1="0" y1="20"  x2="900" y2="20"  stroke="#F0F0EC" stroke-width="1"/>
+        <line x1="0" y1="60"  x2="900" y2="60"  stroke="#F0F0EC" stroke-width="1"/>
+        <line x1="0" y1="100" x2="900" y2="100" stroke="#F0F0EC" stroke-width="1"/>
+        <line x1="0" y1="140" x2="900" y2="140" stroke="#F0F0EC" stroke-width="1"/>
+
+        <!-- Y labels -->
+        <text x="0" y="18"  font-family="DM Mono,monospace" font-size="11" fill="#CCC">250</text>
+        <text x="0" y="58"  font-family="DM Mono,monospace" font-size="11" fill="#CCC">175</text>
+        <text x="0" y="98"  font-family="DM Mono,monospace" font-size="11" fill="#CCC">100</text>
+        <text x="0" y="138" font-family="DM Mono,monospace" font-size="11" fill="#CCC">25</text>
+
+        <!-- Bars — high confidence (dark) + low (light) stacked -->
+        <!-- Day 1: Apr 5 -->
+        <rect x="80"  y="72"  width="72" height="68" rx="3" fill="#111"/>
+        <rect x="80"  y="62"  width="72" height="10" rx="3" fill="#DDD"/>
+        <text x="116" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 5</text>
+
+        <!-- Day 2: Apr 6 -->
+        <rect x="196" y="55"  width="72" height="85" rx="3" fill="#111"/>
+        <rect x="196" y="44"  width="72" height="11" rx="3" fill="#DDD"/>
+        <text x="232" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 6</text>
+
+        <!-- Day 3: Apr 7 -->
+        <rect x="312" y="80"  width="72" height="60" rx="3" fill="#111"/>
+        <rect x="312" y="72"  width="72" height="8"  rx="3" fill="#DDD"/>
+        <text x="348" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 7</text>
+
+        <!-- Day 4: Apr 8 -->
+        <rect x="428" y="48"  width="72" height="92" rx="3" fill="#111"/>
+        <rect x="428" y="36"  width="72" height="12" rx="3" fill="#DDD"/>
+        <text x="464" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 8</text>
+
+        <!-- Day 5: Apr 9 -->
+        <rect x="544" y="60"  width="72" height="80" rx="3" fill="#111"/>
+        <rect x="544" y="50"  width="72" height="10" rx="3" fill="#DDD"/>
+        <text x="580" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 9</text>
+
+        <!-- Day 6: Apr 10 -->
+        <rect x="660" y="40"  width="72" height="100" rx="3" fill="#111"/>
+        <rect x="660" y="28"  width="72" height="12"  rx="3" fill="#DDD"/>
+        <text x="696" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Apr 10</text>
+
+        <!-- Day 7: Apr 11 (today, partial) -->
+        <rect x="776" y="88"  width="72" height="52" rx="3" fill="#CCC" opacity="0.5"/>
+        <text x="812" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#CCC" text-anchor="middle">Today</text>
+      </svg>
+    </div>
+
+    <!-- TWO COL: confidence + platform -->
+    <div class="two-col">
+      <div class="conf-card">
+        <div class="conf-title">Confidence breakdown</div>
+
+        <div class="conf-bar-row">
+          <div class="conf-bar-header">
+            <span class="conf-bar-label">High</span>
+            <span class="conf-bar-pct">91.2%</span>
+          </div>
+          <div class="conf-track"><div class="conf-fill high" style="width:91.2%"></div></div>
+          <div class="conf-count">1,171 verifications</div>
+        </div>
+
+        <div class="conf-bar-row">
+          <div class="conf-bar-header">
+            <span class="conf-bar-label">Medium</span>
+            <span class="conf-bar-pct">6.8%</span>
+          </div>
+          <div class="conf-track"><div class="conf-fill med" style="width:6.8%"></div></div>
+          <div class="conf-count">87 verifications · simulator likely</div>
+        </div>
+
+        <div class="conf-bar-row">
+          <div class="conf-bar-header">
+            <span class="conf-bar-label">Low</span>
+            <span class="conf-bar-pct">2.0%</span>
+          </div>
+          <div class="conf-track"><div class="conf-fill low" style="width:2%"></div></div>
+          <div class="conf-count">26 verifications · fallback triggered</div>
+        </div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-title">Platform split</div>
+
+        <div class="platform-row">
+          <div class="platform-label">iOS</div>
+          <div class="platform-track"><div class="platform-fill ios" style="width:68%"></div></div>
+          <div class="platform-pct">68%</div>
+        </div>
+
+        <div class="platform-row">
+          <div class="platform-label">Android</div>
+          <div class="platform-track"><div class="platform-fill android" style="width:32%"></div></div>
+          <div class="platform-pct">32%</div>
+        </div>
+
+        <div style="border-top:1px solid var(--border); margin-top:16px; padding-top:16px;">
+          <div style="font-size:11px; color:var(--ink-3); margin-bottom:10px; font-weight:500; letter-spacing:0.5px;">BIOMETRIC METHOD</div>
+          <div style="display:flex; flex-direction:column; gap:7px;">
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+              <span style="color:var(--ink-2)">Face ID</span>
+              <span style="font-family:var(--mono); font-size:11px; color:var(--ink-3)">54%</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+              <span style="color:var(--ink-2)">Touch ID</span>
+              <span style="font-family:var(--mono); font-size:11px; color:var(--ink-3)">14%</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+              <span style="color:var(--ink-2)">Android biometric</span>
+              <span style="font-family:var(--mono); font-size:11px; color:var(--ink-3)">29%</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+              <span style="color:var(--ink-2)">None</span>
+              <span style="font-family:var(--mono); font-size:11px; color:var(--ink-3)">3%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NETWORK CARD -->
+    <div class="network-card">
+      <svg class="network-bg" viewBox="0 0 200 200" fill="none">
+        <circle cx="100" cy="100" r="60" stroke="white" stroke-width="1"/>
+        <circle cx="100" cy="100" r="90" stroke="white" stroke-width="0.5"/>
+        <circle cx="40"  cy="60"  r="8"  stroke="white" stroke-width="1"/>
+        <circle cx="160" cy="50"  r="8"  stroke="white" stroke-width="1"/>
+        <circle cx="150" cy="155" r="8"  stroke="white" stroke-width="1"/>
+        <line x1="46" y1="65"  x2="92"  y2="95"  stroke="white" stroke-width="0.5"/>
+        <line x1="154" y1="56" x2="108" y2="92"  stroke="white" stroke-width="0.5"/>
+        <line x1="145" y1="150" x2="108" y2="108" stroke="white" stroke-width="0.5"/>
+      </svg>
+
+      <div class="network-eyebrow">Device reputation network</div>
+      <div class="network-value">2.8×</div>
+      <div class="network-label">avg verifications per device · 90 days</div>
+      <div class="network-sub">
+        <div class="network-sub-item">
+          <div class="network-sub-val">248</div>
+          <div class="network-sub-label">network devices</div>
+        </div>
+        <div class="network-sub-item">
+          <div class="network-sub-val">—</div>
+          <div class="network-sub-label">cross-app signals</div>
+        </div>
+        <div class="network-sub-item">
+          <div class="network-sub-val">sandbox</div>
+          <div class="network-sub-label">graph writes paused</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT VERIFICATIONS -->
+    <div class="log-card">
+      <div class="log-header">
+        <div class="log-title">Recent verifications</div>
+        <a class="log-link" href="#">View all →</a>
+      </div>
+      <table class="log-table">
+        <thead>
+          <tr>
+            <th>Device</th>
+            <th>Confidence</th>
+            <th>Platform</th>
+            <th>Duration</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="device-id-cell">dvc_01HZXK9M4P3R</td>
+            <td><span class="conf-badge high"><span class="conf-badge-dot"></span>high</span></td>
+            <td class="platform-cell">iOS · Face ID</td>
+            <td class="dur-cell">1.2s</td>
+            <td class="time-cell">2 min ago</td>
+          </tr>
+          <tr>
+            <td class="device-id-cell">dvc_02KAYLN5Q4S9</td>
+            <td><span class="conf-badge high"><span class="conf-badge-dot"></span>high</span></td>
+            <td class="platform-cell">Android · biometric</td>
+            <td class="dur-cell">1.8s</td>
+            <td class="time-cell">6 min ago</td>
+          </tr>
+          <tr>
+            <td class="device-id-cell">dvc_03LBZMO6R5T0</td>
+            <td><span class="conf-badge med"><span class="conf-badge-dot"></span>medium</span></td>
+            <td class="platform-cell">iOS · simulator</td>
+            <td class="dur-cell">0.9s</td>
+            <td class="time-cell">14 min ago</td>
+          </tr>
+          <tr>
+            <td class="device-id-cell">dvc_04MCAPN7S6U1</td>
+            <td><span class="conf-badge high"><span class="conf-badge-dot"></span>high</span></td>
+            <td class="platform-cell">iOS · Touch ID</td>
+            <td class="dur-cell">1.4s</td>
+            <td class="time-cell">22 min ago</td>
+          </tr>
+          <tr>
+            <td class="device-id-cell">dvc_05NDBQO8T7V2</td>
+            <td><span class="conf-badge low"><span class="conf-badge-dot"></span>low</span></td>
+            <td class="platform-cell">Android · none</td>
+            <td class="dur-cell">2.1s</td>
+            <td class="time-cell">31 min ago</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function confClass(c) {
+  return c === 'medium' ? 'med' : (c || 'low');
+}
+
+function formatTime(isoString) {
+  if (!isoString) return '—';
+  const d = new Date(isoString);
+  const now = new Date();
+  const diffMin = Math.floor((now - d) / 60000);
+  if (diffMin < 1)  return 'just now';
+  if (diffMin < 60) return `${diffMin} min ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24)  return `${diffHr} hr ago`;
+  return d.toLocaleDateString();
+}
+
+function formatPlatform(p) {
+  if (!p) return '—';
+  return p.charAt(0).toUpperCase() + p.slice(1);
+}
+
+function renderStats(overview) {
+  const els = {
+    'stat-verifications': (overview.verificationCount ?? 0).toLocaleString(),
+    'stat-devices':       (overview.deviceCount        ?? 0).toLocaleString(),
+    'stat-confidence':    overview.highConfidencePct != null ? `${overview.highConfidencePct.toFixed(1)}%` : '—',
+    'stat-duration':      overview.avgDurationMs      != null ? `${(overview.avgDurationMs / 1000).toFixed(1)}s` : '—',
+  };
+  for (const [id, val] of Object.entries(els)) {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('loading-skeleton'); el.textContent = val; }
+  }
+}
+
+function renderRecentVerifications(rows) {
+  const tbody = document.querySelector('.log-table tbody');
+  if (!tbody) return;
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--ink-3);padding:24px;">No verifications yet — run your first one from the onboarding checklist.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map((row, i) => `
+    <tr>
+      <td class="device-id-cell">${row.deviceId ?? row.sessionId ?? '—'}</td>
+      <td><span class="conf-badge ${confClass(row.confidence)}"><span class="conf-badge-dot"></span>${row.confidence ?? '—'}</span></td>
+      <td class="platform-cell">${formatPlatform(row.platform)}</td>
+      <td class="dur-cell">${row.durationMs ? `${(row.durationMs / 1000).toFixed(1)}s` : '—'}</td>
+      <td class="time-cell">${i === 0 ? '<span class="live-dot"></span>' : ''}${formatTime(row.createdAt)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderUsage(usage) {
+  const count = usage.verificationCount ?? 0;
+  const label = document.querySelector('.usage-label strong');
+  const sub   = document.querySelector('.usage-sub');
+  if (label) label.textContent = `${count.toLocaleString()} / ∞`;
+  if (sub)   sub.textContent   = 'Beta · unlimited · no billing';
+}
+
+function renderChart(dailyBreakdown) {
+  const chartCard = document.querySelector('.chart-card');
+  if (!chartCard) return;
+  if (!dailyBreakdown || dailyBreakdown.length === 0) {
+    chartCard.style.display = 'none';
+  }
+}
+
+function updatePageSubtitle(usage) {
+  const sub = document.querySelector('.page-sub');
+  if (!sub || !usage.periodStart) return;
+  const fmt = { month: 'short', day: 'numeric', year: 'numeric' };
+  const start = new Date(usage.periodStart).toLocaleDateString('en-US', fmt);
+  const end   = new Date(usage.periodEnd).toLocaleDateString('en-US',   fmt);
+  sub.textContent = `${start} – ${end} · sandbox`;
+}
+
+async function loadDashboard(range = '7d') {
+  ['stat-verifications', 'stat-devices', 'stat-confidence', 'stat-duration'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = ''; el.classList.add('loading-skeleton'); }
+  });
+
+  try {
+    const [sessionRes, overviewRes, verificationsRes, usageRes] = await Promise.all([
+      fetch('/web/session',                 { credentials: 'include' }),
+      fetch(`/web/overview?range=${range}`, { credentials: 'include' }),
+      fetch('/web/verifications?limit=5',   { credentials: 'include' }),
+      fetch('/web/usage',                   { credentials: 'include' }),
+    ]);
+
+    if (overviewRes.redirected || overviewRes.status === 401) {
+      window.location.href = '/signup';
+      return;
+    }
+
+    const [session, overview, verifications, usage] = await Promise.all([
+      sessionRes.json(),
+      overviewRes.json(),
+      verificationsRes.json(),
+      usageRes.json(),
+    ]);
+
+    const topbarOrg    = document.getElementById('topbar-org');
+    const topbarAvatar = document.getElementById('topbar-avatar');
+    if (topbarOrg    && session.email) topbarOrg.textContent    = session.email;
+    if (topbarAvatar && session.email) topbarAvatar.textContent = session.email[0].toUpperCase();
+
+    renderStats(overview);
+    renderRecentVerifications(verifications.rows ?? []);
+    renderUsage(usage);
+    renderChart(overview.dailyBreakdown);
+    updatePageSubtitle(usage);
+  } catch (err) {
+    console.error('Dashboard load failed', err);
+    ['stat-verifications', 'stat-devices', 'stat-confidence', 'stat-duration'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.classList.remove('loading-skeleton'); el.textContent = '—'; }
+    });
+  }
+}
+
+document.querySelectorAll('.range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.closest('.range-selector').querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadDashboard(btn.textContent.trim());
+  });
+});
+
+function toggleNav() {
+  const nav = document.getElementById('sidenav');
+  const overlay = document.getElementById('nav-overlay');
+  nav.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      const nav = document.getElementById('sidenav');
+      if (nav.classList.contains('open')) toggleNav();
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => loadDashboard('7d'));
+</script>
+
+</body>
 </html>

@@ -1,5 +1,1092 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><title>Vouchflow</title></head>
-<body><p>api-reference</p></body>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vouchflow — API Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:      #111111;
+  --ink-2:    #555555;
+  --ink-3:    #999999;
+  --ink-4:    #CCCCCC;
+  --surface:  #FFFFFF;
+  --ground:   #F7F7F5;
+  --border:   #EAEAE6;
+  --mono:     'DM Mono', monospace;
+  --sans:     'DM Sans', sans-serif;
+  --nav-w:    232px;
+  --ref-w:    420px;
+  --top-h:    52px;
+
+  --post:   #1A6E3C;
+  --post-bg:#E8F7EF;
+  --get:    #1A4F9E;
+  --get-bg: #EBF0FB;
+  --del:    #9E1A1A;
+  --del-bg: #FBEAEA;
+
+  --success:#1A9E5C;
+  --warn:   #C87D20;
+  --danger: #CC3333;
+}
+
+html, body { height: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--ground);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--top-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 100;
+  gap: 0;
+}
+
+.topbar-logo {
+  display: flex; align-items: center; gap: 8px;
+  width: var(--nav-w); flex-shrink: 0;
+  text-decoration: none;
+}
+
+.logo-word { font-size: 15px; font-weight: 500; color: var(--ink); letter-spacing: -0.3px; }
+
+.topbar-divider { width: 1px; height: 20px; background: var(--border); margin: 0 20px; }
+.topbar-section { font-size: 12px; color: var(--ink-3); }
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.topbar-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--ground); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 12px;
+  font-size: 12px; color: var(--ink-3); width: 200px; cursor: text;
+}
+.topbar-search kbd {
+  margin-left: auto; font-family: var(--mono); font-size: 10px;
+  color: var(--ink-4); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px;
+}
+
+.btn-dash {
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  color: var(--surface); background: var(--ink);
+  border: none; border-radius: 6px; padding: 7px 14px; cursor: pointer;
+}
+
+/* ── LAYOUT ── */
+.layout { display: flex; padding-top: var(--top-h); min-height: 100vh; }
+
+/* ── SIDENAV ── */
+.sidenav {
+  width: var(--nav-w); position: fixed;
+  top: var(--top-h); bottom: 0; left: 0;
+  background: var(--surface); border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 24px 0 40px;
+}
+.sidenav::-webkit-scrollbar { display: none; }
+
+.nav-section-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 2px;
+  color: var(--ink-4); text-transform: uppercase;
+  padding: 12px 20px 6px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 20px; font-size: 13px; font-weight: 400;
+  color: var(--ink-2); cursor: pointer; text-decoration: none;
+  transition: background 0.1s, color 0.1s; position: relative;
+}
+.nav-item:hover { background: var(--ground); color: var(--ink); }
+.nav-item.active {
+  color: var(--ink); font-weight: 500; background: var(--ground);
+}
+.nav-item.active::before {
+  content: ''; position: absolute; left: 0; top: 4px; bottom: 4px;
+  width: 2px; background: var(--ink); border-radius: 0 2px 2px 0;
+}
+
+.nav-method {
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: 0.5px; border-radius: 3px; padding: 2px 5px;
+  flex-shrink: 0;
+}
+.nav-method.post { background: var(--post-bg); color: var(--post); }
+.nav-method.get  { background: var(--get-bg);  color: var(--get);  }
+
+.nav-badge {
+  margin-left: auto; font-size: 9px; font-weight: 500;
+  background: #EDFAF4; color: var(--success);
+  border-radius: 3px; padding: 1px 5px; letter-spacing: 0.3px;
+}
+.nav-badge.tier { background: #F0F0F0; color: var(--ink-3); }
+
+.nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--ink-4); flex-shrink: 0; }
+.nav-item.active .nav-dot { background: var(--ink); }
+
+/* ── MAIN: two-column reference layout ── */
+.main {
+  margin-left: var(--nav-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Endpoint rows — full width, two-column each */
+.endpoint-row {
+  display: grid;
+  grid-template-columns: 1fr var(--ref-w);
+  border-bottom: 1px solid var(--border);
+  min-height: 0;
+}
+
+.endpoint-row:last-child { border-bottom: none; }
+
+/* Left: spec */
+.endpoint-spec {
+  padding: 48px 48px 48px 52px;
+  border-right: 1px solid var(--border);
+}
+
+/* Right: examples panel */
+.endpoint-example {
+  background: #0F1117;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: var(--top-h);
+  max-height: calc(100vh - var(--top-h));
+  overflow-y: auto;
+}
+.endpoint-example::-webkit-scrollbar { display: none; }
+
+/* ── PAGE HEADER (full width) ── */
+.page-header {
+  grid-column: 1 / -1;
+  padding: 52px 52px 40px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.page-eyebrow {
+  font-size: 10px; font-weight: 500; letter-spacing: 2.5px;
+  color: var(--ink-3); text-transform: uppercase; margin-bottom: 10px;
+}
+
+.page-title {
+  font-size: 28px; font-weight: 300; letter-spacing: -0.6px;
+  color: var(--ink); margin-bottom: 12px;
+}
+
+.page-lead {
+  font-size: 14px; font-weight: 300; color: var(--ink-2);
+  line-height: 1.7; max-width: 520px; margin-bottom: 24px;
+}
+
+/* Base URL pill */
+.base-url {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--ground); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 14px;
+}
+.base-url-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.base-url-value {
+  font-family: var(--mono); font-size: 12px; color: var(--ink);
+}
+
+/* ── ENDPOINT HEADER ── */
+.endpoint-title-row {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+}
+
+.method-badge {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.5px; border-radius: 4px; padding: 3px 8px;
+}
+.method-badge.post { background: var(--post-bg); color: var(--post); }
+.method-badge.get  { background: var(--get-bg);  color: var(--get);  }
+
+.endpoint-path {
+  font-family: var(--mono); font-size: 15px; font-weight: 400; color: var(--ink);
+}
+
+.endpoint-name {
+  font-size: 18px; font-weight: 500; letter-spacing: -0.3px;
+  color: var(--ink); margin-bottom: 10px;
+}
+
+.endpoint-desc {
+  font-size: 13px; font-weight: 300; color: var(--ink-2);
+  line-height: 1.75; margin-bottom: 28px; max-width: 480px;
+}
+
+/* ── PARAMS TABLE ── */
+.params-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--ink-4); margin-bottom: 10px;
+}
+
+.params-table {
+  width: 100%; border-collapse: collapse; margin-bottom: 28px;
+}
+
+.params-table tr {
+  border-bottom: 1px solid var(--border);
+}
+.params-table tr:last-child { border-bottom: none; }
+
+.params-table td {
+  padding: 12px 0; vertical-align: top; font-size: 13px;
+}
+
+.param-name {
+  font-family: var(--mono); font-size: 12px; color: var(--ink);
+  font-weight: 500; width: 160px; padding-right: 16px;
+}
+
+.param-type {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  width: 80px; padding-right: 16px; padding-top: 1px;
+}
+
+.param-req {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.5px;
+  text-transform: uppercase; width: 72px; padding-right: 16px;
+  padding-top: 2px;
+}
+.param-req.required { color: var(--ink); }
+.param-req.optional { color: var(--ink-4); }
+
+.param-desc { color: var(--ink-2); font-weight: 300; line-height: 1.6; }
+.param-desc code {
+  font-family: var(--mono); font-size: 11px; background: var(--ground);
+  border: 1px solid var(--border); border-radius: 3px;
+  padding: 1px 5px; color: var(--ink);
+}
+
+/* ── RESPONSE FIELDS ── */
+.response-section { margin-bottom: 28px; }
+
+/* ── CALLOUT ── */
+.callout {
+  border-left: 3px solid var(--ink); background: var(--ground);
+  border-radius: 0 6px 6px 0; padding: 12px 16px;
+  margin: 0 0 24px; font-size: 12.5px; color: var(--ink-2); font-weight: 300;
+}
+.callout.warning { border-left-color: var(--warn); background: #FFFBF5; }
+.callout.info    { border-left-color: var(--get);  background: #F0F4FD; }
+
+.callout strong {
+  display: block; font-size: 10px; font-weight: 500;
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px;
+}
+.callout.warning strong { color: var(--warn); }
+.callout.info strong    { color: var(--get);  }
+.callout strong.plain   { color: var(--ink);  }
+
+/* ── RIGHT PANEL: code ── */
+.ex-tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid #1E2028;
+  padding: 0 16px;
+  background: #0B0E14;
+}
+
+.ex-tab {
+  font-family: var(--sans); font-size: 11px; font-weight: 400;
+  color: #555B6E; background: none; border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 10px; cursor: pointer;
+  transition: color 0.1s; letter-spacing: 0.2px;
+}
+.ex-tab.active { color: #C8CBD6; border-bottom-color: #C8CBD6; }
+
+.ex-section-label {
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: #3A3D4A; padding: 20px 20px 8px;
+}
+
+pre {
+  padding: 0 20px 20px;
+  font-family: var(--mono);
+  font-size: 12px; line-height: 1.85;
+  overflow-x: auto;
+}
+
+.t  { color: #9DA0AC; }
+.c  { color: #3A3D4A; font-style: italic; }
+.k  { color: #E8EAF0; font-weight: 500; }
+.s  { color: #A8D8B4; }
+.f  { color: #C8CBD6; }
+.n  { color: #B0B4C0; }
+.p  { color: #555B6E; }
+.num{ color: #E8C87A; }
+.kw { color: #9DB4D8; }
+
+.ex-divider { border: none; border-top: 1px solid #1E2028; margin: 8px 0; }
+
+/* Response block inside dark panel */
+.ex-response {
+  margin: 0 20px 20px;
+  background: #0B0E14;
+  border: 1px solid #1E2028;
+  border-radius: 6px;
+  padding: 16px;
+}
+.ex-response pre { padding: 0; }
+
+/* Status pill */
+.status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  border-radius: 4px; padding: 3px 8px; margin: 16px 20px 0;
+}
+.status-pill.ok  { background: #0D2A1A; color: #4DCC8F; }
+.status-pill.err { background: #2A0D0D; color: #CC4D4D; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; }
+.status-pill.ok  .status-dot { background: #4DCC8F; }
+.status-pill.err .status-dot { background: #CC4D4D; }
+
+/* Copy btn inside dark panel */
+.ex-copy-row {
+  display: flex; justify-content: flex-end; padding: 0 20px 4px;
+}
+.ex-copy {
+  font-family: var(--sans); font-size: 10px; color: #3A3D4A;
+  background: none; border: 1px solid #2A2D3A; border-radius: 4px;
+  padding: 3px 10px; cursor: pointer; transition: color 0.15s;
+}
+.ex-copy:hover { color: #9DA0AC; }
+
+/* Tier badge on endpoint */
+.tier-badge {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.5px;
+  background: #EDFAF4; color: var(--success);
+  border-radius: 4px; padding: 2px 8px; margin-left: 8px;
+  vertical-align: middle;
+}
+.tier-badge.paid { background: #F5F0FF; color: #6E4DCC; }
+
+/* Error table */
+.error-table {
+  width: 100%; border-collapse: collapse;
+}
+.error-table tr { border-bottom: 1px solid var(--border); }
+.error-table tr:last-child { border-bottom: none; }
+.error-table td { padding: 11px 0; font-size: 13px; vertical-align: top; }
+.err-code { font-family: var(--mono); font-size: 11px; color: var(--danger); width: 180px; font-weight: 500; }
+.err-desc { color: var(--ink-2); font-weight: 300; }
+
+/* ── MOBILE ── */
+.hamburger {
+  display: none;
+  background: none; border: none; cursor: pointer;
+  padding: 8px; margin-left: 8px; color: var(--ink);
+  flex-shrink: 0;
+}
+.nav-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 90;
+}
+
+@media (max-width: 768px) {
+  .hamburger { display: flex; align-items: center; justify-content: center; }
+
+  .sidenav {
+    transform: translateX(-100%);
+    transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+    z-index: 95;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+  }
+  .sidenav.open { transform: translateX(0); }
+  .nav-overlay.open { display: block; }
+
+  .main { margin-left: 0 !important; width: 100%; }
+
+  .topbar-org    { display: none; }
+  .topbar-docs   { display: none; }
+  .topbar-right  { display: none; }
+  .topbar-logo   { width: auto; padding: 0 16px; border-right: none; }
+
+  /* Override ref-width variable so grid tracks collapse on mobile */
+  :root { --ref-w: 0px; }
+
+  /* Prevent body-level horizontal scroll */
+  .layout        { overflow-x: hidden; max-width: 100vw; }
+
+  /* API reference specific */
+  .endpoint-row  { grid-template-columns: 1fr !important; overflow-x: hidden; max-width: 100%; }
+  .endpoint-spec {
+    padding: 24px 16px; border-right: none;
+    border-bottom: 1px solid var(--border);
+    width: 100% !important; max-width: 100% !important; overflow-x: hidden; box-sizing: border-box;
+  }
+  .endpoint-name { max-width: 100%; word-break: break-word; }
+  .endpoint-example {
+    position: static;
+    max-height: none;
+    width: 100% !important;
+    overflow-x: hidden;
+  }
+  .params-table  { width: 100%; table-layout: fixed; }
+  .params-table td { padding: 10px 0; }
+  .param-name    { width: 110px; font-size: 11px; }
+  .param-type    { width: 60px; }
+  .param-req     { width: 56px; font-size: 9px; }
+  .error-table   { width: 100%; table-layout: fixed; }
+  .page-header   { padding: 28px 16px 24px; }
+  .base-url      { flex-wrap: wrap; }
+  pre            { font-size: 11px; overflow-x: auto; max-width: 100%; white-space: pre; }
+  .code-block    { max-width: 100%; overflow-x: auto; }
+  .ex-tabs       { overflow-x: auto; }
+
+}
+
+@media (max-width: 768px) {
+  .topbar-divider { display: none; }
+  .topbar-section { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="topbar-logo" href="/">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="11" height="11" rx="2.5" stroke="#111" stroke-width="1.8"/>
+      <rect x="10" y="10" width="11" height="11" rx="2.5" fill="white" stroke="#111" stroke-width="1.8"/>
+      <circle cx="15.5" cy="15.5" r="2" fill="#111"/>
+    </svg>
+    <span class="logo-word">vouchflow</span>
+  </a>
+  <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+  <div class="topbar-divider"></div>
+  <span class="topbar-section">API Reference</span>
+  <div class="topbar-right">
+    <div class="topbar-search">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.5" stroke="#CCC" stroke-width="1.2"/><line x1="7.5" y1="7.5" x2="10.5" y2="10.5" stroke="#CCC" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Search docs…<kbd>⌘K</kbd>
+    </div>
+    <a href="/signup" class="btn-dash" style="text-decoration:none;">Get started free →</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDENAV -->
+  <div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+  <nav class="sidenav" id="sidenav">
+    <div>
+      <div class="nav-section-label">Get started</div>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Introduction</a>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Quickstart</a>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>How it works</a>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Sandbox vs production</a>
+    </div>
+    <div>
+      <div class="nav-section-label">iOS SDK</div>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Verification</a>
+    </div>
+    <div>
+      <div class="nav-section-label">Android SDK</div>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Verification</a>
+    </div>
+    <div>
+      <div class="nav-section-label">Backend</div>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Authentication</a>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Webhooks</a>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Webhook signatures</a>
+    </div>
+    <div>
+      <div class="nav-section-label">API Reference</div>
+      <a class="nav-item active" href="#enroll">
+        <span class="nav-method post">POST</span>
+        /v1/enroll
+      </a>
+      <a class="nav-item" href="#verify">
+        <span class="nav-method post">POST</span>
+        /v1/verify
+      </a>
+      <a class="nav-item" href="#device">
+        <span class="nav-method get">GET</span>
+        /v1/device
+      </a>
+      <a class="nav-item" href="#reputation">
+        <span class="nav-method post">POST</span>
+        /v1/reputation
+        
+      </a>
+      <a class="nav-item" href="#errors">
+        <span class="nav-dot"></span>Errors
+      </a>
+    </div>
+    <div>
+      <div class="nav-section-label">Concepts</div>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Confidence levels</a>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Device reputation</a>
+      <a class="nav-item" href="#"><span class="nav-dot"></span>Privacy model</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- PAGE HEADER -->
+    <div style="background:var(--surface); border-bottom:1px solid var(--border); padding: 52px 52px 40px; margin-left:0;">
+      <div class="page-eyebrow">API Reference</div>
+      <h1 class="page-title">REST API</h1>
+      <p class="page-lead">All requests are authenticated using your API key. The SDK handles enrollment and verification automatically — use the REST API directly for backend integrations and the reputation endpoint.</p>
+      <div class="base-url">
+        <span class="base-url-label">Base URL</span>
+        <span class="base-url-value">https://api.vouchflow.dev/v1</span>
+      </div>
+    </div>
+
+    <!-- ── ENDPOINT 1: POST /v1/enroll ── -->
+    <div class="endpoint-row" id="enroll">
+      <div class="endpoint-spec">
+        <div class="endpoint-title-row">
+          <span class="method-badge post">POST</span>
+          <span class="endpoint-path">/v1/enroll</span>
+        </div>
+        <div class="endpoint-name">Enroll a device</div>
+        <p class="endpoint-desc">Registers a device's public key with Vouchflow. Called automatically by the iOS and Android SDKs on first use. Call directly only if implementing a custom SDK or testing enrollment flows from your backend.</p>
+
+        <div class="callout warning">
+          <strong>⚠ App Attest required (iOS)</strong>
+          Enrollment on iOS requires the App Attest entitlement. Without it, the platform attestation step fails and confidence is capped at <code>medium</code>.
+        </div>
+
+        <div class="params-label">Request body</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">public_key</td>
+            <td class="param-type">string</td>
+            <td class="param-req required">Required</td>
+            <td class="param-desc">Base64-encoded public key generated by the Secure Enclave (iOS) or Android Keystore. The private key never leaves the chip.</td>
+          </tr>
+          <tr>
+            <td class="param-name">attestation</td>
+            <td class="param-type">string</td>
+            <td class="param-req required">Required</td>
+            <td class="param-desc">Platform attestation blob. Apple App Attest on iOS; Play Integrity API on Android. Used to verify request originated from genuine, unmodified SDK on real hardware.</td>
+          </tr>
+          <tr>
+            <td class="param-name">platform</td>
+            <td class="param-type">enum</td>
+            <td class="param-req required">Required</td>
+            <td class="param-desc">One of <code>ios</code>, <code>android</code>.</td>
+          </tr>
+          <tr>
+            <td class="param-name">network_opt_in</td>
+            <td class="param-type">boolean</td>
+            <td class="param-req optional">Optional</td>
+            <td class="param-desc">Default <code>false</code>. Set to <code>true</code> to contribute this device's verification history to the cross-app reputation graph. Requires user consent surfaced by your app.</td>
+          </tr>
+        </table>
+
+        <div class="params-label">Response</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">device_id</td>
+            <td class="param-type">string</td>
+            <td class="param-req" style="width:72px"></td>
+            <td class="param-desc">Scoped device identifier. Unique per app by default; shared across network participants when <code>network_opt_in</code> is <code>true</code>.</td>
+          </tr>
+          <tr>
+            <td class="param-name">enrolled_at</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">ISO 8601 timestamp of enrollment.</td>
+          </tr>
+          <tr>
+            <td class="param-name">attestation_level</td>
+            <td class="param-type">enum</td>
+            <td class="param-req"></td>
+            <td class="param-desc">One of <code>hardware</code>, <code>software</code>, <code>none</code>. Reflects whether platform attestation succeeded.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Right: code panel -->
+      <div class="endpoint-example">
+        <div class="ex-tabs">
+          <button class="ex-tab active">cURL</button>
+          <button class="ex-tab">Node.js</button>
+          <button class="ex-tab">Python</button>
+        </div>
+        <div class="ex-copy-row"><button class="ex-copy">Copy</button></div>
+        <div class="ex-section-label">REQUEST</div>
+        <pre><span class="kw">curl</span> <span class="t">-X POST https://api.vouchflow.dev/v1/enroll \</span>
+  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_sandbox_••••"</span><span class="t"> \</span>
+  <span class="t">-H </span><span class="s">"Content-Type: application/json"</span><span class="t"> \</span>
+  <span class="t">-d </span><span class="s">'{
+    "public_key": "MFkwEwYHKoZIzj0CAQY...",
+    "attestation": "o2NmbXRvYXBwbGUt...",
+    "platform": "ios",
+    "network_opt_in": false
+  }'</span></pre>
+        <hr class="ex-divider"/>
+        <div class="status-pill ok"><span class="status-dot"></span>200 OK</div>
+        <div class="ex-section-label">RESPONSE</div>
+        <div class="ex-response">
+          <pre><span class="p">{</span>
+  <span class="s">"device_id"</span><span class="p">:</span> <span class="s">"dvc_01HZXK9M4P3R8TQYF6N2W"</span><span class="p">,</span>
+  <span class="s">"enrolled_at"</span><span class="p">:</span> <span class="s">"2026-04-11T09:14:22Z"</span><span class="p">,</span>
+  <span class="s">"attestation_level"</span><span class="p">:</span> <span class="s">"hardware"</span>
+<span class="p">}</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ENDPOINT 2: POST /v1/verify ── -->
+    <div class="endpoint-row" id="verify">
+      <div class="endpoint-spec">
+        <div class="endpoint-title-row">
+          <span class="method-badge post">POST</span>
+          <span class="endpoint-path">/v1/verify</span>
+        </div>
+        <div class="endpoint-name">Verify a device</div>
+        <p class="endpoint-desc">Validates a signed challenge-response from an enrolled device. Returns a confidence signal proving the same physical device is present. This is the core API call — everything else supports it.</p>
+
+        <div class="params-label">Request body</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">device_id</td>
+            <td class="param-type">string</td>
+            <td class="param-req required">Required</td>
+            <td class="param-desc">The <code>device_id</code> returned at enrollment.</td>
+          </tr>
+          <tr>
+            <td class="param-name">challenge</td>
+            <td class="param-type">string</td>
+            <td class="param-req required">Required</td>
+            <td class="param-desc">Single-use challenge string issued by your backend. Must not be reused — each verification requires a fresh challenge.</td>
+          </tr>
+          <tr>
+            <td class="param-name">signature</td>
+            <td class="param-type">string</td>
+            <td class="param-req required">Required</td>
+            <td class="param-desc">Base64-encoded signature of the challenge, produced by the Secure Enclave or Keystore private key.</td>
+          </tr>
+          <tr>
+            <td class="param-name">idempotency_key</td>
+            <td class="param-type">string</td>
+            <td class="param-req optional">Optional</td>
+            <td class="param-desc">Supply a unique key to safely retry a request without triggering a duplicate verification. Valid for 24 hours.</td>
+          </tr>
+        </table>
+
+        <div class="params-label">Response</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">verified</td>
+            <td class="param-type">boolean</td>
+            <td class="param-req"></td>
+            <td class="param-desc"><code>true</code> if signature is valid and confidence meets your configured threshold.</td>
+          </tr>
+          <tr>
+            <td class="param-name">confidence</td>
+            <td class="param-type">enum</td>
+            <td class="param-req"></td>
+            <td class="param-desc">One of <code>high</code>, <code>medium</code>, <code>low</code>. Reflects hardware attestation level, biometric type, and device history.</td>
+          </tr>
+          <tr>
+            <td class="param-name">platform</td>
+            <td class="param-type">enum</td>
+            <td class="param-req"></td>
+            <td class="param-desc"><code>ios</code> or <code>android</code>.</td>
+          </tr>
+          <tr>
+            <td class="param-name">biometric</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Biometric method used. One of <code>face_id</code>, <code>touch_id</code>, <code>biometric</code> (Android), <code>none</code>.</td>
+          </tr>
+          <tr>
+            <td class="param-name">device_age_days</td>
+            <td class="param-type">integer</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Days since this device_id was first enrolled. <code>0</code> on first verification.</td>
+          </tr>
+          <tr>
+            <td class="param-name">session_duration_ms</td>
+            <td class="param-type">integer</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Time in milliseconds from SDK call to verified result.</td>
+          </tr>
+        </table>
+
+        <div class="callout info">
+          <strong>Confidence thresholds</strong>
+          You can configure a minimum confidence level in your dashboard. Verifications below the threshold return <code>verified: false</code> with the actual confidence value still present — allowing you to decide how to handle degraded cases.
+        </div>
+      </div>
+
+      <div class="endpoint-example">
+        <div class="ex-tabs">
+          <button class="ex-tab active">cURL</button>
+          <button class="ex-tab">Node.js</button>
+          <button class="ex-tab">Python</button>
+        </div>
+        <div class="ex-copy-row"><button class="ex-copy">Copy</button></div>
+        <div class="ex-section-label">REQUEST</div>
+        <pre><span class="kw">curl</span> <span class="t">-X POST https://api.vouchflow.dev/v1/verify \</span>
+  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_live_••••"</span><span class="t"> \</span>
+  <span class="t">-H </span><span class="s">"Content-Type: application/json"</span><span class="t"> \</span>
+  <span class="t">-d </span><span class="s">'{
+    "device_id": "dvc_01HZXK9M4P3R8TQYF6N2W",
+    "challenge": "ch_9f2a8e1b4d3c7f0e",
+    "signature": "MEUCIQDx7mN3p...",
+    "idempotency_key": "idem_signup_user_8821"
+  }'</span></pre>
+        <hr class="ex-divider"/>
+        <div class="status-pill ok"><span class="status-dot"></span>200 OK</div>
+        <div class="ex-section-label">RESPONSE</div>
+        <div class="ex-response">
+          <pre><span class="p">{</span>
+  <span class="s">"verified"</span><span class="p">:</span> <span class="kw">true</span><span class="p">,</span>
+  <span class="s">"confidence"</span><span class="p">:</span> <span class="s">"high"</span><span class="p">,</span>
+  <span class="s">"platform"</span><span class="p">:</span> <span class="s">"ios"</span><span class="p">,</span>
+  <span class="s">"biometric"</span><span class="p">:</span> <span class="s">"face_id"</span><span class="p">,</span>
+  <span class="s">"device_age_days"</span><span class="p">:</span> <span class="num">142</span><span class="p">,</span>
+  <span class="s">"session_duration_ms"</span><span class="p">:</span> <span class="num">1840</span>
+<span class="p">}</span></pre>
+        </div>
+        <hr class="ex-divider" style="margin-top:16px"/>
+        <div class="status-pill err"><span class="status-dot"></span>200 OK — low confidence</div>
+        <div class="ex-section-label">DEGRADED RESPONSE</div>
+        <div class="ex-response">
+          <pre><span class="p">{</span>
+  <span class="s">"verified"</span><span class="p">:</span> <span class="kw">false</span><span class="p">,</span>
+  <span class="s">"confidence"</span><span class="p">:</span> <span class="s">"low"</span><span class="p">,</span>
+  <span class="s">"platform"</span><span class="p">:</span> <span class="s">"android"</span><span class="p">,</span>
+  <span class="s">"biometric"</span><span class="p">:</span> <span class="s">"none"</span><span class="p">,</span>
+  <span class="s">"device_age_days"</span><span class="p">:</span> <span class="num">0</span>
+<span class="p">}</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ENDPOINT 3: GET /v1/device ── -->
+    <div class="endpoint-row" id="device">
+      <div class="endpoint-spec">
+        <div class="endpoint-title-row">
+          <span class="method-badge get">GET</span>
+          <span class="endpoint-path">/v1/device/:device_id</span>
+        </div>
+        <div class="endpoint-name">Retrieve a device</div>
+        <p class="endpoint-desc">Returns the enrollment state and verification history for a single device. Useful for auditing, support tooling, and building device management UIs.</p>
+
+        <div class="params-label">Path parameters</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">device_id</td>
+            <td class="param-type">string</td>
+            <td class="param-req required">Required</td>
+            <td class="param-desc">The device identifier returned at enrollment.</td>
+          </tr>
+        </table>
+
+        <div class="params-label">Response</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">device_id</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">The device identifier.</td>
+          </tr>
+          <tr>
+            <td class="param-name">platform</td>
+            <td class="param-type">enum</td>
+            <td class="param-req"></td>
+            <td class="param-desc"><code>ios</code> or <code>android</code>.</td>
+          </tr>
+          <tr>
+            <td class="param-name">enrolled_at</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">ISO 8601 enrollment timestamp.</td>
+          </tr>
+          <tr>
+            <td class="param-name">verification_count</td>
+            <td class="param-type">integer</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Total verifications completed for this device.</td>
+          </tr>
+          <tr>
+            <td class="param-name">last_verified_at</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">ISO 8601 timestamp of most recent successful verification.</td>
+          </tr>
+          <tr>
+            <td class="param-name">attestation_level</td>
+            <td class="param-type">enum</td>
+            <td class="param-req"></td>
+            <td class="param-desc"><code>hardware</code>, <code>software</code>, or <code>none</code>.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="endpoint-example">
+        <div class="ex-tabs">
+          <button class="ex-tab active">cURL</button>
+          <button class="ex-tab">Node.js</button>
+          <button class="ex-tab">Python</button>
+        </div>
+        <div class="ex-copy-row"><button class="ex-copy">Copy</button></div>
+        <div class="ex-section-label">REQUEST</div>
+        <pre><span class="kw">curl</span> <span class="t">https://api.vouchflow.dev/v1/device/dvc_01HZXK9M \</span>
+  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_live_••••"</span></pre>
+        <hr class="ex-divider"/>
+        <div class="status-pill ok"><span class="status-dot"></span>200 OK</div>
+        <div class="ex-section-label">RESPONSE</div>
+        <div class="ex-response">
+          <pre><span class="p">{</span>
+  <span class="s">"device_id"</span><span class="p">:</span> <span class="s">"dvc_01HZXK9M4P3R8TQYF6N2W"</span><span class="p">,</span>
+  <span class="s">"platform"</span><span class="p">:</span> <span class="s">"ios"</span><span class="p">,</span>
+  <span class="s">"enrolled_at"</span><span class="p">:</span> <span class="s">"2025-11-20T14:02:11Z"</span><span class="p">,</span>
+  <span class="s">"verification_count"</span><span class="p">:</span> <span class="num">38</span><span class="p">,</span>
+  <span class="s">"last_verified_at"</span><span class="p">:</span> <span class="s">"2026-04-11T09:14:22Z"</span><span class="p">,</span>
+  <span class="s">"attestation_level"</span><span class="p">:</span> <span class="s">"hardware"</span>
+<span class="p">}</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ENDPOINT 4: POST /v1/reputation ── -->
+    <div class="endpoint-row" id="reputation">
+      <div class="endpoint-spec">
+        <div class="endpoint-title-row">
+          <span class="method-badge post">POST</span>
+          <span class="endpoint-path">/v1/reputation</span>
+          
+        </div>
+        <div class="endpoint-name">Query device reputation</div>
+        <p class="endpoint-desc">Returns cross-app reputation signals for a device that has opted into the Vouchflow Network. A device verified across many apps over a long period with no anomalies has a stronger reputation signal than a device that appeared recently.</p>
+
+        <div class="callout">
+          <strong class="plain">Network participation required</strong>
+          This endpoint returns meaningful data only for devices enrolled with <code>network_opt_in: true</code>. Devices in isolated mode return a minimal response with no cross-app signals.
+        </div>
+
+        <div class="params-label">Request body</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">device_id</td>
+            <td class="param-type">string</td>
+            <td class="param-req required">Required</td>
+            <td class="param-desc">The network-scoped device identifier.</td>
+          </tr>
+        </table>
+
+        <div class="params-label">Response</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">reputation_score</td>
+            <td class="param-type">integer</td>
+            <td class="param-req"></td>
+            <td class="param-desc">0–100. Composite score derived from device age, cross-app verification count, anomaly history, and reinstall events.</td>
+          </tr>
+          <tr>
+            <td class="param-name">network_app_count</td>
+            <td class="param-type">integer</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Number of distinct Vouchflow-integrated apps this device has verified with.</td>
+          </tr>
+          <tr>
+            <td class="param-name">anomaly_flags</td>
+            <td class="param-type">array</td>
+            <td class="param-req"></td>
+            <td class="param-desc">List of anomaly signals detected. May include <code>rapid_app_spread</code>, <code>reinstall_detected</code>, <code>attestation_downgrade</code>.</td>
+          </tr>
+          <tr>
+            <td class="param-name">first_seen_at</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">ISO 8601 timestamp of the device's earliest known network enrollment.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="endpoint-example">
+        <div class="ex-tabs">
+          <button class="ex-tab active">cURL</button>
+          <button class="ex-tab">Node.js</button>
+          <button class="ex-tab">Python</button>
+        </div>
+        <div class="ex-copy-row"><button class="ex-copy">Copy</button></div>
+        <div class="ex-section-label">REQUEST</div>
+        <pre><span class="kw">curl</span> <span class="t">-X POST https://api.vouchflow.dev/v1/reputation \</span>
+  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_live_••••"</span><span class="t"> \</span>
+  <span class="t">-H </span><span class="s">"Content-Type: application/json"</span><span class="t"> \</span>
+  <span class="t">-d </span><span class="s">'{ "device_id": "dvc_01HZXK9M4P3R8TQYF6N2W" }'</span></pre>
+        <hr class="ex-divider"/>
+        <div class="status-pill ok"><span class="status-dot"></span>200 OK</div>
+        <div class="ex-section-label">RESPONSE</div>
+        <div class="ex-response">
+          <pre><span class="p">{</span>
+  <span class="s">"reputation_score"</span><span class="p">:</span> <span class="num">91</span><span class="p">,</span>
+  <span class="s">"network_app_count"</span><span class="p">:</span> <span class="num">14</span><span class="p">,</span>
+  <span class="s">"anomaly_flags"</span><span class="p">:</span> <span class="p">[]</span><span class="p">,</span>
+  <span class="s">"first_seen_at"</span><span class="p">:</span> <span class="s">"2025-09-03T07:44:01Z"</span>
+<span class="p">}</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ERRORS ── -->
+    <div class="endpoint-row" id="errors">
+      <div class="endpoint-spec" style="border-right:none; max-width: 680px;">
+        <div class="endpoint-name" style="margin-bottom:10px;">Errors</div>
+        <p class="endpoint-desc">Vouchflow uses standard HTTP status codes. All error responses include a machine-readable <code>code</code> and a human-readable <code>message</code>.</p>
+
+        <div class="params-label" style="margin-top:24px;">Error codes</div>
+        <table class="error-table">
+          <tr>
+            <td class="err-code">enrollment_failed</td>
+            <td class="err-desc">Platform attestation did not succeed. Check App Attest entitlement (iOS) or Play Integrity configuration (Android).</td>
+          </tr>
+          <tr>
+            <td class="err-code">invalid_signature</td>
+            <td class="err-desc">The challenge signature could not be verified against the enrolled public key. Device may have been re-keyed or tampered with.</td>
+          </tr>
+          <tr>
+            <td class="err-code">challenge_expired</td>
+            <td class="err-desc">Challenges are single-use and expire after 5 minutes. Generate a fresh challenge and retry.</td>
+          </tr>
+          <tr>
+            <td class="err-code">challenge_already_used</td>
+            <td class="err-desc">This challenge has already been consumed. Use an <code>idempotency_key</code> to safely retry a request.</td>
+          </tr>
+          <tr>
+            <td class="err-code">device_not_found</td>
+            <td class="err-desc">No device matching the provided <code>device_id</code> exists in this account's scope.</td>
+          </tr>
+          <tr>
+            <td class="err-code">minimum_confidence_unmet</td>
+            <td class="err-desc">Verification succeeded cryptographically but confidence fell below your configured threshold.</td>
+          </tr>
+          <tr>
+            <td class="err-code">network_not_enrolled</td>
+            <td class="err-desc">Reputation endpoint called for a device not enrolled in the Vouchflow Network.</td>
+          </tr>
+          <tr>
+            <td class="err-code">rate_limit_exceeded</td>
+            <td class="err-desc">Too many requests. Back off and retry using exponential backoff. Limits are per API key.</td>
+          </tr>
+          <tr>
+            <td class="err-code">unauthorized</td>
+            <td class="err-desc">API key missing, malformed, or scoped incorrectly. Sandbox keys cannot call production endpoints.</td>
+          </tr>
+        </table>
+
+        <div class="code-block standalone" style="border-radius:8px; overflow:hidden; margin-top:28px; background:#0F1117; border:1px solid #1E2028;">
+          <div style="padding:10px 16px; border-bottom:1px solid #1E2028; background:#0B0E14;">
+            <span style="font-family:var(--mono); font-size:10px; color:#555B6E; letter-spacing:1px; text-transform:uppercase;">Error response shape</span>
+          </div>
+          <pre style="padding:20px;"><span class="p">{</span>
+  <span class="s">"error"</span><span class="p">: {</span>
+    <span class="s">"code"</span><span class="p">:</span>    <span class="s">"challenge_expired"</span><span class="p">,</span>
+    <span class="s">"message"</span><span class="p">:</span> <span class="s">"Challenge has expired. Generate a new one."</span><span class="p">,</span>
+    <span class="s">"status"</span><span class="p">:</span>  <span class="num">400</span>
+  <span class="p">}</span>
+<span class="p">}</span></pre>
+        </div>
+      </div>
+      <div style="background:#0F1117; width:var(--ref-w); flex-shrink:0;"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  document.querySelectorAll('.ex-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tab.closest('.ex-tabs').querySelectorAll('.ex-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.ex-copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.textContent = 'Copied';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  });
+
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+function toggleNav() {
+  const nav = document.getElementById('sidenav');
+  const overlay = document.getElementById('nav-overlay');
+  nav.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      const nav = document.getElementById('sidenav');
+      if (nav.classList.contains('open')) toggleNav();
+    }
+  });
+});
+
+function toggleNav() {
+  const nav = document.getElementById('sidenav');
+  const overlay = document.getElementById('nav-overlay');
+  nav.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      const nav = document.getElementById('sidenav');
+      if (nav.classList.contains('open')) toggleNav();
+    }
+  });
+});
+</script>
+</body>
 </html>

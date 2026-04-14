@@ -3,13 +3,6 @@ import { createToken, consumeToken, checkRateLimit } from '../services/tokenStor
 import { sendMagicLink } from '../services/email.js'
 import { findOrCreateCustomer } from '../services/apiClient.js'
 
-const BLOCKED_DOMAINS = new Set([
-  'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com',
-  'protonmail.com', 'mail.com', 'aol.com', 'yandex.com', 'gmx.com',
-  'guerrillamail.com', 'temp-mail.org', 'mailinator.com', 'throwaway.email',
-  '10minutemail.com', 'trashmail.com', 'sharklasers.com', 'tempmail.com',
-])
-
 export default async function authRoutes(fastify: FastifyInstance) {
 
   // POST /auth/magic-link
@@ -28,10 +21,6 @@ export default async function authRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       const email  = request.body.email.toLowerCase().trim()
       const domain = email.split('@')[1]
-
-      if (!domain || BLOCKED_DOMAINS.has(domain)) {
-        return reply.status(400).send({ error: 'invalid_email_domain' })
-      }
 
       const allowed = await checkRateLimit(email)
       if (!allowed) {

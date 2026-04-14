@@ -6,6 +6,7 @@ import {
   getVerification,
   getDevices,
   getUsage,
+  getWebhooks,
   createWebhook,
   deleteWebhook,
   updateCustomer,
@@ -118,4 +119,22 @@ export default async function webRoutes(fastify: FastifyInstance) {
       return { ok: true }
     }
   )
+
+  // GET /web/webhooks — list webhook endpoints
+  fastify.get('/web/webhooks', async (request) => {
+    const customerId      = request.session.get('customerId') as string
+    const sandboxWriteKey = request.session.get('sandboxWriteKey') as string
+    try {
+      return await getWebhooks(customerId, sandboxWriteKey)
+    } catch {
+      return { webhooks: [] }
+    }
+  })
+
+  // GET /web/keys/reveal — full unmasked keys (session-protected, never logged)
+  fastify.get('/web/keys/reveal', async (request) => ({
+    sandboxWriteKey: request.session.get('sandboxWriteKey') as string,
+    sandboxReadKey:  request.session.get('sandboxReadKey')  as string,
+    webhookSecret:   request.session.get('webhookSecret')   as string,
+  }))
 }

@@ -136,6 +136,17 @@ export interface Webhook {
   createdAt: string
 }
 
+export async function getWebhooks(
+  customerId: string,
+  sandboxWriteKey: string
+): Promise<{ webhooks: Webhook[] }> {
+  return apiFetch<{ webhooks: Webhook[] }>(
+    `/v1/customers/${customerId}/webhooks`,
+    {},
+    sandboxWriteKey
+  )
+}
+
 export async function createWebhook(
   sandboxWriteKey: string,
   data: { url: string; events: string[] }
