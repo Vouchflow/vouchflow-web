@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy — Vouchflow</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+    h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.25rem; margin-top: 2.25rem; }
+    h3 { font-size: 1.05rem; margin-top: 1.5rem; }
+    .effective { color: #666; margin-top: 0; }
+    .brand { color: #666; font-size: 0.95rem; margin: 0 0 1.5rem; }
+    ul { padding-left: 1.25rem; }
+    li { margin-bottom: 0.35rem; }
+    code { background: #f3f3f3; padding: 0 0.25rem; border-radius: 3px; font-size: 0.95em; }
+    a { color: #1a56db; }
+  </style>
+</head>
+<body>
+  <p class="brand">Vouchflow</p>
+  <h1>Privacy Policy</h1>
+  <p class="effective">Effective date: 14 April 2026</p>
+
+  <p>Moon Rice Limited ("Moon Rice Limited", "we", "us", "our") operates the Vouchflow platform at vouchflow.dev and api.vouchflow.dev. This Privacy Policy explains how we collect, use, store, and share information when you use our Services.</p>
+
+  <p>Vouchflow is designed around a privacy-first principle: we prove device presence without storing personal identity. No names, phone numbers, or email addresses are attached to device verification records.</p>
+
+  <h2>1. Who This Policy Applies To</h2>
+  <p>This policy applies to:</p>
+  <ul>
+    <li>Developers and businesses ("Customers") who integrate Vouchflow into their applications</li>
+    <li>End users of applications built by our Customers ("End Users")</li>
+  </ul>
+  <p>If you are an End User of an app that uses Vouchflow, this policy explains what Vouchflow itself collects. The app you are using will have its own privacy policy governing how that company uses your data.</p>
+
+  <h2>2. Information We Collect</h2>
+
+  <h3>2.1 From Customers (Developers)</h3>
+  <p>When you create a Vouchflow account, we collect:</p>
+  <ul>
+    <li>Your work email address (used to send your magic link login and for account communications)</li>
+    <li>Your organisation name and billing email (if provided in account settings)</li>
+    <li>API usage data — verification counts, error rates, confidence distribution</li>
+    <li>Log data — IP addresses, timestamps, and request metadata for security and debugging</li>
+  </ul>
+
+  <h3>2.2 From End User Devices (via SDK)</h3>
+  <p>When the Vouchflow SDK runs in an application on an End User's device, we collect and process:</p>
+  <ul>
+    <li>A device token — a pseudonymous identifier derived from the hardware-bound keypair. This is not a hardware ID and does not identify the device manufacturer or model.</li>
+    <li>The device public key — generated inside the Secure Enclave (iOS) or hardware Keystore (Android). The private key never leaves the device and is never transmitted to us.</li>
+    <li>Platform attestation data — Apple App Attest or Google Play Integrity API outputs, used to verify the device is genuine and unmodified.</li>
+    <li>Verification signals — confidence level, biometric type used (e.g. Face ID, fingerprint), attestation level, session duration.</li>
+    <li>Anomaly flags — if unusual patterns are detected (e.g. rapid cross-app spread, reinstall events).</li>
+  </ul>
+  <p>We do not collect:</p>
+  <ul>
+    <li>The End User's name, email address, phone number, or any other directly identifying information</li>
+    <li>The biometric data itself (face scan, fingerprint) — this is processed entirely on-device by the operating system</li>
+    <li>Device hardware identifiers (IMEI, serial number, MAC address)</li>
+    <li>Location data</li>
+  </ul>
+
+  <h3>2.3 Email Fallback</h3>
+  <p>If biometric verification is unavailable and your application uses our email OTP fallback, the End User's email address is SHA-256 hashed before transmission to our servers for rate-limiting purposes. The raw email address is never stored by us.</p>
+
+  <h2>3. How We Use Information</h2>
+
+  <h3>3.1 Customer Data</h3>
+  <ul>
+    <li>To provide, operate, and improve the Services</li>
+    <li>To authenticate your account via magic link</li>
+    <li>To send transactional emails (login links, account notices)</li>
+    <li>To generate usage statistics for your dashboard</li>
+    <li>To prevent fraud, abuse, and misuse of the platform</li>
+    <li>To comply with legal obligations</li>
+  </ul>
+
+  <h3>3.2 End User Device Data</h3>
+  <ul>
+    <li>To perform the cryptographic verification and return a confidence signal to the Customer's application</li>
+    <li>To maintain the device reputation graph (for Network-opted-in devices only)</li>
+    <li>To detect anomalies and fraud signals</li>
+    <li>To improve the accuracy of confidence scoring over time</li>
+  </ul>
+
+  <h3>3.3 Network Graph</h3>
+  <p>If a Customer enables Network participation (<code>network_opt_in: true</code>), device verification history is incorporated into our cross-app reputation graph. Only pseudonymous device tokens and behavioural signals (verification count, timing, anomaly flags) are stored in the graph. No PII is ever stored in or linked to the graph. Customers who do not opt into the Network have their data siloed and isolated.</p>
+
+  <h2>4. Legal Basis for Processing (GDPR)</h2>
+  <p>If you are located in the European Economic Area (EEA), the United Kingdom, or Switzerland, we process your personal data under the following legal bases:</p>
+  <ul>
+    <li>Contract performance — processing necessary to provide the Services you have contracted for (Article 6(1)(b) GDPR)</li>
+    <li>Legitimate interests — fraud prevention, security, and improving the Services (Article 6(1)(f) GDPR)</li>
+    <li>Legal obligation — where required by applicable law (Article 6(1)(c) GDPR)</li>
+    <li>Consent — where we rely on consent, you may withdraw it at any time without affecting the lawfulness of prior processing</li>
+  </ul>
+  <p>For End Users, Customers act as the data controller for the decision to integrate Vouchflow. Moon Rice Limited acts as a data processor in relation to End User device data processed on behalf of Customers, and as a controller in relation to the pseudonymous Network graph data.</p>
+
+  <h2>5. Data Retention</h2>
+  <ul>
+    <li>Customer account data — retained for the duration of your account plus 90 days after deletion, then permanently deleted.</li>
+    <li>Verification event logs — retained for 12 months, then deleted.</li>
+    <li>Device tokens and Network graph data — retained as long as the device remains active in the Network. Customers may request device deletion via the API.</li>
+    <li>API logs — retained for 90 days for security and debugging purposes.</li>
+    <li>Hashed email addresses (fallback) — retained for 1 hour for rate-limiting, then deleted.</li>
+  </ul>
+
+  <h2>6. Data Sharing</h2>
+  <p>We do not sell personal data. We share data only as follows:</p>
+  <ul>
+    <li>Service providers — we use third-party providers to operate the Services, including cloud infrastructure (Fly.io), database hosting, Redis (Upstash), and email delivery (Resend). These providers process data only on our instructions and are bound by data processing agreements.</li>
+    <li>Customers — device verification results are returned to the Customer's application as part of the API response. The Customer is responsible for how they use this data in their application.</li>
+    <li>Network participants — if a device is enrolled in the Network, pseudonymous signals from that device may be shared across other Network-participating Customers. No PII is included.</li>
+    <li>Legal requirements — we may disclose data if required by law, court order, or government authority.</li>
+    <li>Business transfers — if Moon Rice Limited is acquired or merged, data may be transferred to the successor entity.</li>
+  </ul>
+
+  <h2>7. International Data Transfers</h2>
+  <p>Moon Rice Limited is based in the UAE. Our infrastructure is hosted primarily in the United States (via Fly.io). If you are located in the EEA or UK, your data may be transferred to and processed in countries that do not have the same data protection laws as your home country.</p>
+  <p>Where we transfer personal data from the EEA or UK to third countries, we rely on appropriate safeguards including Standard Contractual Clauses (SCCs) or the UK International Data Transfer Agreement (IDTA), as applicable.</p>
+
+  <h2>8. Security</h2>
+  <p>We implement technical and organisational measures to protect data, including:</p>
+  <ul>
+    <li>TLS encryption for all data in transit, with certificate pinning in production SDK builds</li>
+    <li>API keys are SHA-256 hashed before storage — raw keys are never persisted server-side</li>
+    <li>Hardware attestation (Apple App Attest / Google Play Integrity) to verify SDK integrity</li>
+    <li>Private keys are generated and stored exclusively in the Secure Enclave or hardware Keystore — we never have access to them</li>
+    <li>Access to production systems is restricted to authorised personnel</li>
+  </ul>
+  <p>No security measure is perfect. In the event of a data breach that poses a risk to your rights and freedoms, we will notify affected parties and relevant authorities as required by applicable law.</p>
+
+  <h2>9. Your Rights</h2>
+
+  <h3>9.1 All Users</h3>
+  <ul>
+    <li>Access — request a copy of the personal data we hold about you</li>
+    <li>Correction — request correction of inaccurate data</li>
+    <li>Deletion — request deletion of your data, subject to our retention obligations</li>
+    <li>Portability — receive your data in a machine-readable format</li>
+  </ul>
+
+  <h3>9.2 EEA / UK Users (GDPR / UK GDPR)</h3>
+  <p>In addition to the above, you have the right to:</p>
+  <ul>
+    <li>Object to processing based on legitimate interests</li>
+    <li>Restrict processing in certain circumstances</li>
+    <li>Lodge a complaint with your local supervisory authority</li>
+  </ul>
+  <p>To exercise any of these rights, contact us at <a href="mailto:privacy@vouchflow.dev">privacy@vouchflow.dev</a>. We will respond within 30 days. We may need to verify your identity before processing your request.</p>
+
+  <h2>10. Cookies and Tracking</h2>
+  <p>The Vouchflow developer dashboard uses a session cookie to maintain your login state. This cookie is:</p>
+  <ul>
+    <li>HttpOnly — not accessible to JavaScript</li>
+    <li>Secure — transmitted only over HTTPS</li>
+    <li>SameSite=Lax — not sent on cross-site requests</li>
+    <li>Set to expire after 30 days of inactivity</li>
+  </ul>
+  <p>We do not use advertising cookies, tracking pixels, or third-party analytics on vouchflow.dev. We do not use cookies in the iOS or Android SDKs.</p>
+
+  <h2>11. Children's Privacy</h2>
+  <p>The Services are not directed at children under the age of 16 (or such higher age as required by applicable law in your jurisdiction). We do not knowingly collect personal data from children. If you believe we have inadvertently collected data from a child, please contact us at <a href="mailto:privacy@vouchflow.dev">privacy@vouchflow.dev</a> and we will delete it promptly.</p>
+
+  <h2>12. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. We will notify you of material changes by posting the updated policy on vouchflow.dev and, where appropriate, by email. The effective date at the top of this policy indicates when it was last revised.</p>
+
+  <h2>13. Contact Us</h2>
+  <p>For privacy-related questions, requests, or complaints:</p>
+  <p>
+    Moon Rice Limited<br>
+    <a href="mailto:privacy@vouchflow.dev">privacy@vouchflow.dev</a><br>
+    vouchflow.dev
+  </p>
+  <p>For general support: <a href="mailto:support@vouchflow.dev">support@vouchflow.dev</a></p>
+</body>
+</html>
