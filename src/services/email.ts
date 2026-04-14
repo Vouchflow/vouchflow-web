@@ -10,7 +10,7 @@ export async function sendPartnerInquiry(
   await resend.emails.send({
     from: 'Vouchflow <noreply@vouchflow.dev>',
     to: 'hello@vouchflow.dev',
-    replyTo: fromEmail,
+    reply_to: fromEmail,
     subject: `Design partner inquiry from ${fromEmail}`,
     text: [
       `From: ${fromEmail}`,
