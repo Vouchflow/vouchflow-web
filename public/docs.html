@@ -818,9 +818,18 @@ hr {
       </div>
 
       <div id="tab-android" style="display:none">
-        <div class="callout" style="margin-top:0">
-          <strong>Android SDK — coming soon</strong>
-          The Android SDK is in private beta. <a href="/signup" style="color:var(--ink)">Join the waitlist</a> to get early access.
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Gradle (build.gradle.kts)</span>
+            <button class="code-copy">Copy</button>
+          </div>
+          <pre><span class="t">dependencies {</span>
+    <span class="t">implementation(</span><span class="s">"com.vouchflow:android-sdk:1.0.0"</span><span class="t">)</span>
+<span class="t">}</span></pre>
+        </div>
+        <div class="callout warning">
+          <strong>⚠ Minimum requirements</strong>
+          Android 7.0+ (API 24), Google Play Services for Play Integrity attestation. StrongBox-backed keys require Android 9+.
         </div>
       </div>
 
@@ -833,7 +842,7 @@ hr {
 
       <!-- INITIALISE -->
       <h2 class="section-anchor" id="init">Initialise</h2>
-      <p>Call <code>Vouchflow.configure(VouchflowConfig(...))</code> once at app launch. Requires both <code>apiKey</code> and <code>customerId</code> from the dashboard.</p>
+      <p>Call <code>Vouchflow.configure(VouchflowConfig(...))</code> once at app launch. Only your write-scoped <code>apiKey</code> is required — there is no <code>customerId</code>.</p>
 
       <div class="code-block standalone">
         <div class="code-header">
@@ -847,7 +856,6 @@ hr {
   <span class="k">init</span><span class="t">() {</span>
     <span class="k">try</span><span class="t">? Vouchflow.</span><span class="f">configure</span><span class="t">(VouchflowConfig(</span>
       <span class="n">apiKey</span><span class="t">: </span><span class="s">"vsk_sandbox_••••••••••••••••"</span><span class="t">,</span>
-      <span class="n">customerId</span><span class="t">: </span><span class="s">"cust_..."</span><span class="t">,</span>
       <span class="n">environment</span><span class="t">: .</span><span class="n">sandbox</span>
     <span class="t">))</span>
   <span class="t">}</span>

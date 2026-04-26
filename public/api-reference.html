@@ -547,12 +547,7 @@ pre {
       </a>
       <a class="nav-item" href="#device">
         <span class="nav-method get">GET</span>
-        /v1/device
-      </a>
-      <a class="nav-item" href="#reputation">
-        <span class="nav-method post">POST</span>
-        /v1/reputation
-        
+        /v1/device/:token/reputation
       </a>
       <a class="nav-item" href="#errors">
         <span class="nav-dot"></span>Errors
@@ -657,6 +652,7 @@ pre {
         <div class="ex-section-label">REQUEST</div>
         <pre><span class="kw">curl</span> <span class="t">-X POST https://api.vouchflow.dev/v1/enroll \</span>
   <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_sandbox_••••"</span><span class="t"> \</span>
+  <span class="t">-H </span><span class="s">"Vouchflow-API-Version: 2026-04-01"</span><span class="t"> \</span>
   <span class="t">-H </span><span class="s">"Content-Type: application/json"</span><span class="t"> \</span>
   <span class="t">-d </span><span class="s">'{
     "public_key": "MFkwEwYHKoZIzj0CAQY...",
@@ -753,6 +749,18 @@ pre {
             <td class="param-req"></td>
             <td class="param-desc">Time in milliseconds from SDK call to verified result.</td>
           </tr>
+          <tr>
+            <td class="param-name">device_token</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Opaque token identifying this device. Pass to <code>GET /v1/device/:device_token/reputation</code> from your server to query trust signals. Never log or expose client-side.</td>
+          </tr>
+          <tr>
+            <td class="param-name">session_id</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Identifier for this verification session. Matches the <code>session_id</code> in webhook payloads.</td>
+          </tr>
         </table>
 
         <div class="callout info">
@@ -771,6 +779,7 @@ pre {
         <div class="ex-section-label">REQUEST</div>
         <pre><span class="kw">curl</span> <span class="t">-X POST https://api.vouchflow.dev/v1/verify \</span>
   <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_live_••••"</span><span class="t"> \</span>
+  <span class="t">-H </span><span class="s">"Vouchflow-API-Version: 2026-04-01"</span><span class="t"> \</span>
   <span class="t">-H </span><span class="s">"Content-Type: application/json"</span><span class="t"> \</span>
   <span class="t">-d </span><span class="s">'{
     "device_id": "dvc_01HZXK9M4P3R8TQYF6N2W",
@@ -788,7 +797,9 @@ pre {
   <span class="s">"platform"</span><span class="p">:</span> <span class="s">"ios"</span><span class="p">,</span>
   <span class="s">"biometric"</span><span class="p">:</span> <span class="s">"face_id"</span><span class="p">,</span>
   <span class="s">"device_age_days"</span><span class="p">:</span> <span class="num">142</span><span class="p">,</span>
-  <span class="s">"session_duration_ms"</span><span class="p">:</span> <span class="num">1840</span>
+  <span class="s">"session_duration_ms"</span><span class="p">:</span> <span class="num">1840</span><span class="p">,</span>
+  <span class="s">"device_token"</span><span class="p">:</span> <span class="s">"dvt_01HZXKBM9F2R4QWEP7N3J"</span><span class="p">,</span>
+  <span class="s">"session_id"</span><span class="p">:</span> <span class="s">"ses_01HZXK9M4P3R8TQYF6N2W"</span>
 <span class="p">}</span></pre>
         </div>
         <hr class="ex-divider" style="margin-top:16px"/>
@@ -806,33 +817,80 @@ pre {
       </div>
     </div>
 
-    <!-- ── ENDPOINT 3: GET /v1/device ── -->
+    <!-- ── ENDPOINT 3: GET /v1/device/:device_token/reputation ── -->
     <div class="endpoint-row" id="device">
       <div class="endpoint-spec">
         <div class="endpoint-title-row">
           <span class="method-badge get">GET</span>
-          <span class="endpoint-path">/v1/device/:device_id</span>
+          <span class="endpoint-path">/v1/device/:device_token/reputation</span>
         </div>
-        <div class="endpoint-name">Retrieve a device</div>
-        <p class="endpoint-desc">Returns the enrollment state and verification history for a single device. Useful for auditing, support tooling, and building device management UIs.</p>
+        <div class="endpoint-name">Query device reputation</div>
+        <p class="endpoint-desc">Returns trust signals and the most recent verification record for a device token. Call this from your server after the mobile SDK returns a <code>device_token</code> — never expose your read-scoped key to the mobile client.</p>
+
+        <div class="callout">
+          <strong class="plain">Read-scoped key required</strong>
+          This endpoint requires a read-scoped API key (<code>vsk_read_...</code>). Write-scoped keys used by the mobile SDK will return <code>403 insufficient_scope</code>.
+        </div>
 
         <div class="params-label">Path parameters</div>
         <table class="params-table">
           <tr>
-            <td class="param-name">device_id</td>
+            <td class="param-name">device_token</td>
             <td class="param-type">string</td>
             <td class="param-req required">Required</td>
-            <td class="param-desc">The device identifier returned at enrollment.</td>
+            <td class="param-desc">The opaque device token returned in the <code>POST /v1/verify</code> response.</td>
           </tr>
         </table>
 
         <div class="params-label">Response</div>
         <table class="params-table">
           <tr>
-            <td class="param-name">device_id</td>
+            <td class="param-name">device_token</td>
             <td class="param-type">string</td>
             <td class="param-req"></td>
-            <td class="param-desc">The device identifier.</td>
+            <td class="param-desc">Echo of the requested device token.</td>
+          </tr>
+          <tr>
+            <td class="param-name">first_seen</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">ISO 8601 timestamp of first enrollment.</td>
+          </tr>
+          <tr>
+            <td class="param-name">last_seen</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">ISO 8601 timestamp of most recent API activity.</td>
+          </tr>
+          <tr>
+            <td class="param-name">total_verifications</td>
+            <td class="param-type">integer</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Total successful verifications for this device across your app.</td>
+          </tr>
+          <tr>
+            <td class="param-name">network_verifications</td>
+            <td class="param-type">integer</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Verifications contributed to the cross-app network. <code>0</code> for devices not opted in.</td>
+          </tr>
+          <tr>
+            <td class="param-name">anomaly_flags</td>
+            <td class="param-type">array</td>
+            <td class="param-req"></td>
+            <td class="param-desc">List of anomaly signals. May include <code>rapid_app_spread</code>, <code>reinstall_detected</code>, <code>attestation_downgrade</code>.</td>
+          </tr>
+          <tr>
+            <td class="param-name">risk_score</td>
+            <td class="param-type">integer</td>
+            <td class="param-req"></td>
+            <td class="param-desc">0–100 composite risk score. Lower is better. Derived from device age, anomaly history, and attestation level.</td>
+          </tr>
+          <tr>
+            <td class="param-name">device_age_days</td>
+            <td class="param-type">integer</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Days since this device was first enrolled.</td>
           </tr>
           <tr>
             <td class="param-name">platform</td>
@@ -841,28 +899,22 @@ pre {
             <td class="param-desc"><code>ios</code> or <code>android</code>.</td>
           </tr>
           <tr>
-            <td class="param-name">enrolled_at</td>
-            <td class="param-type">string</td>
+            <td class="param-name">keychain_persistent</td>
+            <td class="param-type">boolean</td>
             <td class="param-req"></td>
-            <td class="param-desc">ISO 8601 enrollment timestamp.</td>
+            <td class="param-desc"><code>true</code> if the device token has persisted across app reinstalls.</td>
           </tr>
           <tr>
-            <td class="param-name">verification_count</td>
-            <td class="param-type">integer</td>
+            <td class="param-name">network_participant</td>
+            <td class="param-type">boolean</td>
             <td class="param-req"></td>
-            <td class="param-desc">Total verifications completed for this device.</td>
+            <td class="param-desc"><code>true</code> if the device is opted into the cross-app reputation graph.</td>
           </tr>
           <tr>
-            <td class="param-name">last_verified_at</td>
-            <td class="param-type">string</td>
+            <td class="param-name">last_verification</td>
+            <td class="param-type">object</td>
             <td class="param-req"></td>
-            <td class="param-desc">ISO 8601 timestamp of most recent successful verification.</td>
-          </tr>
-          <tr>
-            <td class="param-name">attestation_level</td>
-            <td class="param-type">enum</td>
-            <td class="param-req"></td>
-            <td class="param-desc"><code>hardware</code>, <code>software</code>, or <code>none</code>.</td>
+            <td class="param-desc">Most recent completed verification, or <code>null</code>. Contains: <code>confidence</code> (<code>high</code> / <code>medium</code> / <code>low</code>), <code>context</code>, <code>completed_at</code> (ISO 8601), <code>biometric_used</code>, <code>fallback_used</code>.</td>
           </tr>
         </table>
       </div>
@@ -875,100 +927,32 @@ pre {
         </div>
         <div class="ex-copy-row"><button class="ex-copy">Copy</button></div>
         <div class="ex-section-label">REQUEST</div>
-        <pre><span class="kw">curl</span> <span class="t">https://api.vouchflow.dev/v1/device/dvc_01HZXK9M \</span>
-  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_live_••••"</span></pre>
+        <pre><span class="kw">curl</span> <span class="t">https://api.vouchflow.dev/v1/device/dvt_01HZXKBM9F2R4QWEP7N3J/reputation \</span>
+  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_read_••••"</span><span class="t"> \</span>
+  <span class="t">-H </span><span class="s">"Vouchflow-API-Version: 2026-04-01"</span></pre>
         <hr class="ex-divider"/>
         <div class="status-pill ok"><span class="status-dot"></span>200 OK</div>
         <div class="ex-section-label">RESPONSE</div>
         <div class="ex-response">
           <pre><span class="p">{</span>
-  <span class="s">"device_id"</span><span class="p">:</span> <span class="s">"dvc_01HZXK9M4P3R8TQYF6N2W"</span><span class="p">,</span>
-  <span class="s">"platform"</span><span class="p">:</span> <span class="s">"ios"</span><span class="p">,</span>
-  <span class="s">"enrolled_at"</span><span class="p">:</span> <span class="s">"2025-11-20T14:02:11Z"</span><span class="p">,</span>
-  <span class="s">"verification_count"</span><span class="p">:</span> <span class="num">38</span><span class="p">,</span>
-  <span class="s">"last_verified_at"</span><span class="p">:</span> <span class="s">"2026-04-11T09:14:22Z"</span><span class="p">,</span>
-  <span class="s">"attestation_level"</span><span class="p">:</span> <span class="s">"hardware"</span>
-<span class="p">}</span></pre>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── ENDPOINT 4: POST /v1/reputation ── -->
-    <div class="endpoint-row" id="reputation">
-      <div class="endpoint-spec">
-        <div class="endpoint-title-row">
-          <span class="method-badge post">POST</span>
-          <span class="endpoint-path">/v1/reputation</span>
-          
-        </div>
-        <div class="endpoint-name">Query device reputation</div>
-        <p class="endpoint-desc">Returns cross-app reputation signals for a device that has opted into the Vouchflow Network. A device verified across many apps over a long period with no anomalies has a stronger reputation signal than a device that appeared recently.</p>
-
-        <div class="callout">
-          <strong class="plain">Network participation required</strong>
-          This endpoint returns meaningful data only for devices enrolled with <code>network_opt_in: true</code>. Devices in isolated mode return a minimal response with no cross-app signals.
-        </div>
-
-        <div class="params-label">Request body</div>
-        <table class="params-table">
-          <tr>
-            <td class="param-name">device_id</td>
-            <td class="param-type">string</td>
-            <td class="param-req required">Required</td>
-            <td class="param-desc">The network-scoped device identifier.</td>
-          </tr>
-        </table>
-
-        <div class="params-label">Response</div>
-        <table class="params-table">
-          <tr>
-            <td class="param-name">reputation_score</td>
-            <td class="param-type">integer</td>
-            <td class="param-req"></td>
-            <td class="param-desc">0–100. Composite score derived from device age, cross-app verification count, anomaly history, and reinstall events.</td>
-          </tr>
-          <tr>
-            <td class="param-name">network_app_count</td>
-            <td class="param-type">integer</td>
-            <td class="param-req"></td>
-            <td class="param-desc">Number of distinct Vouchflow-integrated apps this device has verified with.</td>
-          </tr>
-          <tr>
-            <td class="param-name">anomaly_flags</td>
-            <td class="param-type">array</td>
-            <td class="param-req"></td>
-            <td class="param-desc">List of anomaly signals detected. May include <code>rapid_app_spread</code>, <code>reinstall_detected</code>, <code>attestation_downgrade</code>.</td>
-          </tr>
-          <tr>
-            <td class="param-name">first_seen_at</td>
-            <td class="param-type">string</td>
-            <td class="param-req"></td>
-            <td class="param-desc">ISO 8601 timestamp of the device's earliest known network enrollment.</td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="endpoint-example">
-        <div class="ex-tabs">
-          <button class="ex-tab active">cURL</button>
-          <button class="ex-tab">Node.js</button>
-          <button class="ex-tab">Python</button>
-        </div>
-        <div class="ex-copy-row"><button class="ex-copy">Copy</button></div>
-        <div class="ex-section-label">REQUEST</div>
-        <pre><span class="kw">curl</span> <span class="t">-X POST https://api.vouchflow.dev/v1/reputation \</span>
-  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_live_••••"</span><span class="t"> \</span>
-  <span class="t">-H </span><span class="s">"Content-Type: application/json"</span><span class="t"> \</span>
-  <span class="t">-d </span><span class="s">'{ "device_id": "dvc_01HZXK9M4P3R8TQYF6N2W" }'</span></pre>
-        <hr class="ex-divider"/>
-        <div class="status-pill ok"><span class="status-dot"></span>200 OK</div>
-        <div class="ex-section-label">RESPONSE</div>
-        <div class="ex-response">
-          <pre><span class="p">{</span>
-  <span class="s">"reputation_score"</span><span class="p">:</span> <span class="num">91</span><span class="p">,</span>
-  <span class="s">"network_app_count"</span><span class="p">:</span> <span class="num">14</span><span class="p">,</span>
+  <span class="s">"device_token"</span><span class="p">:</span> <span class="s">"dvt_01HZXKBM9F2R4QWEP7N3J"</span><span class="p">,</span>
+  <span class="s">"first_seen"</span><span class="p">:</span> <span class="s">"2025-11-20T14:02:11Z"</span><span class="p">,</span>
+  <span class="s">"last_seen"</span><span class="p">:</span> <span class="s">"2026-04-11T09:14:22Z"</span><span class="p">,</span>
+  <span class="s">"total_verifications"</span><span class="p">:</span> <span class="num">38</span><span class="p">,</span>
+  <span class="s">"network_verifications"</span><span class="p">:</span> <span class="num">12</span><span class="p">,</span>
   <span class="s">"anomaly_flags"</span><span class="p">:</span> <span class="p">[]</span><span class="p">,</span>
-  <span class="s">"first_seen_at"</span><span class="p">:</span> <span class="s">"2025-09-03T07:44:01Z"</span>
+  <span class="s">"risk_score"</span><span class="p">:</span> <span class="num">4</span><span class="p">,</span>
+  <span class="s">"device_age_days"</span><span class="p">:</span> <span class="num">142</span><span class="p">,</span>
+  <span class="s">"platform"</span><span class="p">:</span> <span class="s">"ios"</span><span class="p">,</span>
+  <span class="s">"keychain_persistent"</span><span class="p">:</span> <span class="kw">true</span><span class="p">,</span>
+  <span class="s">"network_participant"</span><span class="p">:</span> <span class="kw">true</span><span class="p">,</span>
+  <span class="s">"last_verification"</span><span class="p">: {</span>
+    <span class="s">"confidence"</span><span class="p">:</span> <span class="s">"high"</span><span class="p">,</span>
+    <span class="s">"context"</span><span class="p">:</span> <span class="s">"login"</span><span class="p">,</span>
+    <span class="s">"completed_at"</span><span class="p">:</span> <span class="s">"2026-04-11T09:14:22Z"</span><span class="p">,</span>
+    <span class="s">"biometric_used"</span><span class="p">:</span> <span class="kw">true</span><span class="p">,</span>
+    <span class="s">"fallback_used"</span><span class="p">:</span> <span class="kw">false</span>
+  <span class="p">}</span>
 <span class="p">}</span></pre>
         </div>
       </div>

@@ -184,7 +184,6 @@
     <span class="k">super</span><span class="t">.</span><span class="f">onCreate</span><span class="t">()</span>
     <span class="t">Vouchflow.</span><span class="f">configure</span><span class="t">(VouchflowConfig(</span>
       <span class="n">apiKey</span><span class="t">      = </span><span class="s">"vsk_sandbox_••••••••••••••••"</span><span class="t">,</span>
-      <span class="n">customerId</span>  <span class="t">= </span><span class="s">"cust_..."</span><span class="t">,</span>
       <span class="n">environment</span> <span class="t">= VouchflowEnvironment.SANDBOX</span>   <span class="c">// PRODUCTION in release</span>
     <span class="t">))</span>
   <span class="t">}</span>
@@ -196,7 +195,6 @@
         <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td><code>apiKey</code></td><td><code>String</code></td><td>Yes</td><td>Write-scoped key from the dashboard. Must start with <code>vsk_</code>.</td></tr>
-          <tr><td><code>customerId</code></td><td><code>String</code></td><td>Yes</td><td>Your customer ID from the dashboard.</td></tr>
           <tr><td><code>environment</code></td><td><code>VouchflowEnvironment</code></td><td>No</td><td><code>PRODUCTION</code> (default) or <code>SANDBOX</code>.</td></tr>
           <tr><td><code>leafCertificatePin</code></td><td><code>String</code></td><td>No</td><td>SHA-256 pin for the API leaf certificate. Rotates every 60 days.</td></tr>
           <tr><td><code>intermediateCertificatePin</code></td><td><code>String</code></td><td>No</td><td>SHA-256 pin for ISRG Root X1 (effectively permanent).</td></tr>

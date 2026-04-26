@@ -127,6 +127,15 @@
         <pre><span class="t">Authorization: Bearer vsk_live_••••••••••••••••••••••••••••</span></pre>
       </div>
 
+      <p>All API requests must also include the API version header:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">HTTP</span><button class="code-copy">Copy</button></div>
+        <pre><span class="t">Vouchflow-API-Version: 2026-04-01</span></pre>
+      </div>
+
+      <p>Requests without this header are rejected with <code>400 missing_api_version</code>. The current version is <code>2026-04-01</code>. When breaking changes are introduced, a new version string is published; the previous version remains valid for 90 days.</p>
+
       <h2 class="section-anchor" id="key-scopes">Key scopes</h2>
       <p>There are two key scopes:</p>
       <table>
