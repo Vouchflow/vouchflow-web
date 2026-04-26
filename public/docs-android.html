@@ -119,38 +119,13 @@
 
       <!-- INSTALLATION -->
       <h2 class="section-anchor" id="install">Installation</h2>
-      <p>Add the Maven repository and dependency to your project. The SDK is distributed via GitHub Packages under <code>com.vouchflow.sdk</code>.</p>
-
-      <div class="code-block standalone">
-        <div class="code-header"><span class="code-lang">settings.gradle.kts</span><button class="code-copy">Copy</button></div>
-        <pre><span class="f">dependencyResolutionManagement</span><span class="t"> {</span>
-  <span class="f">repositories</span><span class="t"> {</span>
-    <span class="t">google()</span>
-    <span class="t">mavenCentral()</span>
-    <span class="f">maven</span><span class="t"> {</span>
-      <span class="n">url</span><span class="t"> = uri(</span><span class="s">"https://maven.pkg.github.com/Vouchflow/android-sdk"</span><span class="t">)</span>
-      <span class="f">credentials</span><span class="t"> {</span>
-        <span class="n">username</span><span class="t"> = providers.</span><span class="f">gradleProperty</span><span class="t">(</span><span class="s">"gpr.user"</span><span class="t">).</span><span class="f">orNull</span>
-        <span class="n">password</span><span class="t"> = providers.</span><span class="f">gradleProperty</span><span class="t">(</span><span class="s">"gpr.key"</span><span class="t">).</span><span class="f">orNull</span>
-      <span class="t">}</span>
-    <span class="t">}</span>
-  <span class="t">}</span>
-<span class="t">}</span></pre>
-      </div>
+      <p>The SDK is distributed on Maven Central. No additional repository configuration or credentials are required.</p>
 
       <div class="code-block standalone">
         <div class="code-header"><span class="code-lang">build.gradle.kts (app)</span><button class="code-copy">Copy</button></div>
         <pre><span class="f">dependencies</span><span class="t"> {</span>
   <span class="f">implementation</span><span class="t">(</span><span class="s">"dev.vouchflow:android-sdk:latest.release"</span><span class="t">)</span>
 <span class="t">}</span></pre>
-      </div>
-
-      <p>Add a <code>gradle.properties</code> entry (or CI secret) with your GitHub PAT for Packages access:</p>
-
-      <div class="code-block standalone">
-        <div class="code-header"><span class="code-lang">~/.gradle/gradle.properties</span><button class="code-copy">Copy</button></div>
-        <pre><span class="n">gpr.user</span><span class="t">=your-github-username</span>
-<span class="n">gpr.key</span><span class="t">=ghp_...</span></pre>
       </div>
 
       <p><strong>Required manifest permissions</strong> (added automatically via manifest merger):</p>
@@ -214,7 +189,7 @@
         <li>Generates an EC secp256r1 keypair backed by StrongBox (if available) or TEE</li>
         <li>Obtains a Play Integrity token attesting the app and device state</li>
         <li>Registers the keypair with the Vouchflow backend (<code>POST /v1/enroll</code>)</li>
-        <li>Stores the resulting <code>device_token</code> in Android AccountManager under the <code>com.vouchflow.sdk</code> account type — this survives app uninstalls on most devices</li>
+        <li>Stores the resulting <code>device_token</code> in Android AccountManager under the <code>dev.vouchflow.sdk</code> account type — this survives app uninstalls on most devices</li>
       </ol>
 
       <div class="callout">
