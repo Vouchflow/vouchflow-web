@@ -74,8 +74,7 @@
       <div class="nav-section-label">API Reference</div>
       <a class="nav-item" href="/api-reference#enroll"><span class="nav-dot"></span>POST /v1/enroll</a>
       <a class="nav-item" href="/api-reference#verify"><span class="nav-dot"></span>POST /v1/verify</a>
-      <a class="nav-item" href="/api-reference#device"><span class="nav-dot"></span>GET /v1/device</a>
-      <a class="nav-item" href="/api-reference#reputation"><span class="nav-dot"></span>POST /v1/reputation</a>
+      <a class="nav-item" href="/api-reference#device"><span class="nav-dot"></span>GET /v1/device/:token/reputation</a>
       <a class="nav-item" href="/api-reference#errors"><span class="nav-dot"></span>Errors</a>
     </div>
     <div class="nav-section">
@@ -266,7 +265,6 @@
         <div class="code-header"><span class="code-lang">Kotlin — production config</span><button class="code-copy">Copy</button></div>
         <pre><span class="t">Vouchflow.</span><span class="f">configure</span><span class="t">(VouchflowConfig(</span>
   <span class="n">apiKey</span>                    <span class="t">= BuildConfig.VOUCHFLOW_API_KEY,</span>
-  <span class="n">customerId</span>                <span class="t">= BuildConfig.VOUCHFLOW_CUSTOMER_ID,</span>
   <span class="n">environment</span>               <span class="t">= VouchflowEnvironment.PRODUCTION,</span>
   <span class="n">leafCertificatePin</span>        <span class="t">= BuildConfig.VOUCHFLOW_LEAF_PIN,</span>
   <span class="n">intermediateCertificatePin</span> <span class="t">= </span><span class="s">"sha256/MbhbGJBPPfMVJDqwl..."</span>  <span class="c">// ISRG Root X1</span>

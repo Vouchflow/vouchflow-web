@@ -744,13 +744,13 @@ code {
             <div class="step-circle pending" id="circle-2">2</div>
             <div class="step-info">
               <div class="step-title">Initialise with your API key</div>
-              <div class="step-hint">VouchflowConfig · apiKey + customerId · UIKit &amp; SwiftUI</div>
+              <div class="step-hint">VouchflowConfig · apiKey · UIKit &amp; SwiftUI</div>
             </div>
             <svg class="step-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="step-body" id="body-2">
             <div class="step-body-inner">
-              <p class="step-desc">Initialise Vouchflow once at app launch with <code>VouchflowConfig</code>. You'll need your API key and customer ID from the dashboard. The sandbox key is pre-filled — safe to commit during development.</p>
+              <p class="step-desc">Initialise Vouchflow once at app launch with <code>VouchflowConfig</code>. Only your write-scoped <code>apiKey</code> is required — there is no <code>customerId</code>. The sandbox key is pre-filled — safe to commit during development.</p>
 
               <div class="step-code">
                 <div class="step-code-header">
@@ -762,8 +762,7 @@ code {
 <span class="k">func</span> <span class="f">application</span><span class="t">(</span><span class="n">_</span><span class="t"> application: UIApplication,</span>
   <span class="n">didFinishLaunchingWithOptions</span><span class="t"> ...) -> Bool {</span>
     <span class="k">try</span><span class="t">? Vouchflow.</span><span class="f">configure</span><span class="t">(VouchflowConfig(</span>
-        <span class="n">apiKey</span><span class="t">: </span><span class="s">"vsk_sandbox_4xK9mN2pL8qR7tW3yH6jD1"</span><span class="t">,</span>
-        <span class="n">customerId</span><span class="t">: </span><span class="s">"cust_..."</span>
+        <span class="n">apiKey</span><span class="t">: </span><span class="s">"vsk_sandbox_4xK9mN2pL8qR7tW3yH6jD1"</span>
     <span class="t">))</span>
     <span class="k">return true</span>
 <span class="t">}</span></pre>
@@ -780,7 +779,6 @@ code {
   <span class="k">init</span><span class="t">() {</span>
     <span class="k">try</span><span class="t">? Vouchflow.</span><span class="f">configure</span><span class="t">(VouchflowConfig(</span>
       <span class="n">apiKey</span><span class="t">: </span><span class="s">"vsk_sandbox_4xK9mN2pL8qR7tW3yH6jD1"</span><span class="t">,</span>
-      <span class="n">customerId</span><span class="t">: </span><span class="s">"cust_..."</span><span class="t">,</span>
       <span class="n">environment</span><span class="t">: .</span><span class="n">sandbox</span>
     <span class="t">))</span>
   <span class="t">}</span>
