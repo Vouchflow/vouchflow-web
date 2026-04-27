@@ -52,6 +52,7 @@
       <a class="nav-item active" href="/docs/ios-sdk#install"><span class="nav-dot"></span>Installation</a>
       <a class="nav-item active" href="/docs/ios-sdk#init"><span class="nav-dot"></span>Initialisation</a>
       <a class="nav-item active" href="/docs/ios-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item active" href="/docs/ios-sdk#cached-token"><span class="nav-dot"></span>Checking enrollment status</a>
       <a class="nav-item active" href="/docs/ios-sdk#verify"><span class="nav-dot"></span>Verification</a>
       <a class="nav-item active" href="/docs/ios-sdk#errors"><span class="nav-dot"></span>Error handling</a>
       <a class="nav-item active" href="/docs/ios-sdk#app-attest"><span class="nav-dot"></span>App Attest setup</a>
@@ -190,6 +191,29 @@
         <strong>Keychain persistence</strong>
         The device token is stored with <code>kSecAttrSynchronizable = false</code> so it does not sync to iCloud. If the app is deleted and reinstalled, the token is also deleted; re-enrollment produces a new token with no prior history, which is surfaced in the result as <code>signals.keychainPersistent = false</code>.
       </div>
+
+      <hr/>
+
+      <!-- CACHED DEVICE TOKEN -->
+      <h2 class="section-anchor" id="cached-token">Checking enrollment status</h2>
+      <p>If you need to know whether the device is already enrolled — without triggering a biometric prompt or network call — read <code>cachedDeviceToken</code>:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Swift</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">if let</span><span class="t"> token = Vouchflow.shared.</span><span class="n">cachedDeviceToken</span><span class="t"> {</span>
+  <span class="c">// Device is enrolled. token is the stable device identifier.</span>
+  <span class="c">// Safe to pass to your server for a reputation check before the user acts.</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p>The property reads directly from Keychain and returns <code>nil</code> if:</p>
+      <ul>
+        <li>The device has never completed enrollment</li>
+        <li><code>reset()</code> was called</li>
+        <li>The Keychain is unavailable (e.g. device has never been unlocked since boot)</li>
+      </ul>
+
+      <p>It is safe to call at cold start, on any thread, before the user authenticates. No biometric prompt or network request is made.</p>
 
       <hr/>
 
