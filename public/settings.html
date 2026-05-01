@@ -850,6 +850,40 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
           </div>
         </div>
 
+        <!-- App identity (attestation) -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">App identity (attestation)</div>
+            <div class="section-sub">Required before <code style="font-family:var(--mono);font-size:11px;background:#f0f0ec;padding:1px 4px;border-radius:3px;">confidence: high</code> can be returned. Tell Vouchflow which app's attestations are legitimate — anything else falls back to <code style="font-family:var(--mono);font-size:11px;background:#f0f0ec;padding:1px 4px;border-radius:3px;">medium</code>. None of these are secrets; they're public identifiers.</div>
+          </div>
+          <div class="section-body">
+            <div class="field">
+              <label class="field-label">iOS team ID</label>
+              <input class="field-input" id="input-ios-team-id" type="text" placeholder="ABCDE12345" maxlength="10"/>
+              <div class="field-hint">10-character alphanumeric. Apple Developer Portal → Membership.</div>
+            </div>
+            <div class="field">
+              <label class="field-label">iOS bundle ID</label>
+              <input class="field-input" id="input-ios-bundle-id" type="text" placeholder="com.acme.app"/>
+              <div class="field-hint">Reverse-DNS bundle identifier from your Xcode project.</div>
+            </div>
+            <div class="field">
+              <label class="field-label">Android package name</label>
+              <input class="field-input" id="input-android-package-name" type="text" placeholder="com.acme.app"/>
+              <div class="field-hint">Your app's <code>applicationId</code> from <code>build.gradle</code>.</div>
+            </div>
+            <div class="field">
+              <label class="field-label">Android signing-cert SHA-256</label>
+              <input class="field-input" id="input-android-signing-key-sha256" type="text" placeholder="A1:B2:C3:..." spellcheck="false" autocapitalize="off"/>
+              <div class="field-hint">SHA-256 fingerprint of your release signing certificate. Run <code>keytool -list -v -keystore release.jks</code> or copy from Play Console → App signing → "App signing key certificate". Colons and spaces are stripped automatically.</div>
+            </div>
+          </div>
+          <div class="section-footer">
+            <span class="section-footer-note"><a href="/docs/android#enrollment" style="color:var(--ink-2)">Why this matters →</a></span>
+            <button class="btn btn-primary btn-sm" id="btn-save-app-identity">Save changes</button>
+          </div>
+        </div>
+
         <!-- Danger zone -->
         <div class="danger-section">
           <div class="section-header">
@@ -1054,6 +1088,13 @@ function renderAccount(session, usage, overview) {
   if (orgInput)   orgInput.value   = session.orgName ?? '';
   if (emailInput) emailInput.value = session.billingEmail ?? session.email ?? '';
 
+  // App identity (attestation) fields
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? '' };
+  setVal('input-ios-team-id',                session.iosTeamId);
+  setVal('input-ios-bundle-id',              session.iosBundleId);
+  setVal('input-android-package-name',       session.androidPackageName);
+  setVal('input-android-signing-key-sha256', session.androidSigningKeySha256);
+
   // Sidenav usage
   const count = usage?.verificationCount ?? 0;
   const usageStrong = document.querySelector('.usage-label strong');
@@ -1235,6 +1276,31 @@ document.getElementById('btn-save-network').addEventListener('click', async () =
     });
     if (res.ok) showToast('Network preference saved');
     else showToast('Failed to save — try again', true);
+  } catch {
+    showToast('Network error', true);
+  }
+});
+
+document.getElementById('btn-save-app-identity').addEventListener('click', async () => {
+  // Empty string → null (clear); non-empty → save
+  const norm = (v) => (v === '' || v == null ? null : v);
+  const iosTeamId               = norm(document.getElementById('input-ios-team-id')?.value?.trim());
+  const iosBundleId             = norm(document.getElementById('input-ios-bundle-id')?.value?.trim());
+  const androidPackageName      = norm(document.getElementById('input-android-package-name')?.value?.trim());
+  const androidSigningKeySha256 = norm(document.getElementById('input-android-signing-key-sha256')?.value?.trim());
+  try {
+    const res = await fetch('/web/account', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ iosTeamId, iosBundleId, androidPackageName, androidSigningKeySha256 }),
+    });
+    if (res.ok) {
+      showToast('App identity saved');
+    } else {
+      const body = await res.json().catch(() => null);
+      showToast(body?.error?.message || 'Failed to save — check formatting', true);
+    }
   } catch {
     showToast('Network error', true);
   }

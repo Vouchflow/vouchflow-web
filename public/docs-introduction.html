@@ -118,7 +118,7 @@
       <p class="page-lead">Vouchflow verifies that a user is operating from a trusted, real device — without passwords, OTPs, or friction. It gives your backend a cryptographic signal it can act on.</p>
 
       <h2 class="section-anchor" id="introduction">What is Vouchflow?</h2>
-      <p>Most authentication systems prove <em>who</em> a user is. Vouchflow proves <em>what device</em> they're on. A verification result tells your server that the request originated from a specific hardware-bound keypair on a physical device, that the device has passed platform attestation (Apple App Attest or Google Play Integrity), and that the device has an observable history — age, prior verifications, network standing.</p>
+      <p>Most authentication systems prove <em>who</em> a user is. Vouchflow proves <em>what device</em> they're on. A verification result tells your server that the request originated from a specific hardware-bound keypair on a physical device, that the device has passed platform attestation (Apple App Attest on iOS, Android Keystore Attestation on Android), and that the device has an observable history — age, prior verifications, network standing.</p>
 
       <p>This lets you make risk decisions that credentials alone can't support: allow a login without a second factor from a high-confidence device, require step-up from a new or low-confidence one, reject requests from emulators or rooted devices entirely.</p>
 
@@ -145,7 +145,7 @@
         <li class="step">
           <div class="step-body">
             <div class="step-title">Enrollment</div>
-            <div class="step-desc">The SDK generates a hardware-bound EC keypair and registers the public key with Vouchflow. On iOS this uses the Secure Enclave; on Android it uses StrongBox or TEE. The SDK also submits an attestation token — an App Attest assertion (iOS) or Play Integrity token (Android) — that proves the app is genuine and the keypair is hardware-bound. Enrollment is automatic: your code only calls <code>verify()</code>, and the SDK handles enrollment transparently on first call.</div>
+            <div class="step-desc">The SDK generates a hardware-bound EC keypair and registers the public key with Vouchflow. On iOS this uses the Secure Enclave; on Android it uses StrongBox or TEE. The SDK also submits a per-device attestation proof — an App Attest object (iOS) or Keystore Attestation cert chain (Android) — that proves the keypair lives in real hardware and was generated for this enrollment. The Vouchflow server validates the chain against Apple's or Google's public root CA and checks that your app's identity (team ID + bundle ID on iOS; package name + signing-cert digest on Android) matches what you registered. Enrollment is automatic: your code only calls <code>verify()</code>, and the SDK handles enrollment transparently on first call.</div>
           </div>
         </li>
         <li class="step">
@@ -194,7 +194,12 @@
 
       <div class="callout warning">
         <strong>Physical device required in production</strong>
-        App Attest (iOS) and Play Integrity (Android) only run on physical devices. On a simulator, attestation is skipped and confidence is capped at <code>medium</code>. This is expected in sandbox, but will affect users in production if you ship without testing on real hardware.
+        App Attest (iOS) and Android Keystore Attestation only produce a verifiable chain on physical devices. On a simulator/emulator, attestation is either unavailable (iOS) or generates a software-only chain that doesn't root in Google's HW Attestation Root CA — confidence is capped at <code>medium</code>. This is expected in sandbox, but will affect users in production if you ship without testing on real hardware.
+      </div>
+
+      <div class="callout warning">
+        <strong>Register your app's identity in the dashboard</strong>
+        Before going live, set your Android <code>applicationId</code> + signing-cert SHA-256 and iOS team ID + bundle ID in <a href="/settings">Account settings</a>. Without these, the server can't verify the attestation chain belongs to your app, and all devices fall back to <code>confidence_ceiling: medium</code>.
       </div>
 
       <h2 class="section-anchor" id="api-keys">API key scopes</h2>

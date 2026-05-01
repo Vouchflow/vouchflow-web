@@ -115,7 +115,7 @@
 
       <div class="page-eyebrow">Android SDK</div>
       <h1 class="page-title">Android SDK reference</h1>
-      <p class="page-lead">The Android SDK integrates Play Integrity attestation, hardware-backed key management, and biometric presentation into a single coroutine-based call. Requires Android API 28+ (Android 9) and Google Play Services.</p>
+      <p class="page-lead">The Android SDK integrates hardware-backed Keystore Attestation, hardware-backed key management, and biometric presentation into a single coroutine-based call. Requires Android API 28+ (Android 9). No Google Play Services dependency.</p>
 
       <!-- INSTALLATION -->
       <h2 class="section-anchor" id="install">Installation</h2>
@@ -186,9 +186,9 @@
       <h2 class="section-anchor" id="enrollment">Enrollment</h2>
       <p>Like iOS, enrollment on Android is automatic. On the first <code>verify()</code> call, the SDK:</p>
       <ol>
-        <li>Generates an EC secp256r1 keypair backed by StrongBox (if available) or TEE</li>
-        <li>Obtains a Play Integrity token attesting the app and device state</li>
-        <li>Registers the keypair with the Vouchflow backend (<code>POST /v1/enroll</code>)</li>
+        <li>Generates an EC secp256r1 keypair backed by StrongBox (if available) or TEE, with <code>setAttestationChallenge(idempotencyKey)</code></li>
+        <li>Reads the Keystore Attestation certificate chain via <code>KeyStore.getCertificateChain()</code> — this proves to Vouchflow's server that the key is in real hardware on a real Android device</li>
+        <li>Registers the keypair with the Vouchflow backend (<code>POST /v1/enroll</code>) including the cert chain. The server walks the chain to the Google Hardware Attestation Root CA and verifies your app's package name and signing-cert SHA-256 against the values you registered in your Vouchflow account</li>
         <li>Stores the resulting <code>device_token</code> in Android AccountManager under the <code>dev.vouchflow.sdk</code> account type — this survives app uninstalls on most devices</li>
       </ol>
 
@@ -197,7 +197,12 @@
         Unlike the iOS keychain, AccountManager tokens can survive app uninstall on Android. The SDK queries for an existing account before enrolling. If an account is found from a previous install, the device token is reused and <code>signals.persistentToken</code> is <code>true</code>.
       </div>
 
-      <p>If Play Integrity is unavailable (e.g. device without Google Play Services), enrollment still succeeds but <code>attestation_verified</code> is <code>false</code> and confidence is capped at <code>medium</code>. <code>VouchflowError.AttestationUnavailable</code> is not thrown in this case; it is surfaced as a result signal.</p>
+      <p>If hardware key attestation isn't supported (very old KeyMaster) or the chain doesn't validate (rooted device, manufacturer-specific issues), enrollment still succeeds but <code>attestation_verified</code> is <code>false</code> and confidence is capped at <code>medium</code>. <code>VouchflowError.AttestationUnavailable</code> is not thrown in this case; it is surfaced as a result signal.</p>
+
+      <div class="callout">
+        <strong>You must register your app's identity</strong>
+        Before attestation can verify, you must set <code>androidPackageName</code> (your <code>applicationId</code>) and <code>androidSigningKeySha256</code> (the SHA-256 fingerprint of your release signing certificate, from <code>keytool -list -v -keystore release.jks</code> or Play Console → App signing) in your Vouchflow account settings. Until you do, all Android devices fall back to <code>confidence_ceiling: medium</code>.
+      </div>
 
       <hr/>
 
@@ -302,10 +307,10 @@
         <thead><tr><th>OEM / Device</th><th>Issue</th><th>SDK behaviour</th></tr></thead>
         <tbody>
           <tr><td>Samsung (Exynos chips)</td><td>StrongBox may report availability but fail key generation under load</td><td>SDK falls back to TEE automatically; <code>signals.attestationVerified</code> may be <code>false</code></td></tr>
-          <tr><td>Huawei (HMS devices)</td><td>No Google Play Services; Play Integrity unavailable</td><td><code>attestation_verified: false</code>, confidence capped at <code>medium</code></td></tr>
+          <tr><td>Huawei (HMS devices)</td><td>No Google Play Services, but Keystore Attestation works since it doesn't depend on Play</td><td>Hardware attestation usually validates; falls back to <code>medium</code> only if the device's KeyMaster root isn't recognised</td></tr>
           <tr><td>Xiaomi (MIUI)</td><td>AccountManager access restricted in some MIUI versions</td><td><code>AccountStoreAccessDenied</code> thrown; device token stored in shared preferences as fallback</td></tr>
           <tr><td>Various</td><td>Biometric hardware reports enrolled but fails to prompt</td><td><code>BiometricFailed</code> thrown after 3 consecutive failures; fallback offered</td></tr>
-          <tr><td>Android emulator</td><td>No Play Integrity, no StrongBox</td><td>Sandbox only: returns <code>confidence: medium</code>. Production: <code>attestation_verified: false</code></td></tr>
+          <tr><td>Android emulator</td><td>Software-only key generation; cert chain doesn't root in Google HW Attestation root</td><td>Sandbox: shimmed to <code>verified=true</code> for dev convenience. Production: <code>attestation_verified: false</code>, capped at <code>medium</code></td></tr>
         </tbody>
       </table>
 

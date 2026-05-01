@@ -33,6 +33,13 @@ export interface Customer {
   sandboxReadKey:  string
   webhookSecret:   string
   createdAt:       string
+
+  // Per-customer attestation parameters. All nullable; the server treats
+  // an unset value as attestation-not-configured (confidence_ceiling=medium).
+  androidPackageName?:      string | null
+  androidSigningKeySha256?: string | null
+  iosTeamId?:               string | null
+  iosBundleId?:             string | null
 }
 
 export async function findOrCreateCustomer(email: string): Promise<Customer> {
@@ -44,7 +51,18 @@ export async function findOrCreateCustomer(email: string): Promise<Customer> {
 
 export async function updateCustomer(
   customerId: string,
-  data: { orgName?: string; billingEmail?: string; minimumConfidence?: string; networkOptIn?: boolean }
+  data: {
+    orgName?:                 string
+    billingEmail?:            string
+    minimumConfidence?:       string
+    networkOptIn?:            boolean
+    // Per-customer attestation parameters. Pass `null` to clear, omit to
+    // leave unchanged.
+    androidPackageName?:      string | null
+    androidSigningKeySha256?: string | null
+    iosTeamId?:               string | null
+    iosBundleId?:             string | null
+  }
 ): Promise<Customer> {
   return apiFetch<Customer>(`/v1/customers/${customerId}`, {
     method: 'PATCH',
@@ -61,6 +79,10 @@ export interface LiveKeyInfo {
 export interface GeneratedLiveKeys {
   writeKey: { id: string; rawKey: string; scope: 'write'; createdAt: string }
   readKey:  { id: string; rawKey: string; scope: 'read';  createdAt: string }
+}
+
+export async function getCustomer(customerId: string): Promise<Customer> {
+  return apiFetch<Customer>(`/v1/customers/${customerId}`)
 }
 
 export async function generateLiveKeys(customerId: string): Promise<GeneratedLiveKeys> {

@@ -57,7 +57,7 @@
   <ul>
     <li>A device token — a pseudonymous identifier derived from the hardware-bound keypair. This is not a hardware ID and does not identify the device manufacturer or model.</li>
     <li>The device public key — generated inside the Secure Enclave (iOS) or hardware Keystore (Android). The private key never leaves the device and is never transmitted to us.</li>
-    <li>Platform attestation data — Apple App Attest or Google Play Integrity API outputs, used to verify the device is genuine and unmodified.</li>
+    <li>Platform attestation data — Apple App Attest objects (iOS) or Android Keystore Attestation certificate chains, used to verify the device is genuine hardware and the calling app is unmodified.</li>
     <li>Verification signals — confidence level, biometric type used (e.g. Face ID, fingerprint), attestation level, session duration.</li>
     <li>Anomaly flags — if unusual patterns are detected (e.g. rapid cross-app spread, reinstall events).</li>
   </ul>
@@ -133,7 +133,7 @@
   <ul>
     <li>TLS encryption for all data in transit, with certificate pinning in production SDK builds</li>
     <li>API keys are SHA-256 hashed before storage — raw keys are never persisted server-side</li>
-    <li>Hardware attestation (Apple App Attest / Google Play Integrity) to verify SDK integrity</li>
+    <li>Hardware attestation (Apple App Attest / Android Keystore Attestation) to verify SDK integrity and that the calling app matches your registered package and signing certificate</li>
     <li>Private keys are generated and stored exclusively in the Secure Enclave or hardware Keystore — we never have access to them</li>
     <li>Access to production systems is restricted to authorised personnel</li>
   </ul>

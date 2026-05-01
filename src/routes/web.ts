@@ -11,6 +11,7 @@ import {
   createWebhook,
   deleteWebhook,
   updateCustomer,
+  getCustomer,
   generateLiveKeys,
   getLiveKeys,
   deleteAccount,
@@ -25,18 +26,32 @@ export default async function webRoutes(fastify: FastifyInstance) {
 
   fastify.addHook('preHandler', requireSession)
 
-  // GET /web/session — current user info for frontend on load
-  fastify.get('/web/session', async (request) => ({
-    email:              request.session.get('email'),
-    customerId:         request.session.get('customerId'),
-    sandboxWriteKey:    maskKey(request.session.get('sandboxWriteKey') as string),
-    sandboxReadKey:     maskKey(request.session.get('sandboxReadKey')  as string),
-    webhookSecret:      maskKey(request.session.get('webhookSecret')   as string),
-    onboardingComplete: request.session.get('onboardingComplete'),
-    name:               request.session.get('name'),
-    orgName:            request.session.get('orgName'),
-    avatarUrl:          request.session.get('avatarUrl'),
-  }))
+  // GET /web/session — current user info for frontend on load.
+  // Also fetches the live customer record so per-customer attestation
+  // parameters reflect the latest DB state without requiring re-login.
+  fastify.get('/web/session', async (request) => {
+    const customerId = request.session.get('customerId') as string | undefined
+    let customer: Awaited<ReturnType<typeof getCustomer>> | null = null
+    if (customerId) {
+      try { customer = await getCustomer(customerId) } catch { /* fall through with nulls */ }
+    }
+    return {
+      email:              request.session.get('email'),
+      customerId,
+      sandboxWriteKey:    maskKey(request.session.get('sandboxWriteKey') as string),
+      sandboxReadKey:     maskKey(request.session.get('sandboxReadKey')  as string),
+      webhookSecret:      maskKey(request.session.get('webhookSecret')   as string),
+      onboardingComplete: request.session.get('onboardingComplete'),
+      name:               request.session.get('name'),
+      orgName:            request.session.get('orgName'),
+      avatarUrl:          request.session.get('avatarUrl'),
+      // Per-customer attestation parameters (live from DB)
+      iosTeamId:               customer?.iosTeamId               ?? null,
+      iosBundleId:             customer?.iosBundleId             ?? null,
+      androidPackageName:      customer?.androidPackageName      ?? null,
+      androidSigningKeySha256: customer?.androidSigningKeySha256 ?? null,
+    }
+  })
 
   // GET /web/overview
   fastify.get('/web/overview', async (request) => {
@@ -93,7 +108,16 @@ export default async function webRoutes(fastify: FastifyInstance) {
 
   // PATCH /web/account
   fastify.patch<{
-    Body: { orgName?: string; billingEmail?: string; minimumConfidence?: string; networkOptIn?: boolean }
+    Body: {
+      orgName?:                 string
+      billingEmail?:            string
+      minimumConfidence?:       string
+      networkOptIn?:            boolean
+      androidPackageName?:      string | null
+      androidSigningKeySha256?: string | null
+      iosTeamId?:               string | null
+      iosBundleId?:             string | null
+    }
   }>('/web/account', async (request) => {
     const customerId = request.session.get('customerId') as string
     const result = await updateCustomer(customerId, request.body)

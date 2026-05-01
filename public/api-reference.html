@@ -600,9 +600,9 @@ pre {
           </tr>
           <tr>
             <td class="param-name">attestation</td>
-            <td class="param-type">string</td>
-            <td class="param-req required">Required</td>
-            <td class="param-desc">Platform attestation blob. Apple App Attest on iOS; Play Integrity API on Android. Used to verify request originated from genuine, unmodified SDK on real hardware.</td>
+            <td class="param-type">object</td>
+            <td class="param-req">Optional</td>
+            <td class="param-desc">Per-device hardware attestation proof. iOS: <code>{ token, key_id }</code> — Apple App Attest CBOR object + credential ID. Android: <code>{ cert_chain }</code> — Keystore Attestation X.509 chain (leaf-first, each cert base64-DER) rooted in the Google Hardware Attestation Root CA. Omit on Simulator / emulator / unsupported devices; the server falls back to <code>confidence_ceiling: medium</code>.</td>
           </tr>
           <tr>
             <td class="param-name">platform</td>
@@ -968,7 +968,7 @@ pre {
         <table class="error-table">
           <tr>
             <td class="err-code">enrollment_failed</td>
-            <td class="err-desc">Platform attestation did not succeed. Check App Attest entitlement (iOS) or Play Integrity configuration (Android).</td>
+            <td class="err-desc">Enrollment could not complete. Check App Attest entitlement (iOS), or that you've registered your Android <code>applicationId</code> and signing-cert SHA-256 in the dashboard before sending Keystore Attestation chains.</td>
           </tr>
           <tr>
             <td class="err-code">invalid_signature</td>
