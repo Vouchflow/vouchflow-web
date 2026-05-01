@@ -640,29 +640,34 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
         <div class="section" id="live-keys-section">
           <div class="section-header">
             <div class="section-title">Live keys</div>
-            <div class="section-sub">For production. SDK calls authenticated with a live key are billed and contribute to the network graph.</div>
+            <div class="section-sub">For production. Up to 10 active keys per account so you can isolate per-platform (iOS / Android), per-environment (EU / US), or per-integration. Calls authenticated with a live key are billed and contribute to the network graph.</div>
           </div>
           <div class="section-body">
-            <div class="key-row" id="live-key-write-row">
-              <span class="key-env live">live</span>
-              <span class="key-scope">write</span>
-              <span class="key-value" id="live-write-key-value">vsk_live_••••••••••••••••••••••••••••••••</span>
-              <span class="key-created" id="live-write-key-created">Not activated</span>
-              <div class="key-actions" id="live-write-key-actions">
-                <button class="btn btn-primary btn-sm" id="btn-activate-live">Activate</button>
-              </div>
+            <!-- Empty state shown when zero active keys exist. -->
+            <div id="live-keys-empty" class="empty-state" style="display:none;padding:24px 0;text-align:center;color:var(--ink-2)">
+              No live keys yet. Click <strong>Create key</strong> below to generate your first.
             </div>
-            <div class="key-row" id="live-key-read-row" style="display:none">
-              <span class="key-env live">live</span>
-              <span class="key-scope">read</span>
-              <span class="key-value" id="live-read-key-value">vsk_live_read_••••••••••••••••••••••••••••••••</span>
-              <span class="key-created" id="live-read-key-created"></span>
-              <div class="key-actions"></div>
+
+            <!-- Newly-generated raw keys appear here once and are then hidden after copy/dismiss. -->
+            <div id="live-keys-just-created" class="callout success" style="display:none;margin-bottom:12px">
+              <strong>Save these now — they're only shown once.</strong>
+              <div id="just-created-rows" style="margin-top:8px"></div>
+              <button class="btn btn-secondary btn-sm" id="btn-dismiss-just-created" style="margin-top:8px">I've saved them</button>
             </div>
+
+            <!-- One row per existing active key (metadata only — raw keys are gone after creation). -->
+            <div id="live-keys-list"></div>
           </div>
           <div class="section-footer">
-            <span class="section-footer-note" id="live-keys-footer-note">Activate to generate your live API keys. During beta all billing is waived.</span>
-            <button class="btn btn-secondary btn-sm" id="btn-rotate-live" style="display:none">+ Rotate live keys</button>
+            <span class="section-footer-note" id="live-keys-footer-note">Maximum 10 active keys per account.</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <select class="field-input" id="select-new-key-scope" style="height:32px;padding:0 8px;font-size:13px;width:auto">
+                <option value="pair">Write + Read pair</option>
+                <option value="write">Write key only</option>
+                <option value="read">Read key only</option>
+              </select>
+              <button class="btn btn-primary btn-sm" id="btn-create-live-key">Create key</button>
+            </div>
           </div>
         </div>
 
@@ -907,33 +912,6 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   </main>
 </div>
 
-<!-- Live key reveal modal -->
-<div id="live-key-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;" onclick="if(event.target===this)closeLiveKeyModal()">
-  <div style="background:white;border-radius:12px;padding:32px;width:min(540px,94vw);box-shadow:0 20px 60px rgba(0,0,0,0.25);position:relative;">
-    <div style="font-size:16px;font-weight:600;margin-bottom:6px;">Live API keys generated</div>
-    <div style="font-size:13px;color:#CC3333;font-weight:500;margin-bottom:20px;display:flex;align-items:center;gap:6px;">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#CC3333" stroke-width="1.3"/><rect x="6.3" y="3.5" width="1.4" height="4.5" rx="0.7" fill="#CC3333"/><rect x="6.3" y="9.5" width="1.4" height="1.4" rx="0.7" fill="#CC3333"/></svg>
-      Copy these now — they won't be shown again.
-    </div>
-    <div style="margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">Write key</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <code id="modal-write-key" style="flex:1;font-size:12px;font-family:var(--mono);background:#f5f5f5;padding:10px 12px;border-radius:6px;word-break:break-all;"></code>
-        <button class="btn btn-secondary btn-sm" onclick="copyModalKey('modal-write-key',this)">Copy</button>
-      </div>
-    </div>
-    <div style="margin-bottom:24px;">
-      <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">Read key</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <code id="modal-read-key" style="flex:1;font-size:12px;font-family:var(--mono);background:#f5f5f5;padding:10px 12px;border-radius:6px;word-break:break-all;"></code>
-        <button class="btn btn-secondary btn-sm" onclick="copyModalKey('modal-read-key',this)">Copy</button>
-      </div>
-    </div>
-    <div style="font-size:12px;color:#888;margin-bottom:20px;">Store these in your server's environment variables. Never commit live keys to source control. If you lose them, you can rotate to generate new ones.</div>
-    <button class="btn btn-primary" style="width:100%" onclick="closeLiveKeyModal()">I've saved my keys</button>
-  </div>
-</div>
-
 <script>
 function switchTab(tab) {
   document.querySelectorAll('.settings-tab').forEach((t, i) => {
@@ -1116,94 +1094,158 @@ function renderAccount(session, usage, overview) {
   }
 }
 
+// ── Live keys (multi-key) ──────────────────────────────────────────────────
+
+const MAX_ACTIVE_KEYS = 10;
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
 function renderLiveKeys(keys) {
-  const writeRow    = document.getElementById('live-key-write-row');
-  const readRow     = document.getElementById('live-key-read-row');
-  const writeVal    = document.getElementById('live-write-key-value');
-  const readVal     = document.getElementById('live-read-key-value');
-  const writeCreated = document.getElementById('live-write-key-created');
-  const readCreated  = document.getElementById('live-read-key-created');
-  const writeActions = document.getElementById('live-write-key-actions');
-  const footerNote   = document.getElementById('live-keys-footer-note');
-  const btnRotate    = document.getElementById('btn-rotate-live');
-  const btnActivate  = document.getElementById('btn-activate-live');
+  const list       = document.getElementById('live-keys-list');
+  const empty      = document.getElementById('live-keys-empty');
+  const footerNote = document.getElementById('live-keys-footer-note');
+  const createBtn  = document.getElementById('btn-create-live-key');
+  const scopeSel   = document.getElementById('select-new-key-scope');
 
-  const writeKey = keys.find(k => k.scope === 'write');
-  const readKey  = keys.find(k => k.scope === 'read');
+  if (!list) return;
+  list.innerHTML = '';
 
-  if (writeKey) {
-    if (writeVal)    writeVal.textContent    = 'vsk_live_••••••••••••••••••••••••••••••••';
-    if (writeCreated) writeCreated.textContent = 'Created ' + new Date(writeKey.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    if (writeActions) writeActions.innerHTML = '';
-    if (footerNote)   footerNote.textContent = 'Live mode is active. Rotate to deprecate the current keys — a 14-day overlap gives your apps time to update.';
-    if (btnRotate)    btnRotate.style.display = '';
-    if (btnActivate)  btnActivate.style.display = 'none';
+  if (!keys || keys.length === 0) {
+    if (empty) empty.style.display = '';
+    if (footerNote) footerNote.textContent = 'Maximum ' + MAX_ACTIVE_KEYS + ' active keys per account.';
+    if (createBtn) { createBtn.disabled = false; createBtn.textContent = 'Create key'; }
+    if (scopeSel)  { scopeSel.disabled = false; }
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  // One row per active key. Raw values aren't recoverable; we only show the
+  // prefix (so customers can match against keys they already pasted into
+  // their config) plus metadata.
+  for (const k of keys) {
+    const row = document.createElement('div');
+    row.className = 'key-row';
+    row.dataset.keyId = k.id;
+    const prefix = k.scope === 'write' ? 'vsk_live_' : 'vsk_live_read_';
+    const created = new Date(k.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const lastUsed = k.lastUsedAt
+      ? 'Last used ' + new Date(k.lastUsedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : 'Never used';
+    row.innerHTML = `
+      <span class="key-env live">live</span>
+      <span class="key-scope">${escapeHtml(k.scope)}</span>
+      <span class="key-value">${escapeHtml(prefix)}••••••••••••••••••••••••••••••••</span>
+      <span class="key-created">Created ${escapeHtml(created)} · ${escapeHtml(lastUsed)}</span>
+      <div class="key-actions">
+        <button class="btn btn-secondary btn-sm" data-action="revoke" data-key-id="${escapeHtml(k.id)}">Revoke</button>
+      </div>`;
+    list.appendChild(row);
   }
 
-  if (readKey && readRow) {
-    readRow.style.display = '';
-    if (readVal)    readVal.textContent    = 'vsk_live_read_••••••••••••••••••••••••••••••••';
-    if (readCreated) readCreated.textContent = 'Created ' + new Date(readKey.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  // Cap UX: when at the limit, disable the create flow with a clear note.
+  const atCap = keys.length >= MAX_ACTIVE_KEYS;
+  if (footerNote) {
+    footerNote.textContent = atCap
+      ? 'At the maximum of ' + MAX_ACTIVE_KEYS + ' active keys. Revoke one to create another.'
+      : (keys.length + ' of ' + MAX_ACTIVE_KEYS + ' active keys.');
   }
+  if (createBtn) { createBtn.disabled = atCap; }
+  if (scopeSel)  { scopeSel.disabled  = atCap; }
 }
 
-function showLiveKeyModal(writeRaw, readRaw) {
-  document.getElementById('modal-write-key').textContent = writeRaw;
-  document.getElementById('modal-read-key').textContent  = readRaw;
-  const modal = document.getElementById('live-key-modal');
-  modal.style.display = 'flex';
+/** Renders the raw-key callout shown ONCE after creation. Pair vs single. */
+function showFreshKeys(generated) {
+  const wrap   = document.getElementById('live-keys-just-created');
+  const inner  = document.getElementById('just-created-rows');
+  if (!wrap || !inner) return;
+
+  const rowFor = (raw, scope) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-family:var(--mono);font-size:12px">
+      <span class="key-env live">live</span>
+      <span class="key-scope">${escapeHtml(scope)}</span>
+      <code style="flex:1;background:#fff;padding:4px 8px;border:1px solid #e0e0dc;border-radius:4px;overflow-x:auto">${escapeHtml(raw)}</code>
+      <button class="btn btn-secondary btn-sm" data-action="copy-fresh" data-raw="${escapeHtml(raw)}">Copy</button>
+    </div>`;
+
+  let html = '';
+  if (generated.writeKey && generated.readKey) {
+    html += rowFor(generated.writeKey.rawKey, 'write');
+    html += rowFor(generated.readKey.rawKey,  'read');
+  } else if (generated.key) {
+    html += rowFor(generated.key.rawKey, generated.key.scope);
+  }
+  inner.innerHTML = html;
+  wrap.style.display = '';
 }
 
-function closeLiveKeyModal() {
-  document.getElementById('live-key-modal').style.display = 'none';
-}
-
-async function copyModalKey(id, btn) {
-  const text = document.getElementById(id)?.textContent?.trim();
-  if (!text) return;
+async function createLiveKey() {
+  const scope = document.getElementById('select-new-key-scope')?.value ?? 'pair';
+  const btn   = document.getElementById('btn-create-live-key');
+  if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
   try {
-    await navigator.clipboard.writeText(text);
-    btn.textContent = 'Copied!';
-    setTimeout(() => btn.textContent = 'Copy', 1500);
-  } catch {
-    btn.textContent = 'Copy';
-  }
-}
-
-async function generateLiveKeys(isRotation) {
-  const btn = isRotation ? document.getElementById('btn-rotate-live') : document.getElementById('btn-activate-live');
-  if (isRotation) {
-    const confirmed = window.confirm('Rotate live keys?\n\nYour current live keys will be deprecated with a 14-day overlap. During the overlap period both old and new keys work, giving your apps time to update.');
-    if (!confirmed) return;
-  }
-  if (btn) { btn.disabled = true; btn.textContent = isRotation ? 'Rotating…' : 'Activating…'; }
-  try {
-    const res = await fetch('/web/live-keys', { method: 'POST', credentials: 'include' });
-    if (!res.ok) { showToast('Failed to generate live keys — try again', true); return; }
-    const { writeKey, readKey } = await res.json();
-    renderLiveKeys([
-      { id: writeKey.id, scope: 'write', createdAt: writeKey.createdAt },
-      { id: readKey.id,  scope: 'read',  createdAt: readKey.createdAt  },
-    ]);
-    showLiveKeyModal(writeKey.rawKey, readKey.rawKey);
+    const res = await fetch('/web/live-keys', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scope }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      const code = body?.error?.code;
+      if (code === 'key_limit_reached') {
+        showToast('Limit reached — revoke a key first', true);
+      } else {
+        showToast(body?.error?.message || 'Failed to create key — try again', true);
+      }
+      return;
+    }
+    const generated = await res.json();
+    showFreshKeys(generated);
+    await loadLiveKeys();
   } catch {
     showToast('Network error — try again', true);
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = isRotation ? '+ Rotate live keys' : 'Activate';
+    if (btn) { btn.disabled = false; btn.textContent = 'Create key'; }
+  }
+}
+
+async function revokeLiveKey(keyId) {
+  const confirmed = window.confirm(
+    'Revoke this key?\n\nThe schema-defined 14-day grace window keeps it valid until then so any in-flight callers don\'t get cut off, but no new requests will be accepted after that.'
+  );
+  if (!confirmed) return;
+  try {
+    const res = await fetch('/web/live-keys/' + encodeURIComponent(keyId), {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    if (res.ok) {
+      showToast('Key revoked');
+      await loadLiveKeys();
+    } else {
+      const body = await res.json().catch(() => null);
+      showToast(body?.error?.message || 'Failed to revoke — try again', true);
     }
+  } catch {
+    showToast('Network error — try again', true);
   }
 }
 
 async function loadLiveKeys() {
   try {
     const res = await fetch('/web/live-keys', { credentials: 'include' });
-    if (!res.ok) return;
+    if (!res.ok) {
+      renderLiveKeys([]);
+      return;
+    }
     const { keys } = await res.json();
-    if (keys && keys.length > 0) renderLiveKeys(keys);
+    renderLiveKeys(keys ?? []);
   } catch {
-    // silently ignore — UI shows "Not activated" by default
+    renderLiveKeys([]);
   }
 }
 
@@ -1306,8 +1348,35 @@ document.getElementById('btn-save-app-identity').addEventListener('click', async
   }
 });
 
-document.getElementById('btn-activate-live').addEventListener('click', () => generateLiveKeys(false));
-document.getElementById('btn-rotate-live').addEventListener('click',   () => generateLiveKeys(true));
+document.getElementById('btn-create-live-key').addEventListener('click', createLiveKey);
+
+document.getElementById('btn-dismiss-just-created').addEventListener('click', () => {
+  const wrap = document.getElementById('live-keys-just-created');
+  if (wrap) wrap.style.display = 'none';
+});
+
+// Event delegation for the per-row Revoke buttons (rendered into innerHTML)
+// and the per-key Copy buttons in the just-created callout.
+document.getElementById('live-keys-section')?.addEventListener('click', async (e) => {
+  const t = e.target;
+  if (!(t instanceof HTMLElement)) return;
+  const action = t.dataset.action;
+  if (action === 'revoke') {
+    const keyId = t.dataset.keyId;
+    if (keyId) await revokeLiveKey(keyId);
+  } else if (action === 'copy-fresh') {
+    const raw = t.dataset.raw;
+    if (!raw) return;
+    try {
+      await navigator.clipboard.writeText(raw);
+      const orig = t.textContent;
+      t.textContent = 'Copied!';
+      setTimeout(() => { t.textContent = orig; }, 1500);
+    } catch {
+      showToast('Copy failed — select the key manually', true);
+    }
+  }
+});
 
 document.getElementById('btn-delete-account').addEventListener('click', async () => {
   const first = window.confirm(

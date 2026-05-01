@@ -1,5 +1,19 @@
 import { config } from '../config.js'
 
+/** Thrown by apiFetch on non-2xx responses. Web routes can `instanceof`-check
+ *  this to forward 4xx errors verbatim to the dashboard with the API's
+ *  error code/message, while still 500-ing on 5xx and network failures. */
+export class ApiError extends Error {
+  readonly status: number
+  readonly body: unknown
+  constructor(status: number, body: unknown) {
+    super(`API error ${status}: ${typeof body === 'string' ? body : JSON.stringify(body)}`)
+    this.name = 'ApiError'
+    this.status = status
+    this.body = body
+  }
+}
+
 async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
@@ -17,8 +31,10 @@ async function apiFetch<T>(
   const res = await fetch(url, { ...options, headers })
 
   if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`API error ${res.status}: ${body}`)
+    const text = await res.text()
+    let parsed: unknown = text
+    try { parsed = JSON.parse(text) } catch { /* fall through with raw text */ }
+    throw new ApiError(res.status, parsed)
   }
 
   return res.json() as Promise<T>
@@ -71,25 +87,51 @@ export async function updateCustomer(
 }
 
 export interface LiveKeyInfo {
-  id:        string
-  scope:     'write' | 'read'
-  createdAt: string
+  id:         string
+  scope:      'write' | 'read'
+  createdAt:  string
+  lastUsedAt: string | null
 }
 
-export interface GeneratedLiveKeys {
+export interface GeneratedLiveKeyPair {
   writeKey: { id: string; rawKey: string; scope: 'write'; createdAt: string }
   readKey:  { id: string; rawKey: string; scope: 'read';  createdAt: string }
 }
+
+export interface GeneratedLiveKeySingle {
+  key: { id: string; rawKey: string; scope: 'write' | 'read'; createdAt: string }
+}
+
+export type GeneratedLiveKeys = GeneratedLiveKeyPair | GeneratedLiveKeySingle
 
 export async function getCustomer(customerId: string): Promise<Customer> {
   return apiFetch<Customer>(`/v1/customers/${customerId}`)
 }
 
-export async function generateLiveKeys(customerId: string): Promise<GeneratedLiveKeys> {
+/**
+ * Create one or more live keys. By default returns a write+read pair to
+ * preserve the prior dashboard UX; pass `scope: 'write'` or `scope: 'read'`
+ * to create a single key. The API caps active keys at 10 per customer and
+ * returns 409 (key_limit_reached) on overflow.
+ */
+export async function generateLiveKeys(
+  customerId: string,
+  scope: 'pair' | 'write' | 'read' = 'pair',
+): Promise<GeneratedLiveKeys> {
   return apiFetch<GeneratedLiveKeys>(`/v1/customers/${customerId}/live-keys`, {
     method: 'POST',
-    body: '{}',
+    body: JSON.stringify({ scope }),
   })
+}
+
+/** Mark a single live key deprecated. The schema's 14-day grace window
+ *  applies — the key keeps working until deprecatedAt+14d so in-flight
+ *  callers aren't immediately 401'd. */
+export async function revokeLiveKey(customerId: string, keyId: string): Promise<void> {
+  await apiFetch<{ key: unknown }>(
+    `/v1/customers/${customerId}/live-keys/${keyId}`,
+    { method: 'DELETE' },
+  )
 }
 
 export async function deleteAccount(customerId: string): Promise<void> {

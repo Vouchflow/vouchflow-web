@@ -14,7 +14,9 @@ import {
   getCustomer,
   generateLiveKeys,
   getLiveKeys,
+  revokeLiveKey,
   deleteAccount,
+  ApiError,
 } from '../services/apiClient.js'
 
 function maskKey(key: string): string {
@@ -192,17 +194,47 @@ export default async function webRoutes(fastify: FastifyInstance) {
     webhookSecret:   request.session.get('webhookSecret')   as string,
   }))
 
-  // POST /web/live-keys — generate live write+read key pair (raw keys returned once)
-  fastify.post('/web/live-keys', async (request, reply) => {
-    const customerId = request.session.get('customerId') as string
-    try {
-      const result = await generateLiveKeys(customerId)
-      return result
-    } catch (err) {
-      fastify.log.error({ err, event: 'live_key_generation_failed' })
-      return reply.status(500).send({ error: 'generation_failed' })
+  // POST /web/live-keys — create one or more live keys. Body { scope } accepts
+  // 'pair' (write+read, default), 'write', or 'read'. Returns the raw key(s)
+  // ONCE; subsequent reads only ever see metadata. Server-side cap of 10
+  // active keys per customer surfaces as 409 key_limit_reached.
+  fastify.post<{ Body: { scope?: 'pair' | 'write' | 'read' } }>(
+    '/web/live-keys',
+    async (request, reply) => {
+      const customerId = request.session.get('customerId') as string
+      try {
+        return await generateLiveKeys(customerId, request.body?.scope ?? 'pair')
+      } catch (err) {
+        // Forward 4xx errors (key_limit_reached, invalid_request) verbatim so
+        // the dashboard can show the API's message; only blanket 500 on
+        // unexpected failures.
+        if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
+          return reply.status(err.status).send(err.body)
+        }
+        fastify.log.error({ err, event: 'live_key_generation_failed' })
+        return reply.status(500).send({ error: 'generation_failed' })
+      }
     }
-  })
+  )
+
+  // DELETE /web/live-keys/:keyId — revoke a single live key (mark deprecated;
+  // schema-defined 14-day grace window keeps in-flight calls working).
+  fastify.delete<{ Params: { keyId: string } }>(
+    '/web/live-keys/:keyId',
+    async (request, reply) => {
+      const customerId = request.session.get('customerId') as string
+      try {
+        await revokeLiveKey(customerId, request.params.keyId)
+        return { ok: true }
+      } catch (err) {
+        if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
+          return reply.status(err.status).send(err.body)
+        }
+        fastify.log.error({ err, event: 'live_key_revocation_failed' })
+        return reply.status(500).send({ error: 'revocation_failed' })
+      }
+    }
+  )
 
   // DELETE /web/account — permanently delete the customer account and all data
   fastify.delete('/web/account', async (request, reply) => {
