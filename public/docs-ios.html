@@ -145,6 +145,11 @@
       <h2 class="section-anchor" id="init">Initialisation</h2>
       <p>Call <code>Vouchflow.configure(_:)</code> once at app launch, before any call to <code>verify()</code>. The SDK is safe to configure in a background thread.</p>
 
+      <div class="callout warning">
+        <strong>Use the <em>write</em> key, not the read key</strong>
+        The SDK enrolls devices and starts verification sessions, both of which require write scope. Pass the <strong>write</strong> key (<code>vsk_sandbox_…</code> or <code>vsk_live_…</code>, no <code>_read_</code> in the prefix) from <a href="/settings">Settings → API Keys</a>. The read key is for server-side reputation lookups — using it here will return <code>insufficient_scope</code> on every call.
+      </div>
+
       <div class="code-block standalone">
         <div class="code-header"><span class="code-lang">Swift — App entry point</span><button class="code-copy">Copy</button></div>
         <pre><span class="k">import</span> <span class="t">VouchflowSDK</span>
@@ -152,7 +157,7 @@
 <span class="t">@main </span><span class="k">struct</span><span class="t"> MyApp: App {</span>
   <span class="k">init</span><span class="t">() {</span>
     <span class="k">try</span><span class="t">? Vouchflow.</span><span class="f">configure</span><span class="t">(VouchflowConfig(</span>
-      <span class="n">apiKey</span><span class="t">:       </span><span class="s">"vsk_sandbox_••••••••••••••••"</span><span class="t">,</span>
+      <span class="n">apiKey</span><span class="t">:       </span><span class="s">"vsk_sandbox_••••••••••••••••"</span><span class="t">,  </span><span class="c">// write key, not read key</span>
       <span class="n">environment</span><span class="t">: .</span><span class="n">sandbox</span>   <span class="c">// .production in release builds</span>
     <span class="t">))</span>
   <span class="t">}</span>
@@ -163,7 +168,7 @@
       <table>
         <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>apiKey</code></td><td><code>String</code></td><td>Yes</td><td>Write-scoped key from the dashboard. Must start with <code>vsk_</code>.</td></tr>
+          <tr><td><code>apiKey</code></td><td><code>String</code></td><td>Yes</td><td><strong>Write-scoped</strong> key from <a href="/settings">Settings → API Keys</a>. Look for the prefix <code>vsk_sandbox_</code> or <code>vsk_live_</code> (with no <code>_read_</code>). The read key will not work here.</td></tr>
           <tr><td><code>environment</code></td><td><code>VouchflowEnvironment</code></td><td>No</td><td>Defaults to <code>.production</code>. Use <code>.sandbox</code> during development.</td></tr>
         </tbody>
       </table>
@@ -394,13 +399,13 @@
       </div>
 
       <div class="callout warning">
-        <strong>Development vs production key</strong>
-        Use <code>development</code> in debug/simulator builds and <code>production</code> in App Store / TestFlight builds. Mismatching the entitlement value will cause attestation to fail silently and confidence will be capped at <code>medium</code>.
+        <strong>Match the entitlement value to the build channel</strong>
+        Apple's <code>appattest-environment</code> entitlement only accepts <code>development</code> or <code>production</code> — these are Apple's own strings, not Vouchflow's sandbox/production. Map them like this: <code>development</code> for debug, simulator, and Vouchflow sandbox builds; <code>production</code> for App Store and TestFlight builds. Mismatching the value (e.g. <code>production</code> in a debug build) causes attestation to fail silently and confidence is capped at <code>medium</code>.
       </div>
 
       <div class="callout">
         <strong>You must register your app's identity</strong>
-        Set <code>iosTeamId</code> (your 10-character Apple Developer Team ID) and <code>iosBundleId</code> (your app's bundle identifier) in your Vouchflow account settings. App Attest assertions prove the key was minted on a real Apple device, but each assertion identifies the requesting app via <code>&lt;TEAM_ID&gt;.&lt;BUNDLE_ID&gt;</code> — the server has to match that against values you've registered. Without them, an attacker who pulled an attested key out of any other iOS app could submit it as if it came from yours. Until you register, all iOS devices fall back to <code>confidence_ceiling: medium</code>.
+        Set <code>iosTeamId</code> (your 10-character Apple Developer Team ID) and <code>iosBundleId</code> (your app's bundle identifier) in <a href="/settings">Settings → Account → App identity (attestation)</a>. App Attest assertions prove the key was minted on a real Apple device, but each assertion identifies the requesting app via <code>&lt;TEAM_ID&gt;.&lt;BUNDLE_ID&gt;</code> — the server has to match that against values you've registered. Without them, an attacker who pulled an attested key out of any other iOS app could submit it as if it came from yours. Until you register, all iOS devices fall back to <code>confidence_ceiling: medium</code>.
       </div>
 
       <div class="page-nav">

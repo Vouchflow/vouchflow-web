@@ -147,6 +147,11 @@
       <h2 class="section-anchor" id="init">Initialisation</h2>
       <p>Call <code>Vouchflow.configure(VouchflowConfig(...))</code> once before any call to <code>verify()</code>. The best place is <code>Application.onCreate()</code>.</p>
 
+      <div class="callout warning">
+        <strong>Use the <em>write</em> key, not the read key</strong>
+        The SDK enrolls devices and starts verification sessions, both of which require write scope. Pass the <strong>write</strong> key (<code>vsk_sandbox_…</code> or <code>vsk_live_…</code>, no <code>_read_</code> in the prefix) from <a href="/settings">Settings → API Keys</a>. The read key is for server-side reputation lookups — using it here will return <code>insufficient_scope</code> on every call.
+      </div>
+
       <div class="code-block standalone">
         <div class="code-header"><span class="code-lang">Kotlin — Application class</span><button class="code-copy">Copy</button></div>
         <pre><span class="k">import</span> <span class="t">com.vouchflow.sdk.Vouchflow</span>
@@ -157,7 +162,7 @@
   <span class="k">override fun</span> <span class="f">onCreate</span><span class="t">() {</span>
     <span class="k">super</span><span class="t">.</span><span class="f">onCreate</span><span class="t">()</span>
     <span class="t">Vouchflow.</span><span class="f">configure</span><span class="t">(VouchflowConfig(</span>
-      <span class="n">apiKey</span><span class="t">      = </span><span class="s">"vsk_sandbox_••••••••••••••••"</span><span class="t">,</span>
+      <span class="n">apiKey</span><span class="t">      = </span><span class="s">"vsk_sandbox_••••••••••••••••"</span><span class="t">,  </span><span class="c">// write key, not read key</span>
       <span class="n">environment</span> <span class="t">= VouchflowEnvironment.SANDBOX</span>   <span class="c">// PRODUCTION in release</span>
     <span class="t">))</span>
   <span class="t">}</span>
@@ -168,7 +173,7 @@
       <table>
         <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>apiKey</code></td><td><code>String</code></td><td>Yes</td><td>Write-scoped key from the dashboard. Must start with <code>vsk_</code>.</td></tr>
+          <tr><td><code>apiKey</code></td><td><code>String</code></td><td>Yes</td><td><strong>Write-scoped</strong> key from <a href="/settings">Settings → API Keys</a>. Look for the prefix <code>vsk_sandbox_</code> or <code>vsk_live_</code> (with no <code>_read_</code>). The read key will not work here.</td></tr>
           <tr><td><code>environment</code></td><td><code>VouchflowEnvironment</code></td><td>No</td><td><code>PRODUCTION</code> (default) or <code>SANDBOX</code>.</td></tr>
           <tr><td><code>leafCertificatePin</code></td><td><code>String</code></td><td>No</td><td>SHA-256 pin for the API leaf certificate. Rotates every 60 days.</td></tr>
           <tr><td><code>intermediateCertificatePin</code></td><td><code>String</code></td><td>No</td><td>SHA-256 pin for ISRG Root X1 (effectively permanent).</td></tr>
@@ -201,7 +206,7 @@
 
       <div class="callout">
         <strong>You must register your app's identity</strong>
-        Set <code>androidPackageName</code> (your <code>applicationId</code>) and <code>androidSigningKeySha256</code> (the SHA-256 of your release signing certificate, from <code>keytool -list -v -keystore release.jks</code> or Play Console → App signing) in your Vouchflow account settings. The Keystore Attestation chain proves the key was minted in real Android hardware, but the chain itself originates from <em>some</em> app — its leaf certificate carries that app's package name and signing-cert digest in the <code>attestationApplicationId</code> extension. Without your registered values, the server has nothing to match against, so a valid chain pulled from any other app would look just as legitimate as one from yours. Until you register, all Android devices fall back to <code>confidence_ceiling: medium</code>.
+        Set <code>androidPackageName</code> (your <code>applicationId</code>) and <code>androidSigningKeySha256</code> (the SHA-256 of your release signing certificate, from <code>keytool -list -v -keystore release.jks</code> or Play Console → App signing) in <a href="/settings">Settings → Account → App identity (attestation)</a>. The Keystore Attestation chain proves the key was minted in real Android hardware, but the chain itself originates from <em>some</em> app — its leaf certificate carries that app's package name and signing-cert digest in the <code>attestationApplicationId</code> extension. Without your registered values, the server has nothing to match against, so a valid chain pulled from any other app would look just as legitimate as one from yours. Until you register, all Android devices fall back to <code>confidence_ceiling: medium</code>.
       </div>
 
       <hr/>

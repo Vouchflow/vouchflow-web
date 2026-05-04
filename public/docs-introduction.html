@@ -199,7 +199,7 @@
 
       <div class="callout warning">
         <strong>Register your app's identity in the dashboard</strong>
-        Before going live, set your Android <code>applicationId</code> + signing-cert SHA-256 and iOS team ID + bundle ID in <a href="/settings">Account settings</a>. The attestation chain proves a key was minted in real hardware, but it doesn't, by itself, prove which app requested that key — every chain carries the requesting app's package name + signing-cert digest (Android) or <code>&lt;TEAM_ID&gt;.&lt;BUNDLE_ID&gt;</code> (iOS) inside, and the server has to match that against values you've registered. Without them, an attacker who pulled an attested key out of any other Android/iOS app could submit it as if it came from yours. Until you register, all devices fall back to <code>confidence_ceiling: medium</code>.
+        Before going live, set your Android <code>applicationId</code> + signing-cert SHA-256 and iOS team ID + bundle ID in <a href="/settings">Settings → Account → App identity (attestation)</a>. The attestation chain proves a key was minted in real hardware, but it doesn't, by itself, prove which app requested that key — every chain carries the requesting app's package name + signing-cert digest (Android) or <code>&lt;TEAM_ID&gt;.&lt;BUNDLE_ID&gt;</code> (iOS) inside, and the server has to match that against values you've registered. Without them, an attacker who pulled an attested key out of any other Android/iOS app could submit it as if it came from yours. Until you register, all devices fall back to <code>confidence_ceiling: medium</code>.
       </div>
 
       <h2 class="section-anchor" id="api-keys">API key scopes</h2>

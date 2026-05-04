@@ -512,28 +512,28 @@ pre {
   <nav class="sidenav" id="sidenav">
     <div>
       <div class="nav-section-label">Get started</div>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Introduction</a>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Quickstart</a>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>How it works</a>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Sandbox vs production</a>
+      <a class="nav-item" href="/docs/introduction"><span class="nav-dot"></span>Introduction</a>
+      <a class="nav-item" href="/docs"><span class="nav-dot"></span>Quickstart</a>
+      <a class="nav-item" href="/docs/introduction#how-it-works"><span class="nav-dot"></span>How it works</a>
+      <a class="nav-item" href="/docs/introduction#sandbox"><span class="nav-dot"></span>Sandbox vs production</a>
     </div>
     <div>
       <div class="nav-section-label">iOS SDK</div>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Installation</a>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Enrollment</a>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item" href="/docs/ios-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item" href="/docs/ios-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item" href="/docs/ios-sdk#verify"><span class="nav-dot"></span>Verification</a>
     </div>
     <div>
       <div class="nav-section-label">Android SDK</div>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Installation</a>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Enrollment</a>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item" href="/docs/android-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item" href="/docs/android-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item" href="/docs/android-sdk#verify"><span class="nav-dot"></span>Verification</a>
     </div>
     <div>
       <div class="nav-section-label">Backend</div>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Authentication</a>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Webhooks</a>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Webhook signatures</a>
+      <a class="nav-item" href="/docs/backend#auth"><span class="nav-dot"></span>Authentication</a>
+      <a class="nav-item" href="/docs/backend#webhooks"><span class="nav-dot"></span>Webhooks</a>
+      <a class="nav-item" href="/docs/backend#webhook-signatures"><span class="nav-dot"></span>Webhook signatures</a>
     </div>
     <div>
       <div class="nav-section-label">API Reference</div>
@@ -555,9 +555,9 @@ pre {
     </div>
     <div>
       <div class="nav-section-label">Concepts</div>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Confidence levels</a>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Device reputation</a>
-      <a class="nav-item" href="#"><span class="nav-dot"></span>Privacy model</a>
+      <a class="nav-item" href="/docs/concepts#confidence"><span class="nav-dot"></span>Confidence levels</a>
+      <a class="nav-item" href="/docs/concepts#reputation"><span class="nav-dot"></span>Device reputation</a>
+      <a class="nav-item" href="/docs/concepts#privacy"><span class="nav-dot"></span>Privacy model</a>
     </div>
   </nav>
 
@@ -610,13 +610,8 @@ pre {
             <td class="param-req required">Required</td>
             <td class="param-desc">One of <code>ios</code>, <code>android</code>.</td>
           </tr>
-          <tr>
-            <td class="param-name">network_opt_in</td>
-            <td class="param-type">boolean</td>
-            <td class="param-req optional">Optional</td>
-            <td class="param-desc">Default <code>false</code>. Set to <code>true</code> to contribute this device's verification history to the cross-app reputation graph. Requires user consent surfaced by your app.</td>
-          </tr>
         </table>
+        <p class="endpoint-desc" style="margin-top:12px;">Network participation is a <em>customer</em>-level setting, not a per-enroll flag — set it via <code>PATCH /v1/customers/:id</code> with <code>{"network_opt_in": true|false}</code>, or toggle it in <a href="/settings">Settings → Account</a>. It defaults to <code>true</code> for new customers (Private mode opts you out).</p>
 
         <div class="params-label">Response</div>
         <table class="params-table">
@@ -657,8 +652,7 @@ pre {
   <span class="t">-d </span><span class="s">'{
     "public_key": "MFkwEwYHKoZIzj0CAQY...",
     "attestation": "o2NmbXRvYXBwbGUt...",
-    "platform": "ios",
-    "network_opt_in": false
+    "platform": "ios"
   }'</span></pre>
         <hr class="ex-divider"/>
         <div class="status-pill ok"><span class="status-dot"></span>200 OK</div>
