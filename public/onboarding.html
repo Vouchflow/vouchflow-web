@@ -679,7 +679,7 @@ code {
                   <pre><span class="t">dependencies: [</span>
   <span class="t">.</span><span class="f">package</span><span class="t">(</span>
     <span class="n">url</span><span class="t">: </span><span class="s">"https://github.com/Vouchflow/ios-sdk"</span><span class="t">,</span>
-    <span class="n">from</span><span class="t">: </span><span class="s">"1.0.0"</span>
+    <span class="n">from</span><span class="t">: </span><span class="s">"2.0.0"</span>
   <span class="t">)</span>
 <span class="t">]</span>
 <span class="c">// Add VouchflowSDK to your app target</span></pre>
@@ -696,13 +696,9 @@ code {
                     <span class="step-code-lang">settings.gradle.kts — add repo</span>
                     <button class="step-code-copy" onclick="copyCode(this)">Copy</button>
                   </div>
-                  <pre><span class="t">repositories {</span>
-  <span class="t">  maven {</span>
-    <span class="t">    url = uri(</span><span class="s">"https://maven.pkg.github.com/vouchflow/android-sdk"</span><span class="t">)</span>
-    <span class="t">    credentials {</span>
-      <span class="t">      username = providers.</span><span class="f">gradleProperty</span><span class="t">(</span><span class="s">"gpr.user"</span><span class="t">).</span><span class="f">get</span><span class="t">()</span>
-      <span class="t">      password = providers.</span><span class="f">gradleProperty</span><span class="t">(</span><span class="s">"gpr.key"</span><span class="t">).</span><span class="f">get</span><span class="t">()</span>
-    <span class="t">    }</span>
+                  <pre><span class="t">dependencyResolutionManagement {</span>
+  <span class="t">  repositories {</span>
+    <span class="t">    mavenCentral()</span>
   <span class="t">  }</span>
 <span class="t">}</span></pre>
                 </div>
@@ -712,12 +708,12 @@ code {
                     <button class="step-code-copy" onclick="copyCode(this)">Copy</button>
                   </div>
                   <pre><span class="t">dependencies {</span>
-  <span class="t">  implementation(</span><span class="s">"dev.vouchflow:android-sdk:1.0.0"</span><span class="t">)</span>
+  <span class="t">  implementation(</span><span class="s">"dev.vouchflow:android-sdk:2.0.0"</span><span class="t">)</span>
 <span class="t">}</span></pre>
                 </div>
                 <div class="step-callout" style="margin-top:8px;">
                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="6.5" cy="6.5" r="5.5" stroke="#C87D20" stroke-width="1.2"/><rect x="5.9" y="3.5" width="1.2" height="4" rx="0.6" fill="#C87D20"/><rect x="5.9" y="9" width="1.2" height="1.2" rx="0.6" fill="#C87D20"/></svg>
-                  <span>Add your GitHub username and a Personal Access Token (read:packages scope) to <code style="background:rgba(0,0,0,0.06);border:none;color:#C87D20;">~/.gradle/gradle.properties</code> as <code style="background:rgba(0,0,0,0.06);border:none;color:#C87D20;">gpr.user</code> and <code style="background:rgba(0,0,0,0.06);border:none;color:#C87D20;">gpr.key</code>.</span>
+                  <span>Published to Maven Central — no auth required. Android 9.0+ (API 28). No Google Play Services dependency.</span>
                 </div>
               </div>
 
@@ -1003,8 +999,8 @@ const panelContent = {
           <div class="panel-code-header"><span class="panel-code-lang">Package.swift</span><button class="panel-copy" onclick="this.textContent='Copied';setTimeout(()=>this.textContent='Copy',1500)">Copy</button></div>
           <pre><span class="t">dependencies: [</span>
   <span class="t">.</span><span class="f">package</span><span class="t">(</span>
-    <span class="n">url</span><span class="t">: </span><span class="s">"https://github.com/vouchflow/ios-sdk"</span><span class="t">,</span>
-    <span class="n">from</span><span class="t">: </span><span class="s">"1.0.0"</span>
+    <span class="n">url</span><span class="t">: </span><span class="s">"https://github.com/Vouchflow/ios-sdk"</span><span class="t">,</span>
+    <span class="n">from</span><span class="t">: </span><span class="s">"2.0.0"</span>
   <span class="t">)</span>
 <span class="t">]</span></pre>
         </div>
@@ -1016,7 +1012,7 @@ const panelContent = {
         <div class="panel-code">
           <div class="panel-code-header"><span class="panel-code-lang">build.gradle.kts</span><button class="panel-copy" onclick="this.textContent='Copied';setTimeout(()=>this.textContent='Copy',1500)">Copy</button></div>
           <pre><span class="t">dependencies {</span>
-  <span class="t">  implementation(</span><span class="s">"dev.vouchflow:vouchflow-android:1.0.0"</span><span class="t">)</span>
+  <span class="t">  implementation(</span><span class="s">"dev.vouchflow:android-sdk:2.0.0"</span><span class="t">)</span>
 <span class="t">}</span></pre>
         </div>
         <div class="panel-note">Minimum SDK: API 26 (Android 8.0). Hardware-backed Keystore is available on most devices from API 23+, but hardware attestation requires API 26.</div>
