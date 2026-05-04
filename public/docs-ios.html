@@ -398,6 +398,11 @@
         Use <code>development</code> in debug/simulator builds and <code>production</code> in App Store / TestFlight builds. Mismatching the entitlement value will cause attestation to fail silently and confidence will be capped at <code>medium</code>.
       </div>
 
+      <div class="callout">
+        <strong>You must register your app's identity</strong>
+        Set <code>iosTeamId</code> (your 10-character Apple Developer Team ID) and <code>iosBundleId</code> (your app's bundle identifier) in your Vouchflow account settings. App Attest assertions prove the key was minted on a real Apple device, but each assertion identifies the requesting app via <code>&lt;TEAM_ID&gt;.&lt;BUNDLE_ID&gt;</code> — the server has to match that against values you've registered. Without them, an attacker who pulled an attested key out of any other iOS app could submit it as if it came from yours. Until you register, all iOS devices fall back to <code>confidence_ceiling: medium</code>.
+      </div>
+
       <div class="page-nav">
         <a class="page-nav-card" href="/docs">
           <div class="page-nav-dir">← Previous</div>

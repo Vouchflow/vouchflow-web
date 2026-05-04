@@ -201,7 +201,7 @@
 
       <div class="callout">
         <strong>You must register your app's identity</strong>
-        Before attestation can verify, you must set <code>androidPackageName</code> (your <code>applicationId</code>) and <code>androidSigningKeySha256</code> (the SHA-256 fingerprint of your release signing certificate, from <code>keytool -list -v -keystore release.jks</code> or Play Console → App signing) in your Vouchflow account settings. Until you do, all Android devices fall back to <code>confidence_ceiling: medium</code>.
+        Set <code>androidPackageName</code> (your <code>applicationId</code>) and <code>androidSigningKeySha256</code> (the SHA-256 of your release signing certificate, from <code>keytool -list -v -keystore release.jks</code> or Play Console → App signing) in your Vouchflow account settings. The Keystore Attestation chain proves the key was minted in real Android hardware, but the chain itself originates from <em>some</em> app — its leaf certificate carries that app's package name and signing-cert digest in the <code>attestationApplicationId</code> extension. Without your registered values, the server has nothing to match against, so a valid chain pulled from any other app would look just as legitimate as one from yours. Until you register, all Android devices fall back to <code>confidence_ceiling: medium</code>.
       </div>
 
       <hr/>
