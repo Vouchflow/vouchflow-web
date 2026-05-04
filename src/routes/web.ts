@@ -110,7 +110,7 @@ export default async function webRoutes(fastify: FastifyInstance) {
 
   // GET /web/verifications
   fastify.get<{
-    Querystring: { limit?: string; offset?: string; confidence?: string; platform?: string; range?: string }
+    Querystring: { limit?: string; offset?: string; confidence?: string; platform?: string; range?: string; result?: string }
   }>('/web/verifications', async (request) => {
     const sandboxWriteKey = request.session.get('sandboxWriteKey') as string
     const env             = (request.session.get('env') as 'sandbox' | 'production' | undefined) ?? 'sandbox'
@@ -120,6 +120,7 @@ export default async function webRoutes(fastify: FastifyInstance) {
       confidence: request.query.confidence,
       platform:   request.query.platform,
       range:      request.query.range,
+      result:     request.query.result,
       env,
     })
   })

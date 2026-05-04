@@ -179,7 +179,7 @@ export interface VerificationRow {
 
 export async function getVerifications(
   sandboxWriteKey: string,
-  params: { limit?: number; offset?: number; confidence?: string; platform?: string; range?: string; env?: 'sandbox' | 'production' }
+  params: { limit?: number; offset?: number; confidence?: string; platform?: string; range?: string; result?: string; env?: 'sandbox' | 'production' }
 ): Promise<{ rows: VerificationRow[] }> {
   const qs = new URLSearchParams()
   if (params.limit)      qs.set('limit',      String(params.limit))
@@ -187,6 +187,7 @@ export async function getVerifications(
   if (params.confidence) qs.set('confidence', params.confidence)
   if (params.platform)   qs.set('platform',   params.platform)
   if (params.range)      qs.set('range',      params.range)
+  if (params.result)     qs.set('result',     params.result)
   qs.set('env', params.env ?? 'sandbox')
 
   return apiFetch<{ rows: VerificationRow[] }>(
