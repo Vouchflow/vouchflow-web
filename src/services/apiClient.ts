@@ -148,7 +148,7 @@ export interface OverviewStats {
   verificationCount: number
   deviceCount:       number
   highConfidencePct: number
-  avgDurationMs:     number
+  successRatePct:    number
   dailyBreakdown:    Array<{ date: string; high: number; low: number }>
 }
 
@@ -167,23 +167,25 @@ export async function getOverviewStats(
 // ── Verifications ────────────────────────────────────────────────────────────
 
 export interface VerificationRow {
-  sessionId:  string
-  confidence: string
-  platform:   string
-  biometric:  string
-  durationMs: number
-  createdAt:  string
+  sessionId:   string
+  deviceToken: string | null
+  confidence:  string
+  platform:    string
+  biometric:   string
+  durationMs:  number
+  createdAt:   string
 }
 
 export async function getVerifications(
   sandboxWriteKey: string,
-  params: { limit?: number; offset?: number; confidence?: string; platform?: string; env?: 'sandbox' | 'production' }
+  params: { limit?: number; offset?: number; confidence?: string; platform?: string; range?: string; env?: 'sandbox' | 'production' }
 ): Promise<{ rows: VerificationRow[] }> {
   const qs = new URLSearchParams()
   if (params.limit)      qs.set('limit',      String(params.limit))
   if (params.offset)     qs.set('offset',     String(params.offset))
   if (params.confidence) qs.set('confidence', params.confidence)
   if (params.platform)   qs.set('platform',   params.platform)
+  if (params.range)      qs.set('range',      params.range)
   qs.set('env', params.env ?? 'sandbox')
 
   return apiFetch<{ rows: VerificationRow[] }>(

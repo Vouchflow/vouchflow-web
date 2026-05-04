@@ -705,9 +705,9 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
         <div class="stat-delta flat" id="stat-confidence-delta" style="display:none">—<span class="delta-sub">stable</span></div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Avg duration</div>
-        <div class="stat-value loading-skeleton" id="stat-duration"></div>
-        <div class="stat-delta" id="stat-duration-delta" style="display:none"></div>
+        <div class="stat-label">Success rate</div>
+        <div class="stat-value loading-skeleton" id="stat-success-rate"></div>
+        <div class="stat-delta" id="stat-success-rate-delta" style="display:none"></div>
       </div>
     </div>
 
@@ -864,13 +864,13 @@ function renderStats(overview) {
   const total = overview.verificationCount ?? 0;
   const devs  = overview.deviceCount ?? 0;
   const hpct  = overview.highConfidencePct;
-  const dur   = overview.avgDurationMs;
+  const succ  = overview.successRatePct;
 
   const vals = {
     'stat-verifications': total.toLocaleString(),
     'stat-devices':       devs.toLocaleString(),
     'stat-confidence':    hpct != null ? `${hpct.toFixed(1)}%` : '—',
-    'stat-duration':      dur  != null ? `${(dur / 1000).toFixed(1)}s` : '—',
+    'stat-success-rate':  succ != null ? `${succ.toFixed(1)}%` : '—',
   };
   for (const [id, val] of Object.entries(vals)) {
     const el = document.getElementById(id);
@@ -930,7 +930,7 @@ function renderRecentVerifications(rows) {
   }
   tbody.innerHTML = rows.map((row, i) => `
     <tr>
-      <td class="device-id-cell">${row.deviceId ?? row.sessionId ?? '—'}</td>
+      <td class="device-id-cell">${row.deviceToken ?? row.sessionId ?? '—'}</td>
       <td><span class="conf-badge ${confClass(row.confidence)}"><span class="conf-badge-dot"></span>${row.confidence ?? '—'}</span></td>
       <td class="platform-cell">${formatPlatform(row.platform)}${row.biometric ? ' · ' + row.biometric.replace(/_/g,' ') : ''}</td>
       <td class="dur-cell">${row.durationMs ? `${(row.durationMs / 1000).toFixed(1)}s` : '—'}</td>
@@ -1099,7 +1099,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loadDashboard(range = '7d') {
-  ['stat-verifications', 'stat-devices', 'stat-confidence', 'stat-duration'].forEach(id => {
+  ['stat-verifications', 'stat-devices', 'stat-confidence', 'stat-success-rate'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = ''; el.classList.add('loading-skeleton'); }
   });
@@ -1108,7 +1108,7 @@ async function loadDashboard(range = '7d') {
     const [sessionRes, overviewRes, verificationsRes, usageRes] = await Promise.all([
       fetch('/web/session',                 { credentials: 'include' }),
       fetch(`/web/overview?range=${range}`, { credentials: 'include' }),
-      fetch('/web/verifications?limit=5',   { credentials: 'include' }),
+      fetch(`/web/verifications?limit=5&range=${range}`, { credentials: 'include' }),
       fetch('/web/usage',                   { credentials: 'include' }),
     ]);
 
@@ -1140,7 +1140,7 @@ async function loadDashboard(range = '7d') {
     updatePageSubtitle(usage);
   } catch (err) {
     console.error('Dashboard load failed', err);
-    ['stat-verifications', 'stat-devices', 'stat-confidence', 'stat-duration'].forEach(id => {
+    ['stat-verifications', 'stat-devices', 'stat-confidence', 'stat-success-rate'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { el.classList.remove('loading-skeleton'); el.textContent = '—'; }
     });
