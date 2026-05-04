@@ -154,10 +154,11 @@ export interface OverviewStats {
 
 export async function getOverviewStats(
   customerId: string,
-  sandboxWriteKey: string
+  sandboxWriteKey: string,
+  env: 'sandbox' | 'production' = 'sandbox'
 ): Promise<OverviewStats> {
   return apiFetch<OverviewStats>(
-    `/v1/customers/${customerId}/stats`,
+    `/v1/customers/${customerId}/stats?env=${env}`,
     {},
     sandboxWriteKey
   )
@@ -176,13 +177,14 @@ export interface VerificationRow {
 
 export async function getVerifications(
   sandboxWriteKey: string,
-  params: { limit?: number; offset?: number; confidence?: string; platform?: string }
+  params: { limit?: number; offset?: number; confidence?: string; platform?: string; env?: 'sandbox' | 'production' }
 ): Promise<{ rows: VerificationRow[] }> {
   const qs = new URLSearchParams()
   if (params.limit)      qs.set('limit',      String(params.limit))
   if (params.offset)     qs.set('offset',     String(params.offset))
   if (params.confidence) qs.set('confidence', params.confidence)
   if (params.platform)   qs.set('platform',   params.platform)
+  qs.set('env', params.env ?? 'sandbox')
 
   return apiFetch<{ rows: VerificationRow[] }>(
     `/v1/verifications?${qs}`,

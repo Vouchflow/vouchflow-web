@@ -104,7 +104,8 @@ export default async function webRoutes(fastify: FastifyInstance) {
   fastify.get('/web/overview', async (request) => {
     const customerId      = request.session.get('customerId') as string
     const sandboxWriteKey = request.session.get('sandboxWriteKey') as string
-    return getOverviewStats(customerId, sandboxWriteKey)
+    const env             = (request.session.get('env') as 'sandbox' | 'production' | undefined) ?? 'sandbox'
+    return getOverviewStats(customerId, sandboxWriteKey, env)
   })
 
   // GET /web/verifications
@@ -112,11 +113,13 @@ export default async function webRoutes(fastify: FastifyInstance) {
     Querystring: { limit?: string; offset?: string; confidence?: string; platform?: string }
   }>('/web/verifications', async (request) => {
     const sandboxWriteKey = request.session.get('sandboxWriteKey') as string
+    const env             = (request.session.get('env') as 'sandbox' | 'production' | undefined) ?? 'sandbox'
     return getVerifications(sandboxWriteKey, {
       limit:      request.query.limit      ? parseInt(request.query.limit)  : 20,
       offset:     request.query.offset     ? parseInt(request.query.offset) : 0,
       confidence: request.query.confidence,
       platform:   request.query.platform,
+      env,
     })
   })
 
