@@ -603,14 +603,6 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
       Verifications
       <span class="nav-count" id="nav-count-verifications"></span>
     </a>
-    <a class="nav-item" href="/verifications">
-      <span class="nav-icon">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-      </span>
-      Devices
-      <span class="nav-count" id="nav-count-devices"></span>
-    </a>
-
     <div class="nav-section-label">Configure</div>
     <a class="nav-item" href="/settings">
       <span class="nav-icon">
@@ -680,9 +672,9 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
       </div>
       <div class="header-right">
         <div class="range-selector">
-          <button class="range-btn">24h</button>
-          <button class="range-btn active">7d</button>
-          <button class="range-btn">30d</button>
+          <button class="range-btn"        data-range="1d">24h</button>
+          <button class="range-btn active" data-range="7d">7d</button>
+          <button class="range-btn"        data-range="30d">30d</button>
         </div>
       </div>
     </div>
@@ -885,9 +877,7 @@ function renderStats(overview) {
 
   // Nav counts
   const nc = document.getElementById('nav-count-verifications');
-  const nd = document.getElementById('nav-count-devices');
   if (nc && total > 0) nc.textContent = total >= 1000 ? `${(total/1000).toFixed(1)}k` : total;
-  if (nd && devs  > 0) nd.textContent = devs;
 
   // Confidence breakdown
   if (hpct != null && total > 0) {
@@ -1151,7 +1141,7 @@ document.querySelectorAll('.range-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     btn.closest('.range-selector').querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    loadDashboard(btn.textContent.trim());
+    loadDashboard(btn.dataset.range || btn.textContent.trim());
   });
 });
 

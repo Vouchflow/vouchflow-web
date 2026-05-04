@@ -487,11 +487,6 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
       Verifications
       <span class="nav-count">1.2k</span>
     </a>
-    <a class="nav-item" href="/verifications">
-      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
-      Devices
-      <span class="nav-count">248</span>
-    </a>
     <div class="nav-section-label">Configure</div>
     <a class="nav-item" href="/settings">
       <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
@@ -551,9 +546,9 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
       </select>
       <div class="toolbar-right">
         <div class="range-selector">
-          <button class="range-btn">24h</button>
-          <button class="range-btn active">7d</button>
-          <button class="range-btn">30d</button>
+          <button class="range-btn"        data-range="1d">24h</button>
+          <button class="range-btn active" data-range="7d">7d</button>
+          <button class="range-btn"        data-range="30d">30d</button>
         </div>
         <button class="btn-export">Export CSV</button>
       </div>
@@ -868,7 +863,7 @@ function renderTable(rows) {
   tbody.innerHTML = rows.map((row, i) => `
     <tr onclick="selectRow(this, ${i})" class="${i === 0 ? 'selected' : ''}">
       <td class="cell-time">${i === 0 ? '<span class="live-dot"></span>' : ''}${formatTime(row.createdAt)}</td>
-      <td class="cell-id">${row.deviceId ?? row.sessionId ?? '—'}</td>
+      <td class="cell-id">${row.deviceToken ?? row.sessionId ?? '—'}</td>
       <td><span class="conf-badge ${confClass(row.confidence)}"><span class="conf-badge-dot"></span>${row.confidence ?? '—'}</span></td>
       <td class="cell-platform">${formatPlatform(row.platform)}</td>
       <td class="cell-biometric">${formatBiometric(row.biometric)}</td>
@@ -887,7 +882,7 @@ async function selectRow(el, idx) {
   const row = _displayedRows[idx];
   if (!row) return;
 
-  document.getElementById('detail-id').textContent = row.sessionId ?? row.deviceId ?? '—';
+  document.getElementById('detail-id').textContent = row.sessionId ?? row.deviceToken ?? '—';
 
   try {
     const res = await fetch(`/web/verifications/${row.sessionId}`, { credentials: 'include' });
@@ -900,7 +895,7 @@ async function selectRow(el, idx) {
 
 function renderDetailPanel(d) {
   const conf = d.confidence || 'low';
-  document.getElementById('detail-id').textContent        = d.sessionId ?? d.deviceId ?? '—';
+  document.getElementById('detail-id').textContent        = d.sessionId ?? d.deviceToken ?? '—';
   document.getElementById('detail-conf-text').textContent = d.verified ? 'Verified' : conf === 'low' ? 'Failed' : 'Degraded';
   document.getElementById('d-time').textContent           = d.createdAt ? new Date(d.createdAt).toUTCString() : '—';
   document.getElementById('d-dur').textContent            = d.durationMs ? `${d.durationMs}ms` : '—';
@@ -928,16 +923,21 @@ function renderDetailPanel(d) {
 }
 
 // Filters
+function currentFilters() {
+  const selects    = document.querySelectorAll('.filter-select');
+  const confidence = selects[0]?.value ?? '';
+  const platform   = selects[1]?.value ?? '';
+  const range      = document.querySelector('.range-btn.active')?.dataset.range ?? '7d';
+  const filters    = { range };
+  if (!confidence.toLowerCase().startsWith('all')) filters.confidence = confidence.toLowerCase();
+  if (!platform.toLowerCase().startsWith('all'))   filters.platform   = platform.toLowerCase();
+  return filters;
+}
+
 document.querySelectorAll('.filter-select').forEach(sel => {
   sel.addEventListener('change', () => {
     currentPage = 0;
-    const selects    = document.querySelectorAll('.filter-select');
-    const confidence = selects[0].value;
-    const platform   = selects[1].value;
-    const filters    = {};
-    if (!confidence.toLowerCase().startsWith('all')) filters.confidence = confidence.toLowerCase();
-    if (!platform.toLowerCase().startsWith('all'))   filters.platform   = platform.toLowerCase();
-    loadVerifications(filters);
+    loadVerifications(currentFilters());
   });
 });
 
@@ -947,15 +947,17 @@ document.querySelector('.search-box input').addEventListener('input', (e) => {
   if (!q) { renderTable(currentRows); return; }
   renderTable(currentRows.filter(r =>
     (r.sessionId ?? '').toLowerCase().includes(q) ||
-    (r.deviceId  ?? '').toLowerCase().includes(q)
+    (r.deviceToken ?? '').toLowerCase().includes(q)
   ));
 });
 
-// Range buttons — visual toggle only (server ignores range on this endpoint)
+// Range buttons — refetch from server with the new window
 document.querySelectorAll('.range-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     btn.closest('.range-selector').querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    currentPage = 0;
+    loadVerifications(currentFilters());
   });
 });
 

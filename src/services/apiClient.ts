@@ -155,10 +155,11 @@ export interface OverviewStats {
 export async function getOverviewStats(
   customerId: string,
   sandboxWriteKey: string,
-  env: 'sandbox' | 'production' = 'sandbox'
+  env: 'sandbox' | 'production' = 'sandbox',
+  range: string = '7d'
 ): Promise<OverviewStats> {
   return apiFetch<OverviewStats>(
-    `/v1/customers/${customerId}/stats?env=${env}`,
+    `/v1/customers/${customerId}/stats?env=${env}&range=${encodeURIComponent(range)}`,
     {},
     sandboxWriteKey
   )

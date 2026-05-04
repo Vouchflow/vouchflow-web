@@ -101,11 +101,11 @@ export default async function webRoutes(fastify: FastifyInstance) {
   )
 
   // GET /web/overview
-  fastify.get('/web/overview', async (request) => {
+  fastify.get<{ Querystring: { range?: string } }>('/web/overview', async (request) => {
     const customerId      = request.session.get('customerId') as string
     const sandboxWriteKey = request.session.get('sandboxWriteKey') as string
     const env             = (request.session.get('env') as 'sandbox' | 'production' | undefined) ?? 'sandbox'
-    return getOverviewStats(customerId, sandboxWriteKey, env)
+    return getOverviewStats(customerId, sandboxWriteKey, env, request.query.range)
   })
 
   // GET /web/verifications
