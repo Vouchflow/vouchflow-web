@@ -12,5 +12,7 @@ declare module 'fastify' {
     name: string
     orgName: string | null
     avatarUrl: string | null
+    // Dashboard env toggle. Default 'sandbox' when unset.
+    env: 'sandbox' | 'production'
   }
 }

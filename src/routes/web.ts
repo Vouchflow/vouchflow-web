@@ -30,13 +30,21 @@ export default async function webRoutes(fastify: FastifyInstance) {
 
   // GET /web/session — current user info for frontend on load.
   // Also fetches the live customer record so per-customer attestation
-  // parameters reflect the latest DB state without requiring re-login.
+  // parameters reflect the latest DB state without requiring re-login,
+  // and reports whether a live API key exists so the env toggle knows
+  // whether 'production' is selectable.
   fastify.get('/web/session', async (request) => {
     const customerId = request.session.get('customerId') as string | undefined
     let customer: Awaited<ReturnType<typeof getCustomer>> | null = null
+    let liveKeyCount = 0
     if (customerId) {
-      try { customer = await getCustomer(customerId) } catch { /* fall through with nulls */ }
+      try { customer = await getCustomer(customerId) } catch { /* fall through */ }
+      try {
+        const { keys } = await getLiveKeys(customerId)
+        liveKeyCount = keys.length
+      } catch { /* fall through */ }
     }
+    const env = (request.session.get('env') as 'sandbox' | 'production' | undefined) ?? 'sandbox'
     return {
       email:              request.session.get('email'),
       customerId,
@@ -52,8 +60,45 @@ export default async function webRoutes(fastify: FastifyInstance) {
       iosBundleId:             customer?.iosBundleId             ?? null,
       androidPackageName:      customer?.androidPackageName      ?? null,
       androidSigningKeySha256: customer?.androidSigningKeySha256 ?? null,
+      // Env toggle state
+      env,
+      liveKeyCount,
     }
   })
+
+  // PATCH /web/env { env: 'sandbox' | 'production' }
+  // Flips the dashboard's mode. Rejects 'production' when no live key
+  // exists since that view would be empty by design.
+  fastify.patch<{ Body: { env?: string } }>(
+    '/web/env',
+    async (request, reply) => {
+      const next = request.body?.env
+      if (next !== 'sandbox' && next !== 'production') {
+        return reply.code(400).send({
+          error: { code: 'invalid_request', message: 'env must be "sandbox" or "production".' },
+        })
+      }
+      if (next === 'production') {
+        const customerId = request.session.get('customerId') as string
+        try {
+          const { keys } = await getLiveKeys(customerId)
+          if (keys.length === 0) {
+            return reply.code(409).send({
+              error: {
+                code: 'no_live_key',
+                message: 'Create a live API key before switching to production mode.',
+              },
+            })
+          }
+        } catch (err) {
+          fastify.log.error({ err, event: 'env_switch_live_keys_check_failed' })
+          return reply.code(500).send({ error: 'check_failed' })
+        }
+      }
+      request.session.set('env', next)
+      return { ok: true, env: next }
+    }
+  )
 
   // GET /web/overview
   fastify.get('/web/overview', async (request) => {
