@@ -549,6 +549,22 @@ pre {
         <span class="nav-method get">GET</span>
         /v1/device/:token/reputation
       </a>
+      <a class="nav-item" href="#webhooks-create">
+        <span class="nav-method post">POST</span>
+        /v1/webhooks
+      </a>
+      <a class="nav-item" href="#webhooks-list">
+        <span class="nav-method get">GET</span>
+        /v1/customers/:id/webhooks
+      </a>
+      <a class="nav-item" href="#webhooks-update">
+        <span class="nav-method post">PATCH</span>
+        /v1/webhooks/:id
+      </a>
+      <a class="nav-item" href="#webhooks-delete">
+        <span class="nav-method get">DEL</span>
+        /v1/webhooks/:id
+      </a>
       <a class="nav-item" href="#errors">
         <span class="nav-dot"></span>Errors
       </a>
@@ -949,6 +965,208 @@ pre {
   <span class="p">}</span>
 <span class="p">}</span></pre>
         </div>
+      </div>
+    </div>
+
+    <!-- ── ENDPOINT 4: POST /v1/webhooks ── -->
+    <div class="endpoint-row" id="webhooks-create">
+      <div class="endpoint-spec">
+        <div class="endpoint-title-row">
+          <span class="method-badge post">POST</span>
+          <span class="endpoint-path">/v1/webhooks</span>
+        </div>
+        <div class="endpoint-name">Create a webhook endpoint</div>
+        <p class="endpoint-desc">Registers a URL to receive event notifications. The signing secret is returned <em>once</em> in the response and never again — store it the moment you receive it. Subsequent reads only return metadata. Hard cap of 5 endpoints per customer.</p>
+
+        <div class="callout">
+          <strong class="plain">Write-scoped key required</strong>
+          Webhook configuration is treated as a write operation. The same write key your SDK uses works here; read-only keys return <code>403 insufficient_scope</code>.
+        </div>
+
+        <div class="params-label">Request body</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">url</td>
+            <td class="param-type">string</td>
+            <td class="param-req required">Required</td>
+            <td class="param-desc">The HTTPS endpoint that will receive POSTs. <code>http://localhost</code> is allowed in sandbox; everything else must be HTTPS.</td>
+          </tr>
+          <tr>
+            <td class="param-name">events</td>
+            <td class="param-type">array</td>
+            <td class="param-req required">Required</td>
+            <td class="param-desc">Non-empty array of event names this endpoint subscribes to. Currently supported: <code>verification.complete</code>, <code>verification.fallback_complete</code>. Unknown events return <code>400 invalid_request</code>.</td>
+          </tr>
+        </table>
+
+        <div class="params-label">Response (201 Created)</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">id</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Stable identifier for this endpoint. Used in <code>PATCH</code> / <code>DELETE</code> URLs.</td>
+          </tr>
+          <tr>
+            <td class="param-name">url</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Echo of the URL you sent.</td>
+          </tr>
+          <tr>
+            <td class="param-name">events</td>
+            <td class="param-type">array</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Echo of the events array.</td>
+          </tr>
+          <tr>
+            <td class="param-name">secret</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc"><code>whsec_</code>-prefixed signing secret. Use this to verify the <code>X-Vouchflow-Signature</code> header on inbound requests. <strong>Returned only once</strong> — there is no way to retrieve it later.</td>
+          </tr>
+          <tr>
+            <td class="param-name">createdAt</td>
+            <td class="param-type">string</td>
+            <td class="param-req"></td>
+            <td class="param-desc">ISO 8601 timestamp.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="endpoint-example">
+        <div class="ex-tabs">
+          <button class="ex-tab active">cURL</button>
+          <button class="ex-tab">Node.js</button>
+          <button class="ex-tab">Python</button>
+        </div>
+        <div class="ex-copy-row"><button class="ex-copy">Copy</button></div>
+        <div class="ex-section-label">REQUEST</div>
+        <pre><span class="kw">curl</span> <span class="t">-X POST https://api.vouchflow.dev/v1/webhooks \</span>
+  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_sandbox_••••"</span><span class="t"> \</span>
+  <span class="t">-H </span><span class="s">"Content-Type: application/json"</span><span class="t"> \</span>
+  <span class="t">-d </span><span class="s">'{
+    "url": "https://api.acme.com/webhooks/vouchflow",
+    "events": ["verification.complete", "verification.fallback_complete"]
+  }'</span></pre>
+        <hr class="ex-divider"/>
+        <div class="status-pill ok"><span class="status-dot"></span>201 Created</div>
+        <div class="ex-section-label">RESPONSE</div>
+        <div class="ex-response">
+          <pre><span class="p">{</span>
+  <span class="s">"id"</span><span class="p">:</span> <span class="s">"clx9k4m..."</span><span class="p">,</span>
+  <span class="s">"url"</span><span class="p">:</span> <span class="s">"https://api.acme.com/webhooks/vouchflow"</span><span class="p">,</span>
+  <span class="s">"events"</span><span class="p">:</span> <span class="p">[</span><span class="s">"verification.complete"</span><span class="p">,</span> <span class="s">"verification.fallback_complete"</span><span class="p">],</span>
+  <span class="s">"secret"</span><span class="p">:</span> <span class="s">"whsec_a1b2c3d4..."</span><span class="p">,</span>
+  <span class="s">"createdAt"</span><span class="p">:</span> <span class="s">"2026-05-05T18:21:09Z"</span>
+<span class="p">}</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ENDPOINT 5: GET /v1/customers/:id/webhooks ── -->
+    <div class="endpoint-row" id="webhooks-list">
+      <div class="endpoint-spec">
+        <div class="endpoint-title-row">
+          <span class="method-badge get">GET</span>
+          <span class="endpoint-path">/v1/customers/:id/webhooks</span>
+        </div>
+        <div class="endpoint-name">List webhook endpoints</div>
+        <p class="endpoint-desc">Returns metadata for every webhook endpoint registered to your customer. The <code>:id</code> in the path is decorative — scope is taken from the API key, so the response always reflects the auth'd customer regardless of what's in the URL.</p>
+
+        <div class="params-label">Response</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">webhooks</td>
+            <td class="param-type">array</td>
+            <td class="param-req"></td>
+            <td class="param-desc">Array of objects with <code>id</code>, <code>url</code>, <code>events</code>, <code>createdAt</code>. Secrets are never returned here.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="endpoint-example">
+        <div class="ex-copy-row"><button class="ex-copy">Copy</button></div>
+        <div class="ex-section-label">REQUEST</div>
+        <pre><span class="kw">curl</span> <span class="t">https://api.vouchflow.dev/v1/customers/cust_xxx/webhooks \</span>
+  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_sandbox_••••"</span></pre>
+        <hr class="ex-divider"/>
+        <div class="status-pill ok"><span class="status-dot"></span>200 OK</div>
+        <div class="ex-section-label">RESPONSE</div>
+        <div class="ex-response">
+          <pre><span class="p">{</span>
+  <span class="s">"webhooks"</span><span class="p">: [</span>
+    <span class="p">{</span>
+      <span class="s">"id"</span><span class="p">:</span> <span class="s">"clx9k4m..."</span><span class="p">,</span>
+      <span class="s">"url"</span><span class="p">:</span> <span class="s">"https://api.acme.com/webhooks/vouchflow"</span><span class="p">,</span>
+      <span class="s">"events"</span><span class="p">:</span> <span class="p">[</span><span class="s">"verification.complete"</span><span class="p">],</span>
+      <span class="s">"createdAt"</span><span class="p">:</span> <span class="s">"2026-05-05T18:21:09Z"</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ENDPOINT 6: PATCH /v1/webhooks/:id ── -->
+    <div class="endpoint-row" id="webhooks-update">
+      <div class="endpoint-spec">
+        <div class="endpoint-title-row">
+          <span class="method-badge post">PATCH</span>
+          <span class="endpoint-path">/v1/webhooks/:id</span>
+        </div>
+        <div class="endpoint-name">Update a webhook endpoint</div>
+        <p class="endpoint-desc">Updates the URL and/or the events subscription on an existing endpoint. Body must include at least one of <code>url</code> or <code>events</code>. The signing secret cannot be rotated through this endpoint — delete and recreate to get a new secret.</p>
+
+        <div class="params-label">Request body</div>
+        <table class="params-table">
+          <tr>
+            <td class="param-name">url</td>
+            <td class="param-type">string</td>
+            <td class="param-req optional">Optional</td>
+            <td class="param-desc">New HTTPS URL. Same validation rules as create.</td>
+          </tr>
+          <tr>
+            <td class="param-name">events</td>
+            <td class="param-type">array</td>
+            <td class="param-req optional">Optional</td>
+            <td class="param-desc">Replaces the existing events array. Must be non-empty if present.</td>
+          </tr>
+        </table>
+
+        <p class="endpoint-desc">Returns <code>404 not_found</code> if the <code>:id</code> doesn't exist or belongs to another customer (no information leak between tenants).</p>
+      </div>
+
+      <div class="endpoint-example">
+        <div class="ex-copy-row"><button class="ex-copy">Copy</button></div>
+        <div class="ex-section-label">REQUEST</div>
+        <pre><span class="kw">curl</span> <span class="t">-X PATCH https://api.vouchflow.dev/v1/webhooks/clx9k4m... \</span>
+  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_sandbox_••••"</span><span class="t"> \</span>
+  <span class="t">-H </span><span class="s">"Content-Type: application/json"</span><span class="t"> \</span>
+  <span class="t">-d </span><span class="s">'{ "events": ["verification.complete"] }'</span></pre>
+        <hr class="ex-divider"/>
+        <div class="status-pill ok"><span class="status-dot"></span>200 OK</div>
+      </div>
+    </div>
+
+    <!-- ── ENDPOINT 7: DELETE /v1/webhooks/:id ── -->
+    <div class="endpoint-row" id="webhooks-delete">
+      <div class="endpoint-spec">
+        <div class="endpoint-title-row">
+          <span class="method-badge get">DELETE</span>
+          <span class="endpoint-path">/v1/webhooks/:id</span>
+        </div>
+        <div class="endpoint-name">Delete a webhook endpoint</div>
+        <p class="endpoint-desc">Permanently deletes the endpoint and the full delivery history for it. In-flight retry attempts are dropped. Returns <code>404</code> if the endpoint doesn't exist or belongs to another customer.</p>
+      </div>
+
+      <div class="endpoint-example">
+        <div class="ex-copy-row"><button class="ex-copy">Copy</button></div>
+        <div class="ex-section-label">REQUEST</div>
+        <pre><span class="kw">curl</span> <span class="t">-X DELETE https://api.vouchflow.dev/v1/webhooks/clx9k4m... \</span>
+  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_sandbox_••••"</span></pre>
+        <hr class="ex-divider"/>
+        <div class="status-pill ok"><span class="status-dot"></span>204 No Content</div>
       </div>
     </div>
 

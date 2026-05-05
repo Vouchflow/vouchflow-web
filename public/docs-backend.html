@@ -161,6 +161,21 @@
       <h2 class="section-anchor" id="webhooks">Webhooks</h2>
       <p>Vouchflow sends a POST request to your endpoint after each verification completes. Webhooks are optional — you can poll <code>GET /v1/verify/{id}</code> instead — but recommended for real-time event handling.</p>
 
+      <h2 class="section-anchor" id="register">Registering an endpoint</h2>
+      <p>Register a URL by calling <a href="/api-reference#webhooks-create"><code>POST /v1/webhooks</code></a> with the URL and the events you want to subscribe to:</p>
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">cURL</span><button class="code-copy">Copy</button></div>
+        <pre><span class="kw">curl</span> <span class="t">-X POST https://api.vouchflow.dev/v1/webhooks \</span>
+  <span class="t">-H </span><span class="s">"Authorization: Bearer vsk_sandbox_••••"</span><span class="t"> \</span>
+  <span class="t">-H </span><span class="s">"Content-Type: application/json"</span><span class="t"> \</span>
+  <span class="t">-d </span><span class="s">'{
+    "url": "https://api.acme.com/webhooks/vouchflow",
+    "events": ["verification.complete", "verification.fallback_complete"]
+  }'</span></pre>
+      </div>
+      <p>The response includes a <code>secret</code> beginning with <code>whsec_</code> that you must store immediately — it is never returned again. Use it to verify the <code>X-Vouchflow-Signature</code> header on inbound requests (see <a href="#webhook-signatures">Webhook signatures</a>).</p>
+      <p>Each endpoint receives only the events listed in its <code>events</code> array. An endpoint subscribed to <code>verification.complete</code> alone will not receive <code>verification.fallback_complete</code>. List, update, and delete endpoints with <code>GET /v1/customers/:id/webhooks</code>, <code>PATCH /v1/webhooks/:id</code>, <code>DELETE /v1/webhooks/:id</code> respectively. Customers may have at most 5 active endpoints.</p>
+
       <h2 class="section-anchor" id="event-types">Event types</h2>
       <table>
         <thead><tr><th>Event</th><th>Fired when</th></tr></thead>
