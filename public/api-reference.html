@@ -29,6 +29,8 @@
   --get-bg: #EBF0FB;
   --del:    #9E1A1A;
   --del-bg: #FBEAEA;
+  --patch:  #8A5A0A;
+  --patch-bg:#FDF4E2;
 
   --success:#1A9E5C;
   --warn:   #C87D20;
@@ -127,8 +129,10 @@ body {
   letter-spacing: 0.5px; border-radius: 3px; padding: 2px 5px;
   flex-shrink: 0;
 }
-.nav-method.post { background: var(--post-bg); color: var(--post); }
-.nav-method.get  { background: var(--get-bg);  color: var(--get);  }
+.nav-method.post   { background: var(--post-bg);  color: var(--post);  }
+.nav-method.get    { background: var(--get-bg);   color: var(--get);   }
+.nav-method.patch  { background: var(--patch-bg); color: var(--patch); }
+.nav-method.delete { background: var(--del-bg);   color: var(--del);   }
 
 .nav-badge {
   margin-left: auto; font-size: 9px; font-weight: 500;
@@ -223,8 +227,10 @@ body {
   font-family: var(--mono); font-size: 11px; font-weight: 500;
   letter-spacing: 0.5px; border-radius: 4px; padding: 3px 8px;
 }
-.method-badge.post { background: var(--post-bg); color: var(--post); }
-.method-badge.get  { background: var(--get-bg);  color: var(--get);  }
+.method-badge.post   { background: var(--post-bg);  color: var(--post);  }
+.method-badge.get    { background: var(--get-bg);   color: var(--get);   }
+.method-badge.patch  { background: var(--patch-bg); color: var(--patch); }
+.method-badge.delete { background: var(--del-bg);   color: var(--del);   }
 
 .endpoint-path {
   font-family: var(--mono); font-size: 15px; font-weight: 400; color: var(--ink);
@@ -558,11 +564,11 @@ pre {
         /v1/customers/:id/webhooks
       </a>
       <a class="nav-item" href="#webhooks-update">
-        <span class="nav-method post">PATCH</span>
+        <span class="nav-method patch">PATCH</span>
         /v1/webhooks/:id
       </a>
       <a class="nav-item" href="#webhooks-delete">
-        <span class="nav-method get">DEL</span>
+        <span class="nav-method delete">DEL</span>
         /v1/webhooks/:id
       </a>
       <a class="nav-item" href="#errors">
@@ -1112,7 +1118,7 @@ pre {
     <div class="endpoint-row" id="webhooks-update">
       <div class="endpoint-spec">
         <div class="endpoint-title-row">
-          <span class="method-badge post">PATCH</span>
+          <span class="method-badge patch">PATCH</span>
           <span class="endpoint-path">/v1/webhooks/:id</span>
         </div>
         <div class="endpoint-name">Update a webhook endpoint</div>
@@ -1153,7 +1159,7 @@ pre {
     <div class="endpoint-row" id="webhooks-delete">
       <div class="endpoint-spec">
         <div class="endpoint-title-row">
-          <span class="method-badge get">DELETE</span>
+          <span class="method-badge delete">DELETE</span>
           <span class="endpoint-path">/v1/webhooks/:id</span>
         </div>
         <div class="endpoint-name">Delete a webhook endpoint</div>
@@ -1250,9 +1256,11 @@ pre {
     });
   });
 
+  // Update the active highlight on click WITHOUT preventDefault — we still
+  // want hash anchors to scroll and cross-page links to navigate. The
+  // earlier preventDefault was killing both.
   document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', e => {
-      e.preventDefault();
+    item.addEventListener('click', () => {
       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
     });
