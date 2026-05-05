@@ -1081,7 +1081,7 @@ function renderAccount(session, usage, overview) {
   const billingD = document.getElementById('billing-devices');
   const billingP = document.getElementById('billing-period');
   if (billingV) billingV.textContent = count.toLocaleString();
-  if (billingD && overview) billingD.textContent = (overview.deviceCount ?? 0).toLocaleString();
+  if (billingD && usage)    billingD.textContent = (usage.deviceCount ?? 0).toLocaleString();
   if (billingP && usage?.periodStart && usage?.periodEnd) {
     const fmt = { month: 'short', day: 'numeric', year: 'numeric' };
     const start = new Date(usage.periodStart).toLocaleDateString('en-US', fmt);

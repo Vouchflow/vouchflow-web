@@ -266,6 +266,7 @@ export async function deleteWebhook(
 
 export interface Usage {
   verificationCount: number
+  deviceCount:       number
   periodStart:       string
   periodEnd:         string
 }
