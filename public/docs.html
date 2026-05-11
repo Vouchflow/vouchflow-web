@@ -699,6 +699,18 @@ hr {
     </div>
 
     <div class="nav-section">
+      <div class="nav-section-label">Web SDK</div>
+      <a class="nav-item" href="/docs/web-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item" href="/docs/web-sdk#init"><span class="nav-dot"></span>Initialisation</a>
+      <a class="nav-item" href="/docs/web-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item" href="/docs/web-sdk#verify"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item" href="/docs/web-sdk#sign"><span class="nav-dot"></span>Payload signing</a>
+      <a class="nav-item" href="/docs/web-sdk#fallback"><span class="nav-dot"></span>Email fallback</a>
+      <a class="nav-item" href="/docs/web-sdk#errors"><span class="nav-dot"></span>Error handling</a>
+      <a class="nav-item" href="/docs/web-sdk#browsers"><span class="nav-dot"></span>Browser support <span class="nav-badge new">beta</span></a>
+    </div>
+
+    <div class="nav-section">
       <div class="nav-section-label">Backend</div>
       <a class="nav-item" href="/docs/backend#auth"><span class="nav-dot"></span>Authentication</a>
       <a class="nav-item" href="/docs/backend#idempotency"><span class="nav-dot"></span>Idempotency</a>
@@ -837,9 +849,30 @@ hr {
       </div>
 
       <div id="tab-web" style="display:none">
-        <div class="callout" style="margin-top:0">
-          <strong>Web SDK — coming soon</strong>
-          The Web SDK is in private beta. <a href="/signup" style="color:var(--ink)">Join the waitlist</a> to get early access.
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">npm</span>
+            <button class="code-copy">Copy</button>
+          </div>
+          <pre><span class="t">npm install @vouchflow/web</span></pre>
+        </div>
+        <div class="code-block standalone">
+          <div class="code-header">
+            <span class="code-lang">TypeScript</span>
+            <button class="code-copy">Copy</button>
+          </div>
+          <pre><span class="k">import</span><span class="t"> { Vouchflow } </span><span class="k">from</span><span class="t"> </span><span class="s">'@vouchflow/web'</span>
+
+<span class="t">Vouchflow.</span><span class="f">configure</span><span class="t">({</span>
+  <span class="n">apiKey</span><span class="t">:      </span><span class="s">'vsk_sandbox_••••••••••••••••'</span><span class="t">,</span>
+  <span class="n">environment</span><span class="t">: </span><span class="s">'sandbox'</span><span class="t">,</span>
+  <span class="n">rpId</span><span class="t">:        </span><span class="s">'app.example.com'</span><span class="t">,</span>
+  <span class="n">rpName</span><span class="t">:      </span><span class="s">'Example'</span><span class="t">,</span>
+<span class="t">})</span></pre>
+        </div>
+        <div class="callout warning">
+          <strong>⚠ Web SDK — Private Beta</strong>
+          Sandbox-only access during private beta. See the <a href="/docs/web-sdk" style="color:var(--ink)">full Web SDK docs →</a> for verification, payload signing, React hooks, and the email-OTP fallback flow.
         </div>
       </div>
 

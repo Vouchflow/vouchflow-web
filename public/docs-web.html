@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vouchflow — Web SDK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/docs.css"/>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+      <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+  <a class="topbar-logo" href="/">
+    <svg class="logo-mark" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="11" height="11" rx="2.5" stroke="#111" stroke-width="1.8"/>
+      <rect x="10" y="10" width="11" height="11" rx="2.5" fill="white" stroke="#111" stroke-width="1.8"/>
+      <circle cx="15.5" cy="15.5" r="2" fill="#111"/>
+    </svg>
+    <span class="logo-word">vouchflow</span>
+  </a>
+  <div class="topbar-divider"></div>
+  <span class="topbar-section">Documentation</span>
+  <div class="topbar-right">
+    <div class="topbar-search">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.5" stroke="#CCC" stroke-width="1.2"/><line x1="7.5" y1="7.5" x2="10.5" y2="10.5" stroke="#CCC" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Search docs…<kbd>⌘K</kbd>
+    </div>
+    <div id="topbar-auth"><a href="/signup" class="btn-dash" style="text-decoration:none;" id="auth-signin-btn">Sign in</a></div>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+  <nav class="sidenav" id="sidenav">
+    <div class="nav-section">
+      <div class="nav-section-label">Get started</div>
+      <a class="nav-item" href="/docs/introduction"><span class="nav-dot"></span>Introduction</a>
+      <a class="nav-item" href="/docs"><span class="nav-dot"></span>Quickstart</a>
+      <a class="nav-item" href="/docs/introduction#how-it-works"><span class="nav-dot"></span>How it works</a>
+      <a class="nav-item" href="/docs/introduction#sandbox"><span class="nav-dot"></span>Sandbox vs production</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">iOS SDK</div>
+      <a class="nav-item" href="/docs/ios-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item" href="/docs/ios-sdk#init"><span class="nav-dot"></span>Initialisation</a>
+      <a class="nav-item" href="/docs/ios-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item" href="/docs/ios-sdk#verify"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item" href="/docs/ios-sdk#errors"><span class="nav-dot"></span>Error handling</a>
+      <a class="nav-item" href="/docs/ios-sdk#app-attest"><span class="nav-dot"></span>App Attest setup</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Android SDK</div>
+      <a class="nav-item" href="/docs/android-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item" href="/docs/android-sdk#init"><span class="nav-dot"></span>Initialisation</a>
+      <a class="nav-item" href="/docs/android-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item" href="/docs/android-sdk#verify"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item" href="/docs/android-sdk#errors"><span class="nav-dot"></span>Error handling</a>
+      <a class="nav-item" href="/docs/android-sdk#oem"><span class="nav-dot"></span>OEM variance <span class="nav-badge new">note</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Web SDK</div>
+      <a class="nav-item active" href="/docs/web-sdk#install"><span class="nav-dot"></span>Installation</a>
+      <a class="nav-item active" href="/docs/web-sdk#init"><span class="nav-dot"></span>Initialisation</a>
+      <a class="nav-item active" href="/docs/web-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
+      <a class="nav-item active" href="/docs/web-sdk#verify"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item active" href="/docs/web-sdk#sign"><span class="nav-dot"></span>Payload signing</a>
+      <a class="nav-item active" href="/docs/web-sdk#fallback"><span class="nav-dot"></span>Email fallback</a>
+      <a class="nav-item active" href="/docs/web-sdk#capability"><span class="nav-dot"></span>Capability detection</a>
+      <a class="nav-item active" href="/docs/web-sdk#react"><span class="nav-dot"></span>React hooks</a>
+      <a class="nav-item active" href="/docs/web-sdk#errors"><span class="nav-dot"></span>Error handling</a>
+      <a class="nav-item active" href="/docs/web-sdk#browsers"><span class="nav-dot"></span>Browser support</a>
+      <a class="nav-item active" href="/docs/web-sdk#confidence"><span class="nav-dot"></span>Confidence ceiling <span class="nav-badge new">beta</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Backend</div>
+      <a class="nav-item" href="/docs/backend#auth"><span class="nav-dot"></span>Authentication</a>
+      <a class="nav-item" href="/docs/backend#idempotency"><span class="nav-dot"></span>Idempotency</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">API Reference</div>
+      <a class="nav-item" href="/api-reference#enroll"><span class="nav-dot"></span>POST /v1/enroll</a>
+      <a class="nav-item" href="/api-reference#verify"><span class="nav-dot"></span>POST /v1/verify</a>
+      <a class="nav-item" href="/api-reference#sign"><span class="nav-dot"></span>POST /v1/sign</a>
+      <a class="nav-item" href="/api-reference#jwks"><span class="nav-dot"></span>GET /v1/.well-known/jwks.json</a>
+      <a class="nav-item" href="/api-reference#device"><span class="nav-dot"></span>GET /v1/device/:token/reputation</a>
+      <a class="nav-item" href="/api-reference#webhooks-create"><span class="nav-dot"></span>POST /v1/webhooks</a>
+      <a class="nav-item" href="/api-reference#webhooks-list"><span class="nav-dot"></span>GET /v1/customers/:id/webhooks</a>
+      <a class="nav-item" href="/api-reference#webhooks-update"><span class="nav-dot"></span>PATCH /v1/webhooks/:id</a>
+      <a class="nav-item" href="/api-reference#webhooks-delete"><span class="nav-dot"></span>DELETE /v1/webhooks/:id</a>
+      <a class="nav-item" href="/api-reference#errors"><span class="nav-dot"></span>Errors</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Concepts</div>
+      <a class="nav-item" href="/docs/concepts#confidence"><span class="nav-dot"></span>Confidence levels</a>
+      <a class="nav-item" href="/docs/concepts#reputation"><span class="nav-dot"></span>Device reputation</a>
+      <a class="nav-item" href="/docs/concepts#network"><span class="nav-dot"></span>Network graph</a>
+      <a class="nav-item" href="/docs/concepts#privacy"><span class="nav-dot"></span>Privacy model</a>
+      <a class="nav-item" href="/docs/concepts#fallback"><span class="nav-dot"></span>Fallback handling</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Guides</div>
+      <a class="nav-item" href="/docs/guides#sms-otp"><span class="nav-dot"></span>Replacing SMS OTP</a>
+      <a class="nav-item" href="/docs/guides#signup"><span class="nav-dot"></span>Signup flow integration</a>
+      <a class="nav-item" href="/docs/guides#low-confidence"><span class="nav-dot"></span>Handling low confidence</a>
+      <a class="nav-item" href="/docs/guides#production"><span class="nav-dot"></span>Going to production</a>
+      <a class="nav-item" href="/docs/guides#gdpr"><span class="nav-dot"></span>GDPR compliance</a>
+    </div>
+    <div class="nav-app-footer">
+      <div class="nav-section-label">App</div>
+      <a class="nav-app-item" href="/dashboard">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-app-item" href="/settings">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+      <a class="nav-app-item" href="/">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1.5L1.5 6v6.5h4V9h3v3.5h4V6L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Home
+      </a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <article class="content">
+
+      <div class="page-eyebrow">Web SDK</div>
+      <h1 class="page-title">Web SDK reference</h1>
+      <p class="page-lead">The Web SDK wraps WebAuthn, IndexedDB-backed device state, and Vouchflow's verification protocol into a single async call. Adds high-assurance payload signing — a primitive the mobile SDKs don't expose. Modern evergreen browsers only; WebAuthn was added in 2018.</p>
+
+      <div class="callout warning">
+        <strong>Web SDK — Private Beta</strong>
+        Sandbox-only access; production GA targeted Phase 3 of the rollout. The package on npm is unlisted and the API key prefix must be <code>vsk_sandbox_…</code>. Contact us via <a href="/signup" style="color:#C87D20">/signup</a> to request invite.
+      </div>
+
+      <!-- INSTALLATION -->
+      <h2 class="section-anchor" id="install">Installation</h2>
+      <p>The SDK is distributed on npm as <code>@vouchflow/web</code>. Zero runtime dependencies. ESM and UMD builds ship in the same package.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">npm</span><button class="code-copy">Copy</button></div>
+        <pre><span class="t">npm install @vouchflow/web</span></pre>
+      </div>
+
+      <p>Or pull the UMD build via jsDelivr for prototypes and zero-bundler pages — <code>Vouchflow</code> attaches to <code>window</code>:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">HTML — UMD bundle</span><button class="code-copy">Copy</button></div>
+        <pre><span class="t">&lt;script src=</span><span class="s">"https://cdn.jsdelivr.net/npm/@vouchflow/web/dist/umd/vouchflow.min.js"</span><span class="t">&gt;&lt;/script&gt;</span>
+<span class="t">&lt;script&gt;</span>
+  <span class="t">window.Vouchflow.</span><span class="f">configure</span><span class="t">({ </span><span class="n">apiKey</span><span class="t">: </span><span class="s">'vsk_sandbox_…'</span><span class="t">, </span><span class="n">environment</span><span class="t">: </span><span class="s">'sandbox'</span><span class="t">, </span><span class="n">rpId</span><span class="t">: </span><span class="s">location.hostname</span><span class="t">, </span><span class="n">rpName</span><span class="t">: </span><span class="s">'Example'</span><span class="t"> })</span>
+<span class="t">&lt;/script&gt;</span></pre>
+      </div>
+
+      <div class="callout">
+        <strong>React</strong>
+        Applications using React can import from <code>@vouchflow/web/react</code> for the provider and hooks. The React entry point peer-depends on <code>react@&gt;=18</code> and only loads if you import it.
+      </div>
+
+      <hr/>
+
+      <!-- INITIALISATION -->
+      <h2 class="section-anchor" id="init">Initialisation</h2>
+      <p>Call <code>Vouchflow.configure({...})</code> once before any call to <code>Vouchflow.shared</code>. The SDK is safe to configure during module load — there are no async side effects until you call <code>verify()</code> or <code>signPayload()</code>.</p>
+
+      <div class="callout warning">
+        <strong>rpId is the #1 footgun</strong>
+        <code>rpId</code> must equal the current origin's registrable domain or a subdomain. <code>app.example.com</code> works on <code>app.example.com</code> and <code>example.com</code> works on <code>app.example.com</code>, but <code>example.com</code> on <code>app.acme.com</code> fails with a <code>SecurityError</code> from the browser. The SDK surfaces this as <code>invalid_config</code>. If you change <code>rpId</code> after users have enrolled, every previously-enrolled credential becomes unusable — the SDK detects the mismatch and throws rather than letting WebAuthn fail opaquely.
+      </div>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript — module bootstrap</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">import</span><span class="t"> { Vouchflow } </span><span class="k">from</span><span class="t"> </span><span class="s">'@vouchflow/web'</span>
+
+<span class="t">Vouchflow.</span><span class="f">configure</span><span class="t">({</span>
+  <span class="n">apiKey</span><span class="t">:      </span><span class="s">'vsk_sandbox_••••••••••••••••'</span><span class="t">,  </span><span class="c">// write key, not read key</span>
+  <span class="n">environment</span><span class="t">: </span><span class="s">'sandbox'</span><span class="t">,                       </span><span class="c">// 'production' in release builds</span>
+  <span class="n">rpId</span><span class="t">:        </span><span class="s">'app.example.com'</span><span class="t">,              </span><span class="c">// registrable domain or subdomain</span>
+  <span class="n">rpName</span><span class="t">:      </span><span class="s">'Example'</span><span class="t">,                      </span><span class="c">// shown in WebAuthn UI</span>
+<span class="t">})</span></pre>
+      </div>
+
+      <p><code>VouchflowConfig</code> parameters:</p>
+      <table>
+        <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>apiKey</code></td><td><code>string</code></td><td>Yes</td><td><strong>Write-scoped</strong> sandbox key (<code>vsk_sandbox_</code>) from <a href="/settings">Settings → API Keys</a>. Production keys are not yet provisioned for web during the private beta.</td></tr>
+          <tr><td><code>environment</code></td><td><code>'sandbox' | 'production'</code></td><td>Yes</td><td>Required, never inferred from the key prefix. Switching environments wipes local device state automatically so a sandbox device_token never gets posted to production.</td></tr>
+          <tr><td><code>rpId</code></td><td><code>string</code></td><td>Yes</td><td>WebAuthn relying party ID. Must equal the current origin's registrable domain or a subdomain.</td></tr>
+          <tr><td><code>rpName</code></td><td><code>string</code></td><td>Yes</td><td>Display name shown by the browser in the WebAuthn ceremony UI.</td></tr>
+          <tr><td><code>apiBaseUrl</code></td><td><code>string</code></td><td>No</td><td>Override the default <code>https://api.vouchflow.dev</code>. For self-hosted deployments only.</td></tr>
+          <tr><td><code>apiVersion</code></td><td><code>string</code></td><td>No</td><td><code>Vouchflow-API-Version</code> header value. Defaults to a known-good date — leave unset unless pinned.</td></tr>
+        </tbody>
+      </table>
+
+      <hr/>
+
+      <!-- ENROLLMENT -->
+      <h2 class="section-anchor" id="enrollment">Enrollment</h2>
+      <p>Enrollment is automatic on the first <code>verify()</code> call for a given <code>userHandle</code>. You do not need to call <code>enroll()</code> separately. The SDK:</p>
+      <ol>
+        <li>Calls <code>navigator.credentials.create()</code> with the configured <code>rpId</code>, asking for ES256 / RS256 / EdDSA, <code>userVerification: 'required'</code>, and <code>attestation: 'direct'</code></li>
+        <li>Posts the attestation object (server extracts the public key) to <code>POST /v1/enroll</code> with <code>platform: 'web'</code></li>
+        <li>Stores the resulting <code>device_token</code>, <code>credentialId</code>, and attestation level in IndexedDB under the <code>vouchflow</code> database</li>
+      </ol>
+
+      <p>Call <code>enroll()</code> explicitly only when you need to add a second credential (e.g. user wants to register a backup security key) or force a fresh credential:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript — explicit enrollment</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">enroll</span><span class="t">({</span>
+  <span class="n">userHandle</span><span class="t">: </span><span class="s">'user_abc123'</span><span class="t">,</span>
+  <span class="n">forceNew</span><span class="t">:   </span><span class="k">true</span><span class="t">,                          </span><span class="c">// mint a new credential even if one exists</span>
+<span class="t">})</span></pre>
+      </div>
+
+      <div class="callout">
+        <strong>IndexedDB persistence</strong>
+        Records survive across sessions and full browser restarts. In private / incognito mode IndexedDB is ephemeral, so the SDK treats every session as fresh enrollment. Switching environments (sandbox ↔ production) automatically wipes local state — a sandbox <code>device_token</code> will never get posted to production.
+      </div>
+
+      <p>To check enrollment state without triggering a ceremony or biometric prompt, use <code>getEnrollmentState()</code>:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">const</span><span class="t"> state = </span><span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">getEnrollmentState</span><span class="t">({ </span><span class="n">userHandle</span><span class="t">: </span><span class="s">'user_abc123'</span><span class="t"> })</span>
+<span class="c">// state.enrolled        — boolean</span>
+<span class="c">// state.deviceId        — string | null</span>
+<span class="c">// state.credentialIds   — string[]</span>
+<span class="c">// state.lastVerifiedAt  — string | null  (ISO 8601)</span></pre>
+      </div>
+
+      <p>To clear local records — for example, on sign-out:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">forget</span><span class="t">({ </span><span class="n">userHandle</span><span class="t">: </span><span class="s">'user_abc123'</span><span class="t"> })  </span><span class="c">// single user</span>
+<span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">forgetAll</span><span class="t">()                              </span><span class="c">// every user on this device</span></pre>
+      </div>
+
+      <p><code>forget()</code> only clears local state. To revoke the credential server-side, call <code>DELETE /v1/devices/:id</code> from your backend.</p>
+
+      <hr/>
+
+      <!-- VERIFICATION -->
+      <h2 class="section-anchor" id="verify">Verification</h2>
+      <p>Call <code>Vouchflow.shared.verify({...})</code> wherever you need a device trust signal. The method is async, handles enrollment on first use, performs the WebAuthn ceremony, completes the session server-side, and returns a typed result.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">import</span><span class="t"> { Vouchflow, VouchflowError } </span><span class="k">from</span><span class="t"> </span><span class="s">'@vouchflow/web'</span>
+
+<span class="k">try</span><span class="t"> {</span>
+  <span class="k">const</span><span class="t"> result = </span><span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">verify</span><span class="t">({</span>
+    <span class="n">context</span><span class="t">:    </span><span class="s">'login'</span><span class="t">,         </span><span class="c">// 'signup' · 'login' · 'sensitive_action' · custom</span>
+    <span class="n">userHandle</span><span class="t">: </span><span class="s">'user_abc123'</span><span class="t">,   </span><span class="c">// matches WebAuthn user.id; required for multi-user devices</span>
+    <span class="n">minConfidence</span><span class="t">: </span><span class="s">'medium'</span><span class="t">,    </span><span class="c">// default 'medium' for verify()</span>
+  <span class="t">})</span>
+
+  <span class="c">// result.verified      — true</span>
+  <span class="c">// result.confidence    — 'high' | 'medium' | 'low'</span>
+  <span class="c">// result.deviceToken   — pass to your server to query reputation</span>
+  <span class="c">// result.sessionId     — matches webhook session_id</span>
+  <span class="c">// result.biometricUsed — boolean</span>
+  <span class="c">// result.signals       — see VerifySignals below</span>
+  <span class="f">proceedWithLogin</span><span class="t">(result)</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> (err) {</span>
+  <span class="k">if</span><span class="t"> (err </span><span class="k">instanceof</span><span class="t"> VouchflowError) </span><span class="f">handleError</span><span class="t">(err)</span>
+  <span class="k">else throw</span><span class="t"> err</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p><strong>VerifyResult fields:</strong></p>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>verified</code></td><td><code>true</code></td><td>Literal <code>true</code> — failed verifications throw rather than returning <code>verified: false</code>.</td></tr>
+          <tr><td><code>confidence</code></td><td><code>'high' | 'medium' | 'low'</code></td><td>Combines attestation level, user-verification flag, and device history.</td></tr>
+          <tr><td><code>deviceToken</code></td><td><code>string</code></td><td>Opaque token for this device. Pass to your server to query <code>GET /v1/device/:token/reputation</code>.</td></tr>
+          <tr><td><code>sessionId</code></td><td><code>string</code></td><td>Matches the <code>session_id</code> in <code>verification.complete</code> webhooks.</td></tr>
+          <tr><td><code>biometricUsed</code></td><td><code>boolean</code></td><td><code>true</code> when WebAuthn reported user verification (Touch ID, Windows Hello, etc.).</td></tr>
+          <tr><td><code>signals.keychainPersistent</code></td><td><code>boolean</code></td><td><code>true</code> if the device record persisted across sessions (not a fresh IndexedDB).</td></tr>
+          <tr><td><code>signals.anomalyFlags</code></td><td><code>string[]</code></td><td>Active anomaly flags, if any.</td></tr>
+          <tr><td><code>signals.deviceAgeDays</code></td><td><code>number</code></td><td>Days since first enrollment for this <code>deviceToken</code>.</td></tr>
+          <tr><td><code>signals.crossAppHistory</code></td><td><code>boolean</code></td><td><code>true</code> if this device has verified in another Vouchflow-integrated app.</td></tr>
+          <tr><td><code>signals.attestationVerified</code></td><td><code>boolean</code></td><td><code>true</code> if WebAuthn attestation validated server-side.</td></tr>
+        </tbody>
+      </table>
+
+      <p>To require a minimum confidence — for example, on a sensitive action where you want hardware-attested only:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript — minimum confidence</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">const</span><span class="t"> result = </span><span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">verify</span><span class="t">({</span>
+  <span class="n">context</span><span class="t">:       </span><span class="s">'sensitive_action'</span><span class="t">,</span>
+  <span class="n">userHandle</span><span class="t">:    </span><span class="s">'user_abc123'</span><span class="t">,</span>
+  <span class="n">minConfidence</span><span class="t">: </span><span class="s">'high'</span><span class="t">,</span>
+<span class="t">})</span>
+<span class="c">// Throws VouchflowError({ code: 'minimum_confidence_unmet', actualConfidence }) if the device</span>
+<span class="c">// returns below 'high'. Catch and decide whether to block or degrade.</span></pre>
+      </div>
+
+      <hr/>
+
+      <!-- PAYLOAD SIGNING -->
+      <h2 class="section-anchor" id="sign">Payload signing</h2>
+      <p>Web-only. <code>signPayload()</code> produces a Vouchflow-attested JWS over any JSON-serializable payload — useful for mandate signing, approval signing, or anywhere you need a single signed envelope your backend can verify with one library call.</p>
+
+      <p>The SDK canonicalizes the payload using <a href="https://tools.ietf.org/html/rfc8785">RFC 8785 JCS</a> before signing, so byte order doesn't depend on which engine produced the JSON. The default <code>minConfidence</code> is <code>'high'</code> — signing is high-assurance by default.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript — signPayload</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">const</span><span class="t"> signed = </span><span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">signPayload</span><span class="t">({</span>
+  <span class="n">context</span><span class="t">:       </span><span class="s">'mandate_signing'</span><span class="t">,         </span><span class="c">// arbitrary, audited per session</span>
+  <span class="n">payload</span><span class="t">:       { </span><span class="n">v</span><span class="t">: </span><span class="s">1</span><span class="t">, </span><span class="n">id</span><span class="t">: </span><span class="s">'mand_abc'</span><span class="t">, </span><span class="n">scope</span><span class="t">: </span><span class="s">'send'</span><span class="t"> },</span>
+  <span class="n">userHandle</span><span class="t">:    </span><span class="s">'user_abc123'</span><span class="t">,</span>
+  <span class="n">minConfidence</span><span class="t">: </span><span class="s">'high'</span><span class="t">,                    </span><span class="c">// default</span>
+<span class="t">})</span>
+
+<span class="c">// signed.payload         — canonicalized JSON string the user actually signed</span>
+<span class="c">// signed.assertion       — Vouchflow-signed JWS your backend verifies</span>
+<span class="c">// signed.signature       — raw WebAuthn signature, base64url (rarely needed)</span>
+<span class="c">// signed.algorithm       — 'ES256' | 'RS256' | 'EdDSA'</span>
+<span class="c">// signed.deviceToken     — same opaque token as verify()</span>
+<span class="c">// signed.signingDeviceId — sdv_… stable per-credential identifier</span>
+<span class="c">// signed.signedAt        — ISO 8601</span>
+<span class="c">// signed.confidence      — 'high' | 'medium' | 'low'</span>
+<span class="c">// signed.sessionId       — webhook session_id</span>
+
+<span class="k">await</span><span class="t"> </span><span class="f">fetch</span><span class="t">(</span><span class="s">'/api/mandates'</span><span class="t">, {</span>
+  <span class="n">method</span><span class="t">: </span><span class="s">'POST'</span><span class="t">,</span>
+  <span class="n">headers</span><span class="t">: { </span><span class="s">'content-type'</span><span class="t">: </span><span class="s">'application/json'</span><span class="t"> },</span>
+  <span class="n">body</span><span class="t">: JSON.</span><span class="f">stringify</span><span class="t">({ </span><span class="n">mandate</span><span class="t">: signed.payload, </span><span class="n">assertion</span><span class="t">: signed.assertion }),</span>
+<span class="t">})</span></pre>
+      </div>
+
+      <p><strong>Server-side verification.</strong> The <code>assertion</code> is a JWS signed by Vouchflow's verifier key. Your backend verifies it with <code>jose</code> against Vouchflow's JWKS endpoint — no WebAuthn knowledge required:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript — Node.js backend</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">import</span><span class="t"> { </span><span class="n">jwtVerify</span><span class="t">, </span><span class="n">createRemoteJWKSet</span><span class="t"> } </span><span class="k">from</span><span class="t"> </span><span class="s">'jose'</span>
+<span class="k">import</span><span class="t"> </span><span class="n">crypto</span><span class="t"> </span><span class="k">from</span><span class="t"> </span><span class="s">'node:crypto'</span>
+
+<span class="k">const</span><span class="t"> JWKS = </span><span class="f">createRemoteJWKSet</span><span class="t">(</span>
+  <span class="k">new</span><span class="t"> </span><span class="f">URL</span><span class="t">(</span><span class="s">'https://api.vouchflow.dev/v1/.well-known/jwks.json'</span><span class="t">),</span>
+<span class="t">)</span>
+
+<span class="k">export async function</span><span class="t"> </span><span class="f">verifyVouchflowAssertion</span><span class="t">(</span>
+  <span class="n">assertion</span><span class="t">: </span><span class="k">string</span><span class="t">,</span>
+  <span class="n">canonicalizedPayload</span><span class="t">: </span><span class="k">string</span><span class="t">,</span>
+  <span class="n">customerId</span><span class="t">: </span><span class="k">string</span><span class="t">,</span>
+<span class="t">) {</span>
+  <span class="k">const</span><span class="t"> { payload } = </span><span class="k">await</span><span class="t"> </span><span class="f">jwtVerify</span><span class="t">(assertion, JWKS, {</span>
+    <span class="n">issuer</span><span class="t">: </span><span class="s">'https://vouchflow.dev'</span><span class="t">,</span>
+    <span class="n">audience</span><span class="t">: customerId,</span>
+  <span class="t">})</span>
+
+  <span class="k">const</span><span class="t"> expectedHash = </span><span class="n">crypto</span>
+    <span class="t">.</span><span class="f">createHash</span><span class="t">(</span><span class="s">'sha256'</span><span class="t">)</span>
+    <span class="t">.</span><span class="f">update</span><span class="t">(canonicalizedPayload, </span><span class="s">'utf8'</span><span class="t">)</span>
+    <span class="t">.</span><span class="f">digest</span><span class="t">(</span><span class="s">'hex'</span><span class="t">)</span>
+
+  <span class="k">if</span><span class="t"> (payload.</span><span class="n">payload_sha256</span><span class="t"> !== expectedHash) {</span>
+    <span class="k">throw new</span><span class="t"> </span><span class="f">Error</span><span class="t">(</span><span class="s">'Payload hash mismatch — client sent different bytes than were signed'</span><span class="t">)</span>
+  <span class="t">}</span>
+
+  <span class="k">return</span><span class="t"> {</span>
+    <span class="n">confidence</span><span class="t">:      payload.</span><span class="n">confidence</span><span class="t"> </span><span class="k">as</span><span class="t"> </span><span class="s">'high'</span><span class="t"> | </span><span class="s">'medium'</span><span class="t"> | </span><span class="s">'low'</span><span class="t">,</span>
+    <span class="n">deviceToken</span><span class="t">:     payload.</span><span class="n">device_token</span><span class="t"> </span><span class="k">as</span><span class="t"> </span><span class="k">string</span><span class="t">,</span>
+    <span class="n">signingDeviceId</span><span class="t">: payload.</span><span class="n">signing_device_id</span><span class="t"> </span><span class="k">as</span><span class="t"> </span><span class="k">string</span><span class="t">,</span>
+    <span class="n">context</span><span class="t">:         payload.</span><span class="n">context</span><span class="t"> </span><span class="k">as</span><span class="t"> </span><span class="k">string</span><span class="t">,</span>
+    <span class="n">sessionId</span><span class="t">:       payload.</span><span class="n">session_id</span><span class="t"> </span><span class="k">as</span><span class="t"> </span><span class="k">string</span><span class="t">,</span>
+  <span class="t">}</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <div class="callout">
+        <strong>Why a Vouchflow assertion, not the raw WebAuthn signature?</strong>
+        Server-side WebAuthn verification is ~300 lines of fiddly attestation-statement parsing. The JWS bundle is one <code>jwtVerify()</code> call. Your backend trusts Vouchflow's signature; Vouchflow has already verified the WebAuthn signature, the user-verification flag, the origin, and the attestation chain.
+      </div>
+
+      <hr/>
+
+      <!-- EMAIL FALLBACK -->
+      <h2 class="section-anchor" id="fallback">Email fallback</h2>
+      <p>When WebAuthn is unavailable, cancelled, or fails, request an email OTP fallback. The session ID returned in the thrown error feeds directly into <code>requestFallback()</code>.</p>
+
+      <div class="callout warning">
+        <strong>Email OTP is always low confidence</strong>
+        <code>completeFallback()</code> returns <code>confidence: 'low'</code> — always, no exceptions. Email OTP proves the user controls an inbox; it does not prove a hardware-backed device is present. Customers using fallback must know they're not getting a hardware-attested verification. Block the sensitive operation, or downgrade the experience accordingly.
+      </div>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript — fallback flow</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">try</span><span class="t"> {</span>
+  <span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">verify</span><span class="t">({ </span><span class="n">context</span><span class="t">: </span><span class="s">'signup'</span><span class="t">, </span><span class="n">userHandle</span><span class="t"> })</span>
+<span class="t">} </span><span class="k">catch</span><span class="t"> (err) {</span>
+  <span class="k">if</span><span class="t"> (</span>
+    err </span><span class="k">instanceof</span><span class="t"> VouchflowError &amp;&amp;</span>
+    (err.code === </span><span class="s">'biometric_cancelled'</span><span class="t"> ||</span>
+     err.code === </span><span class="s">'biometric_failed'</span><span class="t"> ||</span>
+     err.code === </span><span class="s">'webauthn_unavailable'</span><span class="t">)</span>
+  <span class="t">) {</span>
+    <span class="k">const</span><span class="t"> fb = </span><span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">requestFallback</span><span class="t">({</span>
+      <span class="n">sessionId</span><span class="t">: err.</span><span class="n">sessionId</span><span class="t">!,</span>
+      <span class="n">email</span><span class="t">:     </span><span class="s">'user@example.com'</span><span class="t">,</span>
+      <span class="n">reason</span><span class="t">:    </span><span class="s">'biometric_failed'</span><span class="t">,</span>
+    <span class="t">})</span>
+    <span class="c">// fb.fallbackSessionId, fb.expiresAt (ISO 8601), fb.codeLength === 6</span>
+
+    <span class="k">const</span><span class="t"> code = </span><span class="k">await</span><span class="t"> </span><span class="f">promptUserForCode</span><span class="t">()</span>
+    <span class="k">const</span><span class="t"> completed = </span><span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">completeFallback</span><span class="t">({</span>
+      <span class="n">sessionId</span><span class="t">: fb.</span><span class="n">fallbackSessionId</span><span class="t">,</span>
+      <span class="n">code</span><span class="t">,</span>
+    <span class="t">})</span>
+    <span class="c">// completed.verified === true · completed.confidence === 'low'</span>
+  <span class="t">}</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p><code>FallbackReason</code> is one of <code>'biometric_failed'</code>, <code>'webauthn_unavailable'</code>, <code>'user_chose_email'</code>. The reason flows into the dashboard and webhook payloads so you can analyse why users took the fallback path.</p>
+
+      <hr/>
+
+      <!-- CAPABILITY DETECTION -->
+      <h2 class="section-anchor" id="capability">Capability detection</h2>
+      <p>Call <code>checkSupport()</code> before showing a passkey button — let users on browsers without a platform authenticator skip the WebAuthn prompt entirely.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">const</span><span class="t"> support = </span><span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">checkSupport</span><span class="t">()</span>
+
+<span class="k">if</span><span class="t"> (!support.</span><span class="n">webauthn</span><span class="t">) {</span>
+  <span class="f">showEmailOTPOnly</span><span class="t">()</span>
+<span class="t">} </span><span class="k">else if</span><span class="t"> (!support.</span><span class="n">platformAuthenticator</span><span class="t">) {</span>
+  <span class="f">showSecurityKeyAndEmailOptions</span><span class="t">()</span>
+<span class="t">} </span><span class="k">else</span><span class="t"> {</span>
+  <span class="f">showPasskeyButton</span><span class="t">()</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p><strong>CapabilitySupport fields:</strong></p>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>webauthn</code></td><td><code>boolean</code></td><td><code>window.PublicKeyCredential</code> exists. False in Node / SSR.</td></tr>
+          <tr><td><code>platformAuthenticator</code></td><td><code>boolean</code></td><td>Touch ID / Face ID / Windows Hello / Android biometric available.</td></tr>
+          <tr><td><code>userVerifyingAuthenticator</code></td><td><code>boolean</code></td><td>Same value as <code>platformAuthenticator</code> on every shipping browser today.</td></tr>
+          <tr><td><code>conditionalUI</code></td><td><code>boolean</code></td><td>Passkey-autofill UI available. (The SDK's <code>verifyConditional()</code> is v2-deferred — read the field for your own UI logic.)</td></tr>
+          <tr><td><code>attestation</code></td><td><code>'available' | 'unsupported'</code></td><td><code>'available'</code> when WebAuthn is here at all — attestation quality is checked server-side post-ceremony.</td></tr>
+          <tr><td><code>recommendedFallback</code></td><td><code>'email' | 'none'</code></td><td>Helper for the common case: <code>'email'</code> when no platform authenticator, <code>'none'</code> otherwise.</td></tr>
+        </tbody>
+      </table>
+
+      <hr/>
+
+      <!-- REACT -->
+      <h2 class="section-anchor" id="react">React hooks</h2>
+      <p>The React entry point (<code>@vouchflow/web/react</code>) is a thin wrapper around the core. It exposes a provider, a singleton accessor, and stateful hooks for the two primary actions.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">tsx — VouchflowProvider</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">import</span><span class="t"> { VouchflowProvider } </span><span class="k">from</span><span class="t"> </span><span class="s">'@vouchflow/web/react'</span>
+
+<span class="k">export function</span><span class="t"> </span><span class="f">App</span><span class="t">() {</span>
+  <span class="k">return</span><span class="t"> (</span>
+    <span class="t">&lt;</span><span class="f">VouchflowProvider</span><span class="t"> </span><span class="n">config</span><span class="t">={{</span>
+      <span class="n">apiKey</span><span class="t">:      </span><span class="s">'vsk_sandbox_…'</span><span class="t">,</span>
+      <span class="n">environment</span><span class="t">: </span><span class="s">'sandbox'</span><span class="t">,</span>
+      <span class="n">rpId</span><span class="t">:        </span><span class="s">'app.example.com'</span><span class="t">,</span>
+      <span class="n">rpName</span><span class="t">:      </span><span class="s">'Example'</span><span class="t">,</span>
+    <span class="t">}}&gt;</span>
+      <span class="t">&lt;</span><span class="f">SignInButton</span><span class="t"> /&gt;</span>
+    <span class="t">&lt;/</span><span class="f">VouchflowProvider</span><span class="t">&gt;</span>
+  <span class="t">)</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p><code>useVerify()</code> wraps <code>verify()</code> with loading state and last-result tracking:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">tsx — useVerify</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">import</span><span class="t"> { useVerify } </span><span class="k">from</span><span class="t"> </span><span class="s">'@vouchflow/web/react'</span>
+
+<span class="k">function</span><span class="t"> </span><span class="f">SignInButton</span><span class="t">() {</span>
+  <span class="k">const</span><span class="t"> { verify, isVerifying, lastResult, error } = </span><span class="f">useVerify</span><span class="t">()</span>
+
+  <span class="k">return</span><span class="t"> (</span>
+    <span class="t">&lt;</span><span class="f">button</span><span class="t"></span>
+      <span class="n">disabled</span><span class="t">={isVerifying}</span>
+      <span class="n">onClick</span><span class="t">={() =&gt; </span><span class="f">verify</span><span class="t">({ </span><span class="n">context</span><span class="t">: </span><span class="s">'login'</span><span class="t">, </span><span class="n">userHandle</span><span class="t">: </span><span class="s">'user_abc'</span><span class="t"> })}</span>
+    <span class="t">&gt;</span>
+      <span class="t">{isVerifying ? </span><span class="s">'Authenticating…'</span><span class="t"> : </span><span class="s">'Sign in with passkey'</span><span class="t">}</span>
+    <span class="t">&lt;/</span><span class="f">button</span><span class="t">&gt;</span>
+  <span class="t">)</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p><code>useSign()</code> is the same shape for <code>signPayload()</code>:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">tsx — useSign</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">import</span><span class="t"> { useSign } </span><span class="k">from</span><span class="t"> </span><span class="s">'@vouchflow/web/react'</span>
+
+<span class="k">function</span><span class="t"> </span><span class="f">MandateSigner</span><span class="t">({ mandate }: { mandate: </span><span class="k">unknown</span><span class="t"> }) {</span>
+  <span class="k">const</span><span class="t"> { sign, isSigning, signedResult, error } = </span><span class="f">useSign</span><span class="t">()</span>
+
+  <span class="k">const</span><span class="t"> </span><span class="f">handle</span><span class="t"> = </span><span class="k">async</span><span class="t"> () =&gt; {</span>
+    <span class="k">const</span><span class="t"> r = </span><span class="k">await</span><span class="t"> </span><span class="f">sign</span><span class="t">({</span>
+      <span class="n">context</span><span class="t">:       </span><span class="s">'mandate_signing'</span><span class="t">,</span>
+      <span class="n">payload</span><span class="t">:       mandate,</span>
+      <span class="n">userHandle</span><span class="t">:    </span><span class="s">'user_abc'</span><span class="t">,</span>
+      <span class="n">minConfidence</span><span class="t">: </span><span class="s">'high'</span><span class="t">,</span>
+    <span class="t">})</span>
+    <span class="k">await</span><span class="t"> </span><span class="f">fetch</span><span class="t">(</span><span class="s">'/api/mandates'</span><span class="t">, {</span>
+      <span class="n">method</span><span class="t">: </span><span class="s">'POST'</span><span class="t">,</span>
+      <span class="n">body</span><span class="t">: JSON.</span><span class="f">stringify</span><span class="t">({ </span><span class="n">mandate</span><span class="t">: r.payload, </span><span class="n">assertion</span><span class="t">: r.assertion }),</span>
+    <span class="t">})</span>
+  <span class="t">}</span>
+
+  <span class="k">return</span><span class="t"> &lt;</span><span class="f">button</span><span class="t"> </span><span class="n">disabled</span><span class="t">={isSigning} </span><span class="n">onClick</span><span class="t">={handle}&gt;Sign with passkey&lt;/</span><span class="f">button</span><span class="t">&gt;</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p>Hooks don't add behaviour beyond exposing loading state and the last result. Anything else stays in application code — call <code>Vouchflow.shared.verify()</code> directly when you need full control.</p>
+
+      <hr/>
+
+      <!-- ERROR HANDLING -->
+      <h2 class="section-anchor" id="errors">Error handling</h2>
+      <p>All SDK errors are instances of <code>VouchflowError</code>. The class has a discriminated <code>code</code> field; <code>switch</code> on that, not <code>instanceof</code> per case.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript — full error handling</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">import</span><span class="t"> { Vouchflow, VouchflowError } </span><span class="k">from</span><span class="t"> </span><span class="s">'@vouchflow/web'</span>
+
+<span class="k">try</span><span class="t"> {</span>
+  <span class="k">const</span><span class="t"> result = </span><span class="k">await</span><span class="t"> Vouchflow.shared.</span><span class="f">verify</span><span class="t">({ </span><span class="n">context</span><span class="t">: </span><span class="s">'login'</span><span class="t">, </span><span class="n">userHandle</span><span class="t"> })</span>
+  <span class="f">proceed</span><span class="t">(result)</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> (err) {</span>
+  <span class="k">if</span><span class="t"> (!(err </span><span class="k">instanceof</span><span class="t"> VouchflowError)) </span><span class="k">throw</span><span class="t"> err</span>
+
+  <span class="k">switch</span><span class="t"> (err.code) {</span>
+    <span class="k">case</span><span class="t"> </span><span class="s">'biometric_cancelled'</span><span class="t">:</span>
+      <span class="k">return</span><span class="t"> </span><span class="f">showRetryPrompt</span><span class="t">()</span>
+
+    <span class="k">case</span><span class="t"> </span><span class="s">'biometric_failed'</span><span class="t">:</span>
+    <span class="k">case</span><span class="t"> </span><span class="s">'webauthn_unavailable'</span><span class="t">:</span>
+      <span class="k">return</span><span class="t"> </span><span class="f">offerEmailFallback</span><span class="t">(err.sessionId)</span>
+
+    <span class="k">case</span><span class="t"> </span><span class="s">'minimum_confidence_unmet'</span><span class="t">:</span>
+      <span class="k">return</span><span class="t"> </span><span class="f">handleLowConfidence</span><span class="t">(err.actualConfidence)</span>
+
+    <span class="k">case</span><span class="t"> </span><span class="s">'concurrent_ceremony'</span><span class="t">:</span>
+      <span class="c">// Another tab is mid-verify; ask user to retry in this tab.</span>
+      <span class="k">return</span><span class="t"> </span><span class="f">showActiveTabHint</span><span class="t">()</span>
+
+    <span class="k">case</span><span class="t"> </span><span class="s">'invalid_config'</span><span class="t">:</span>
+      <span class="c">// Almost certainly an rpId mismatch with the current origin.</span>
+      <span class="k">return</span><span class="t"> </span><span class="f">logBugAndShowGeneric</span><span class="t">(err)</span>
+
+    <span class="k">case</span><span class="t"> </span><span class="s">'network_error'</span><span class="t">:</span>
+      <span class="k">return</span><span class="t"> </span><span class="f">showOfflineState</span><span class="t">()</span>
+
+    <span class="k">default</span><span class="t">:</span>
+      <span class="f">logError</span><span class="t">(err)</span>
+      <span class="k">return</span><span class="t"> </span><span class="f">showGenericError</span><span class="t">()</span>
+  <span class="t">}</span>
+<span class="t">}</span></pre>
+      </div>
+
+      <p><strong>All VouchflowErrorCode values:</strong></p>
+      <table>
+        <thead><tr><th>Code</th><th>Description</th><th>Recommended action</th></tr></thead>
+        <tbody>
+          <tr><td><code>invalid_config</code></td><td>RP ID mismatch or missing required config field</td><td>Fix at init — should not reach users</td></tr>
+          <tr><td><code>not_configured</code></td><td><code>Vouchflow.shared</code> accessed before <code>configure()</code></td><td>Fix at init</td></tr>
+          <tr><td><code>not_in_browser</code></td><td><code>verify()</code> / <code>signPayload()</code> called outside a browser context</td><td>Use <code>checkSupport()</code> in SSR builds</td></tr>
+          <tr><td><code>webauthn_unavailable</code></td><td>Browser does not support WebAuthn</td><td>Offer email fallback</td></tr>
+          <tr><td><code>platform_authenticator_unavailable</code></td><td>No Touch ID / Windows Hello / Android biometric present</td><td>Offer security-key or email fallback</td></tr>
+          <tr><td><code>biometric_cancelled</code></td><td>User dismissed the WebAuthn prompt, or the prompt timed out</td><td>Offer retry; <code>err.sessionId</code> is set for fallback</td></tr>
+          <tr><td><code>biometric_failed</code></td><td>Ceremony completed but the server rejected the result</td><td>Offer fallback using <code>err.sessionId</code></td></tr>
+          <tr><td><code>concurrent_ceremony</code></td><td>Another tab on this origin is already mid-ceremony</td><td>Surface a hint; WebAuthn is exclusive per origin</td></tr>
+          <tr><td><code>enrollment_failed</code></td><td>Server rejected the enrollment attestation</td><td>Usually transient; safe to retry</td></tr>
+          <tr><td><code>invalid_signature</code></td><td>WebAuthn signature did not validate server-side</td><td>Log; possible state corruption — clear and re-enroll</td></tr>
+          <tr><td><code>challenge_expired</code></td><td>Challenge was unused past the 60s window</td><td>Retry; SDK normally fires within ms</td></tr>
+          <tr><td><code>challenge_already_used</code></td><td>Atomic single-use guard tripped on the complete call</td><td>Retry from scratch</td></tr>
+          <tr><td><code>device_not_found</code></td><td>Local device record points to a server-side device that no longer exists</td><td>Call <code>forget()</code> and re-enroll</td></tr>
+          <tr><td><code>minimum_confidence_unmet</code></td><td>Device cannot meet the requested <code>minConfidence</code></td><td>Block or degrade; <code>err.actualConfidence</code> is set</td></tr>
+          <tr><td><code>rate_limit_exceeded</code></td><td>Hit the per-IP or per-session limiter</td><td>Back off and retry</td></tr>
+          <tr><td><code>unauthorized</code></td><td>API key missing, malformed, or wrong scope</td><td>Check <code>vsk_sandbox_</code> prefix and write scope</td></tr>
+          <tr><td><code>invalid_otp</code></td><td>Email OTP code was wrong or expired</td><td>Prompt for re-entry up to the lockout limit</td></tr>
+          <tr><td><code>fallback_locked</code></td><td>Too many wrong OTP attempts; fallback is locked</td><td>Surface a generic auth failure</td></tr>
+          <tr><td><code>network_error</code></td><td>Fetch failed or 5xx from the API</td><td><code>retryable: true</code> — back off and retry</td></tr>
+          <tr><td><code>aborted</code></td><td>Caller's <code>AbortSignal</code> fired</td><td>No action — the caller asked for this</td></tr>
+          <tr><td><code>unknown_error</code></td><td>Anything that didn't map to the codes above</td><td>Log <code>err.cause</code> for diagnosis</td></tr>
+        </tbody>
+      </table>
+
+      <hr/>
+
+      <!-- BROWSER SUPPORT -->
+      <h2 class="section-anchor" id="browsers">Browser support</h2>
+      <p>The SDK targets evergreen browsers with WebAuthn + IndexedDB + Web Crypto. WebAuthn was added to the platform in 2018; IE and legacy Safari are out of scope.</p>
+
+      <table>
+        <thead><tr><th>Browser</th><th>Minimum</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Chrome</td><td>109+</td><td>Full WebAuthn + conditional UI</td></tr>
+          <tr><td>Edge</td><td>109+</td><td>Same engine as Chrome; same support</td></tr>
+          <tr><td>Safari</td><td>16.4+</td><td>iOS 16.4+ and macOS 13.3+ for full passkey support</td></tr>
+          <tr><td>Firefox</td><td>119+</td><td>WebAuthn support is mature; conditional UI lags Chromium</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout warning">
+        <strong>HTTPS or localhost required</strong>
+        WebAuthn refuses to run over <code>http://</code> on any host other than <code>localhost</code>. Make sure your staging and preview environments have valid TLS — preview deploys served from <code>http://192.168.x.x</code> will throw <code>webauthn_unavailable</code> the moment you call <code>verify()</code>.
+      </div>
+
+      <p>In Node.js, Server Components, or any non-browser runtime, <code>verify()</code> and <code>signPayload()</code> throw <code>not_in_browser</code>. <code>checkSupport()</code> returns capability flags <code>false</code> everywhere. The package is import-safe in SSR — only the active call sites need a real browser.</p>
+
+      <hr/>
+
+      <!-- CONFIDENCE CEILING -->
+      <h2 class="section-anchor" id="confidence">Confidence ceiling per attestation format</h2>
+      <p>The server caps confidence at enrollment time based on the WebAuthn attestation format. The ceiling is per-device and never raised by later activity — only the realised confidence on each verification can sit at or below it.</p>
+
+      <table>
+        <thead><tr><th>Attestation format</th><th>Ceiling</th><th>Typical authenticators</th></tr></thead>
+        <tbody>
+          <tr><td><code>apple</code></td><td><code>high</code></td><td>Touch ID / Face ID on macOS &amp; iOS Safari</td></tr>
+          <tr><td><code>android-key</code></td><td><code>high</code></td><td>Android biometric with hardware-backed keystore</td></tr>
+          <tr><td><code>tpm</code> (valid cert chain)</td><td><code>high</code></td><td>Windows Hello with TPM 2.0</td></tr>
+          <tr><td><code>packed</code> (with attestation cert)</td><td><code>high</code></td><td>FIDO2 security keys (YubiKey, Feitian)</td></tr>
+          <tr><td><code>packed</code> (self-attestation)</td><td><code>medium</code></td><td>Authenticators without a vendor attestation cert</td></tr>
+          <tr><td><code>android-safetynet</code></td><td><code>medium</code></td><td>Older Android devices using SafetyNet</td></tr>
+          <tr><td><code>none</code></td><td><code>medium</code></td><td>Most platform authenticators when the browser strips attestation</td></tr>
+          <tr><td>Software-only (e.g. 1Password)</td><td><code>medium</code></td><td>Roaming passkeys with no attestation chain</td></tr>
+          <tr><td>Email OTP fallback</td><td><code>low</code></td><td><code>completeFallback()</code> — never higher</td></tr>
+        </tbody>
+      </table>
+
+      <p>The default <code>minConfidence</code> is <code>'medium'</code> for <code>verify()</code> and <code>'high'</code> for <code>signPayload()</code>. Raise the threshold when you need hardware-attested only; the SDK will surface <code>minimum_confidence_unmet</code> with the actual ceiling in <code>err.actualConfidence</code> so you can decide whether to block or degrade.</p>
+
+      <div class="page-nav">
+        <a class="page-nav-card" href="/docs/android-sdk">
+          <div class="page-nav-dir">← Previous</div>
+          <div class="page-nav-title">Android SDK</div>
+        </a>
+        <a class="page-nav-card next" href="/docs/backend">
+          <div class="page-nav-dir">Next →</div>
+          <div class="page-nav-title">Backend</div>
+        </a>
+      </div>
+
+    </article>
+
+    <aside class="toc">
+      <div class="toc-label">On this page</div>
+      <a class="toc-item" href="#install">Installation</a>
+      <a class="toc-item" href="#init">Initialisation</a>
+      <a class="toc-item" href="#enrollment">Enrollment</a>
+      <a class="toc-item" href="#verify">Verification</a>
+      <a class="toc-item" href="#sign">Payload signing</a>
+      <a class="toc-item" href="#fallback">Email fallback</a>
+      <a class="toc-item" href="#capability">Capability detection</a>
+      <a class="toc-item" href="#react">React hooks</a>
+      <a class="toc-item" href="#errors">Error handling</a>
+      <a class="toc-item" href="#browsers">Browser support</a>
+      <a class="toc-item" href="#confidence">Confidence ceiling</a>
+    </aside>
+  </main>
+</div>
+
+<script>
+document.querySelectorAll('.code-copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+});
+function toggleNav() {
+  const nav = document.getElementById('sidenav');
+  const overlay = document.getElementById('nav-overlay');
+  nav.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      const nav = document.getElementById('sidenav');
+      if (nav.classList.contains('open')) toggleNav();
+    }
+  });
+});
+</script>
+<script>
+(async function initDocsAuth() {
+  try {
+    const res = await fetch("/web/me", { credentials: "include" });
+    const me = res.ok ? await res.json() : null;
+    const authEl = document.getElementById("topbar-auth");
+    if (!authEl) return;
+    if (!me) {
+      authEl.innerHTML = "<a href=\"/signup\" class=\"btn-dash\" style=\"text-decoration:none;\">Sign in</a>";
+      return;
+    }
+    const initials = me.name
+      ? me.name.trim().split(/\s+/).map(p => p[0]).slice(0,2).join("").toUpperCase()
+      : (me.email ? me.email[0].toUpperCase() : "?");
+    authEl.innerHTML = `<div class="docs-avatar-wrap" id="docs-avatar-wrap"><div class="docs-avatar" id="docs-avatar" onclick="toggleDocsMenu()">${initials}</div><div class="docs-avatar-menu" id="docs-avatar-menu"><div class="docs-avatar-menu-header">${me.email || ""}</div><a class="docs-avatar-item" href="/dashboard"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>Dashboard</a><a class="docs-avatar-item" href="/settings"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Settings</a><button class="docs-avatar-item danger" onclick="docsSignOut()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 4.5L11 7m0 0L8.5 9.5M11 7H5M5 2H3a1 1 0 00-1 1v7a1 1 0 001 1h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Sign out</button></div></div>`;
+    if (me.avatarUrl) {
+      const av = document.getElementById("docs-avatar");
+      const img = document.createElement("img");
+      img.src = me.avatarUrl;
+      img.style.cssText = "width:100%;height:100%;border-radius:50%;object-fit:cover;";
+      img.onerror = () => { av.textContent = initials; };
+      av.textContent = "";
+      av.appendChild(img);
+    }
+    document.addEventListener("click", e => {
+      const wrap = document.getElementById("docs-avatar-wrap");
+      if (wrap && !wrap.contains(e.target)) document.getElementById("docs-avatar-menu")?.classList.remove("open");
+    });
+  } catch {}
+})();
+function toggleDocsMenu() { document.getElementById("docs-avatar-menu")?.classList.toggle("open"); }
+async function docsSignOut() { await fetch("/auth/signout", { method: "POST", credentials: "include" }); window.location.href = "/"; }
+</script>
+</body>
+</html>

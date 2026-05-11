@@ -17,6 +17,7 @@ export default async function pageRoutes(fastify: FastifyInstance) {
   fastify.get('/docs/introduction',   async (_, reply) => reply.sendFile('docs-introduction.html'))
   fastify.get('/docs/ios-sdk',        async (_, reply) => reply.sendFile('docs-ios.html'))
   fastify.get('/docs/android-sdk',    async (_, reply) => reply.sendFile('docs-android.html'))
+  fastify.get('/docs/web-sdk',        async (_, reply) => reply.sendFile('docs-web.html'))
   fastify.get('/docs/backend',        async (_, reply) => reply.sendFile('docs-backend.html'))
   fastify.get('/docs/concepts',       async (_, reply) => reply.sendFile('docs-concepts.html'))
   fastify.get('/docs/guides',         async (_, reply) => reply.sendFile('docs-guides.html'))
