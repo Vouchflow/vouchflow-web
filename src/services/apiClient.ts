@@ -96,6 +96,8 @@ export interface AppSummary {
   slug:          string
   description:   string | null
   webSdkEnabled: boolean
+  iosConfigured: boolean
+  androidConfigured: boolean
   archivedAt:    string | null
   createdAt:     string
 }
@@ -223,6 +225,32 @@ export async function revokeLiveKey(customerId: string, appId: string, keyId: st
     `/v1/customers/${customerId}/apps/${appId}/live-keys/${keyId}`,
     { method: 'DELETE' },
   )
+}
+
+// ── Per-app webhooks (admin-keyed) ──────────────────────────────────────────
+
+export interface AppWebhook {
+  id:        string
+  url:       string
+  events:    string[]
+  createdAt: string
+}
+
+export async function listAppWebhooks(customerId: string, appId: string): Promise<{ webhooks: AppWebhook[] }> {
+  return apiFetch<{ webhooks: AppWebhook[] }>(`/v1/customers/${customerId}/apps/${appId}/webhooks`)
+}
+
+export async function createAppWebhook(
+  customerId: string, appId: string, data: { url: string; events: string[] },
+): Promise<AppWebhook & { secret: string }> {
+  return apiFetch<AppWebhook & { secret: string }>(
+    `/v1/customers/${customerId}/apps/${appId}/webhooks`,
+    { method: 'POST', body: JSON.stringify(data) },
+  )
+}
+
+export async function deleteAppWebhook(customerId: string, appId: string, webhookId: string): Promise<void> {
+  await apiFetch<void>(`/v1/customers/${customerId}/apps/${appId}/webhooks/${webhookId}`, { method: 'DELETE' })
 }
 
 // ── Stats ────────────────────────────────────────────────────────────────────

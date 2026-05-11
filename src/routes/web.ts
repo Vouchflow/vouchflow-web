@@ -22,6 +22,9 @@ import {
   updateApp,
   archiveApp,
   unarchiveApp,
+  listAppWebhooks,
+  createAppWebhook,
+  deleteAppWebhook,
   ApiError,
 } from '../services/apiClient.js'
 import type { AppPatch } from '../services/apiClient.js'
@@ -301,6 +304,42 @@ export default async function webRoutes(fastify: FastifyInstance) {
         return { ok: true }
       } catch (err) {
         return relayApiError(fastify, reply, err, 'revoke_live_key_failed')
+      }
+    }
+  )
+
+  // ── Per-app webhooks (admin proxy) ────────────────────────────────────
+  fastify.get<{ Params: { appId: string } }>(
+    '/web/apps/:appId/webhooks',
+    async (request, reply) => {
+      const customerId = request.session.get('customerId') as string
+      try {
+        return await listAppWebhooks(customerId, request.params.appId)
+      } catch (err) {
+        return relayApiError(fastify, reply, err, 'list_app_webhooks_failed')
+      }
+    }
+  )
+  fastify.post<{ Params: { appId: string }; Body: { url: string; events: string[] } }>(
+    '/web/apps/:appId/webhooks',
+    async (request, reply) => {
+      const customerId = request.session.get('customerId') as string
+      try {
+        return await createAppWebhook(customerId, request.params.appId, request.body)
+      } catch (err) {
+        return relayApiError(fastify, reply, err, 'create_app_webhook_failed')
+      }
+    }
+  )
+  fastify.delete<{ Params: { appId: string; webhookId: string } }>(
+    '/web/apps/:appId/webhooks/:webhookId',
+    async (request, reply) => {
+      const customerId = request.session.get('customerId') as string
+      try {
+        await deleteAppWebhook(customerId, request.params.appId, request.params.webhookId)
+        return { ok: true }
+      } catch (err) {
+        return relayApiError(fastify, reply, err, 'delete_app_webhook_failed')
       }
     }
   )

@@ -35,4 +35,7 @@ export default async function pageRoutes(fastify: FastifyInstance) {
   fastify.get('/settings',      guard, async (_, reply) => reply.sendFile('settings.html'))
   fastify.get('/reputation',    guard, async (_, reply) => reply.sendFile('reputation.html'))
   fastify.get('/apps/new',      guard, async (_, reply) => reply.sendFile('apps-new.html'))
+  // /settings/apps/:appId — per-app detail page. The :appId is read by JS
+  // from window.location.pathname so the static HTML file is served as-is.
+  fastify.get('/settings/apps/:appId', guard, async (_, reply) => reply.sendFile('apps-detail.html'))
 }

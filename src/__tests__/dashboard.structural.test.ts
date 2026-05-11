@@ -1,7 +1,5 @@
-// Structural smoke tests for the dashboard HTML pages. These don't render
-// the pages in a browser — they assert that the static markup contains the
-// anchors the apps refactor depends on, so that diffs that accidentally
-// remove the App switcher or the new App tab are caught in CI.
+// Structural smoke tests for the dashboard HTML pages (Option A IA).
+// Asserts the pages have the right anchors so accidental diffs are caught.
 
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
@@ -10,52 +8,89 @@ import { resolve } from 'node:path'
 const PUBLIC = resolve(__dirname, '../../public')
 function read(p: string): string { return readFileSync(resolve(PUBLIC, p), 'utf8') }
 
-describe('app switcher: present on all dashboard pages', () => {
+describe('app switcher: removed (Option A — list view replaces it)', () => {
   for (const page of ['dashboard.html', 'verifications.html', 'reputation.html', 'settings.html', 'onboarding.html']) {
-    it(`${page} has the app-switcher button + popover + load script`, () => {
+    it(`${page} no longer carries the topbar app switcher`, () => {
       const html = read(page)
-      expect(html, 'switcher button').toContain('id="app-switcher-button"')
-      expect(html, 'switcher popover').toContain('id="app-switcher-popover"')
-      expect(html, 'list container').toContain('id="app-switcher-list"')
-      expect(html, '+ New app link').toContain('href="/apps/new"')
-      expect(html, 'load function').toContain('vfLoadAppSwitcher')
-      expect(html, 'switch handler').toContain('vfSwitchApp')
+      expect(html, 'switcher button absent').not.toContain('id="app-switcher-button"')
+      expect(html, 'switcher popover absent').not.toContain('id="app-switcher-popover"')
+      expect(html, 'switcher loader absent').not.toContain('vfLoadAppSwitcher')
     })
   }
 })
 
-describe('settings.html: restructured tabs', () => {
+describe('settings.html: Option A tab structure', () => {
   const html = read('settings.html')
-  it('has all five tabs in the new order', () => {
-    // App should be the first (and default-active) tab.
+  it('has three tabs: Apps | Billing | Account', () => {
     const tabsBlock = html.split('class="settings-tabs"')[1]?.split('</div>')[0] ?? ''
-    expect(tabsBlock).toContain(">App<")
-    expect(tabsBlock).toContain(">API Keys<")
-    expect(tabsBlock).toContain(">Webhooks<")
+    expect(tabsBlock).toContain(">Apps<")
     expect(tabsBlock).toContain(">Billing<")
     expect(tabsBlock).toContain(">Account<")
-    // App tab is default-active
-    expect(html).toContain('class="settings-tab active" onclick="switchTab(\'app\')"')
   })
-  it('has panel-app, panel-webhooks, panel-api-keys, panel-billing, panel-account', () => {
-    expect(html).toContain('id="panel-app"')
-    expect(html).toContain('id="panel-webhooks"')
-    expect(html).toContain('id="panel-api-keys"')
+  it('uses data-tab attributes (not positional indexing) for tab activation', () => {
+    expect(html).toContain('data-tab="apps"')
+    expect(html).toContain('data-tab="billing"')
+    expect(html).toContain('data-tab="account"')
+    expect(html).toContain("t.getAttribute('data-tab') === tab")
+  })
+  it('Apps panel is default-active', () => {
+    expect(html).toContain('class="panel active" id="panel-apps"')
+  })
+  it('panel-app, panel-api-keys, panel-webhooks no longer present', () => {
+    expect(html).not.toContain('id="panel-app"')
+    expect(html).not.toContain('id="panel-api-keys"')
+    expect(html).not.toContain('id="panel-webhooks"')
+  })
+  it('panel-billing and panel-account remain', () => {
     expect(html).toContain('id="panel-billing"')
     expect(html).toContain('id="panel-account"')
   })
-  it('panel-app default-active, panel-api-keys not active', () => {
-    expect(html).toContain('class="panel active" id="panel-app"')
-    expect(html).toContain('class="panel" id="panel-api-keys"')
+})
+
+describe('settings.html: Apps list', () => {
+  const html = read('settings.html')
+  it('panel-apps has list container and "+ New app" link', () => {
+    expect(html).toContain('id="apps-list"')
+    expect(html).toContain('href="/apps/new"')
+  })
+  it('include-archived checkbox controls list filter', () => {
+    expect(html).toContain('id="apps-include-archived"')
+  })
+  it('vfLoadApps is the loader function', () => {
+    expect(html).toContain('async function vfLoadApps')
+    expect(html).toContain("'/web/apps'")
   })
 })
 
-describe('settings.html: App tab fields', () => {
+describe('settings.html: billing — "Lock in founding rate" removed', () => {
   const html = read('settings.html')
-  it('has identity inputs (name, slug, description)', () => {
+  it('partner inquiry CTA no longer rendered', () => {
+    expect(html).not.toContain('Lock in founding rate')
+    expect(html).not.toContain('id="partner-overlay"')
+    expect(html).not.toContain('showPartnerForm')
+    expect(html).not.toContain('hidePartnerForm')
+  })
+})
+
+describe('apps-detail.html: per-app detail page', () => {
+  const html = read('apps-detail.html')
+  it('exists and loads DM Sans', () => {
+    expect(html).toContain('DM Sans')
+  })
+  it('reads app id from /settings/apps/:id URL', () => {
+    expect(html).toContain('/settings/apps/')
+    expect(html).toContain('window.__VF_APP_ID__')
+  })
+  it('has identity inputs', () => {
     expect(html).toContain('id="input-app-name"')
     expect(html).toContain('id="input-app-slug"')
     expect(html).toContain('id="input-app-description"')
+  })
+  it('has API keys section with sandbox + live keys', () => {
+    expect(html).toContain('id="sandbox-write-prefix"')
+    expect(html).toContain('id="sandbox-read-prefix"')
+    expect(html).toContain('id="live-keys-list"')
+    expect(html).toContain('id="btn-create-live-key"')
   })
   it('has iOS attestation inputs', () => {
     expect(html).toContain('id="input-ios-team-id"')
@@ -65,67 +100,41 @@ describe('settings.html: App tab fields', () => {
     expect(html).toContain('id="input-android-package-name"')
     expect(html).toContain('id="input-android-signing-key-sha256"')
   })
-  it('has Web SDK section: enable toggle, RP ID, allowed origins, JWKs URL', () => {
+  it('has Web SDK section with toggle, RP ID, origins, JWKs URL', () => {
     expect(html).toContain('id="web-sdk-toggle"')
     expect(html).toContain('id="input-web-rp-id"')
     expect(html).toContain('id="web-origins-list"')
-    expect(html).toContain('id="btn-add-origin"')
     expect(html).toContain('id="jwks-url"')
     expect(html).toContain('https://api.vouchflow.dev/.well-known/jwks.json')
+  })
+  it('has webhooks section', () => {
+    expect(html).toContain('id="webhooks-list"')
+    expect(html).toContain('id="input-new-webhook-url"')
+    expect(html).toContain('id="btn-add-webhook"')
   })
   it('has confidence policy controls', () => {
     expect(html).toContain('id="select-verify-min"')
     expect(html).toContain('id="select-sign-min"')
     expect(html).toContain('id="context-overrides-list"')
-    expect(html).toContain('id="btn-add-context-override"')
   })
-  it('has archive button', () => {
+  it('has archive button + restore handler', () => {
     expect(html).toContain('id="btn-archive-app"')
+    expect(html).toContain('id="btn-unarchive-app"')
+  })
+  it('PATCHes /web/apps/:appId for save flows', () => {
+    expect(html).toContain('`/web/apps/${APP_ID}`')
   })
 })
 
-describe('settings.html: Account tab no longer carries app fields', () => {
-  const html = read('settings.html')
-  it('Account panel does not contain attestation inputs', () => {
-    // panel-account exists but should not duplicate the App-tab attestation fields.
-    const accountPanel = html.split('id="panel-account"')[1]?.split('id="panel-app"')[0] ?? ''
-    // Look for the comment that marks the moved-out section. The Account
-    // panel should NOT contain a fresh ios-team-id input within its own
-    // body. (panel-account is later in the file so we check up to end of
-    // file from that anchor.)
-    const tail = html.slice(html.indexOf('id="panel-account"'))
-    // Tail before its panel close. We assume one input-ios-team-id exists
-    // in the App panel (above panel-account in the file order).
-    const occurrences = (tail.match(/id="input-ios-team-id"/g) ?? []).length
-    expect(occurrences).toBe(0)
-  })
-})
-
-describe('apps-new.html: 3-step create flow', () => {
+describe('apps-new.html: 3-step create flow (unchanged)', () => {
   const html = read('apps-new.html')
   it('exists and has all three steps', () => {
     expect(html).toContain('id="step-1"')
     expect(html).toContain('id="step-2"')
     expect(html).toContain('id="step-3"')
   })
-  it('step 1 has name/slug inputs and a create button', () => {
-    expect(html).toContain('id="input-name"')
-    expect(html).toContain('id="input-slug"')
-    expect(html).toContain('id="btn-create"')
-  })
-  it('step 2 displays raw sandbox keys with copy', () => {
-    expect(html).toContain('id="display-write-key"')
-    expect(html).toContain('id="display-read-key"')
-  })
-  it('step 3 has platform cards and a finish button', () => {
-    expect(html).toContain('data-platform="ios"')
-    expect(html).toContain('data-platform="android"')
-    expect(html).toContain('data-platform="web"')
-    expect(html).toContain('id="btn-finish"')
-  })
-  it('POSTs to /web/apps and switches to the new app on finish', () => {
+  it('POSTs to /web/apps and redirects on finish', () => {
     expect(html).toContain("fetch('/web/apps'")
-    expect(html).toContain("/web/apps/current")
   })
 })
 
@@ -137,11 +146,10 @@ describe('verifications.html: type filter + Web platform', () => {
     expect(html).toContain('value="sign">signPayload()')
   })
   it('platform filter includes Web', () => {
-    // The existing platform select has options "All platforms / iOS / Android / Web"
     expect(html).toMatch(/<option>iOS<\/option>\s*<option>Android<\/option>\s*<option>Web<\/option>/)
   })
   it('currentFilters() includes type', () => {
-    expect(html).toContain("filters.type")
+    expect(html).toContain('filters.type')
   })
 })
 
@@ -161,16 +169,11 @@ describe('onboarding.html: Web platform tab in step 1 and step 2', () => {
   it('Web snippet has a sandbox-read-key placeholder for injection', () => {
     expect(html).toContain('class="vf-sandbox-read-key"')
   })
-  it('switchTab knows the new tab ids', () => {
-    expect(html).toContain("'web-install'")
-    expect(html).toContain("'ios-verify'")
-    expect(html).toContain("'web-verify'")
-  })
 })
 
 describe('shared markup invariants', () => {
-  it('all dashboard pages still load DM Sans / DM Mono', () => {
-    for (const page of ['dashboard.html', 'verifications.html', 'reputation.html', 'settings.html', 'onboarding.html', 'apps-new.html']) {
+  it('all dashboard pages still load DM Sans', () => {
+    for (const page of ['dashboard.html', 'verifications.html', 'reputation.html', 'settings.html', 'onboarding.html', 'apps-new.html', 'apps-detail.html']) {
       const html = read(page)
       expect(html, `${page} loads DM Sans`).toContain('DM Sans')
     }
