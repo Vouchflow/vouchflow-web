@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import oauthPlugin from '@fastify/oauth2'
 import type { OAuth2Namespace } from '@fastify/oauth2'
-import { findOrCreateCustomer, updateCustomer } from '../services/apiClient.js'
+import { findOrCreateCustomer, updateCustomer, listApps, getApp } from '../services/apiClient.js'
 import { config } from '../config.js'
 
 declare module 'fastify' {
@@ -73,10 +73,59 @@ async function finalizeLogin(
     try { await updateCustomer(customer.id, { orgName }) } catch {}
   }
 
+  // Apps refactor: pick the default App for this session. For new customers
+  // the API auto-created one with sandbox keys returned in the
+  // findOrCreateCustomer response; for existing customers we list their
+  // apps and grab the first non-archived (alphabetical by slug) — usually
+  // the migration's "default" app. If a customer has zero non-archived
+  // apps (rare edge case post-migration) we still finalize the session
+  // without app context; the dashboard middleware redirects them to the
+  // create-an-app page.
+  let appId: string | null = null
+  let appSlug: string | null = null
+  let appName: string | null = null
+  let sandboxWriteKey: string | null = customer.sandboxWriteKey ?? null
+  let sandboxReadKey:  string | null = customer.sandboxReadKey  ?? null
+
+  try {
+    const { apps } = await listApps(customer.id)
+    if (apps.length > 0) {
+      const sorted = [...apps].sort((a, b) => a.slug.localeCompare(b.slug))
+      const target = sorted[0]
+      appId   = target.id
+      appSlug = target.slug
+      appName = target.name
+      // Need raw sandbox keys — the find-existing customer response doesn't
+      // carry them. The App detail endpoint returns prefix only, so the
+      // raw keys persist only across creation. For an EXISTING customer
+      // without keys in the response, we have to look them up directly via
+      // a privileged path — currently there isn't one. For now, prefer the
+      // create-time keys when present, otherwise leave the session keys
+      // null (existing customers retain whatever keys they already have
+      // from a prior login). Future hardening: add a privileged
+      // GET /v1/customers/:id/apps/:appId/sandbox-keys endpoint.
+      if (!sandboxWriteKey) {
+        try {
+          const detail = await getApp(customer.id, target.id)
+          // Detail returns prefix only — store the prefix so the dashboard
+          // shows a placeholder, and rely on session preservation across
+          // logins for the raw key.
+          sandboxWriteKey = detail.sandboxWriteKeyPrefix ?? null
+          sandboxReadKey  = detail.sandboxReadKeyPrefix  ?? null
+        } catch {}
+      }
+    }
+  } catch (err) {
+    fastify.log.warn({ err, event: 'list_apps_failed_at_login' })
+  }
+
   request.session.set('email',              customer.email)
   request.session.set('customerId',         customer.id)
-  request.session.set('sandboxWriteKey',    customer.sandboxWriteKey)
-  request.session.set('sandboxReadKey',     customer.sandboxReadKey)
+  request.session.set('appId',              appId ?? '')
+  request.session.set('appSlug',            appSlug ?? '')
+  request.session.set('appName',            appName ?? '')
+  request.session.set('sandboxWriteKey',    sandboxWriteKey ?? '')
+  request.session.set('sandboxReadKey',     sandboxReadKey  ?? '')
   request.session.set('webhookSecret',      customer.webhookSecret)
   request.session.set('createdAt',          customer.createdAt)
   request.session.set('onboardingComplete', !isNew)
@@ -84,7 +133,7 @@ async function finalizeLogin(
   request.session.set('orgName',           orgName)
   request.session.set('avatarUrl',         avatarUrl)
 
-  fastify.log.info({ customerId: customer.id, isNew, provider, event: 'oauth_login' })
+  fastify.log.info({ customerId: customer.id, appId, isNew, provider, event: 'oauth_login' })
   return reply.redirect(isNew ? '/onboarding' : '/dashboard')
 }
 

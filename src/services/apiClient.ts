@@ -36,8 +36,11 @@ async function apiFetch<T>(
     try { parsed = JSON.parse(text) } catch { /* fall through with raw text */ }
     throw new ApiError(res.status, parsed)
   }
-
-  return res.json() as Promise<T>
+  // 204 No Content path — Fastify .send() with no body
+  if (res.status === 204) return undefined as unknown as T
+  const text = await res.text()
+  if (!text) return undefined as unknown as T
+  return JSON.parse(text) as T
 }
 
 // ── Customer ────────────────────────────────────────────────────────────────
@@ -45,21 +48,20 @@ async function apiFetch<T>(
 export interface Customer {
   id:              string
   email:           string
-  sandboxWriteKey: string
-  sandboxReadKey:  string
   webhookSecret:   string
   createdAt:       string
-
-  // Per-customer attestation parameters. All nullable; the server treats
-  // an unset value as attestation-not-configured (confidence_ceiling=medium).
-  androidPackageName?:      string | null
-  androidSigningKeySha256?: string | null
-  iosTeamId?:               string | null
-  iosBundleId?:             string | null
 }
 
-export async function findOrCreateCustomer(email: string): Promise<Customer> {
-  return apiFetch<Customer>('/v1/customers', {
+export interface CustomerWithDefaultApp extends Customer {
+  /** Sandbox keys returned ONCE on create; the response carries the new
+   *  default App's keys for back-compat with the prior auth flow. On
+   *  subsequent calls (find-existing) these are null — fetch the App. */
+  sandboxWriteKey: string | null
+  sandboxReadKey:  string | null
+}
+
+export async function findOrCreateCustomer(email: string): Promise<CustomerWithDefaultApp> {
+  return apiFetch<CustomerWithDefaultApp>('/v1/customers', {
     method: 'POST',
     body: JSON.stringify({ email }),
   })
@@ -68,16 +70,10 @@ export async function findOrCreateCustomer(email: string): Promise<Customer> {
 export async function updateCustomer(
   customerId: string,
   data: {
-    orgName?:                 string
-    billingEmail?:            string
-    minimumConfidence?:       string
-    networkOptIn?:            boolean
-    // Per-customer attestation parameters. Pass `null` to clear, omit to
-    // leave unchanged.
-    androidPackageName?:      string | null
-    androidSigningKeySha256?: string | null
-    iosTeamId?:               string | null
-    iosBundleId?:             string | null
+    orgName?:           string
+    billingEmail?:      string
+    minimumConfidence?: string
+    networkOptIn?:      boolean
   }
 ): Promise<Customer> {
   return apiFetch<Customer>(`/v1/customers/${customerId}`, {
@@ -85,6 +81,109 @@ export async function updateCustomer(
     body: JSON.stringify(data),
   })
 }
+
+export async function deleteAccount(customerId: string): Promise<void> {
+  await apiFetch<void>(`/v1/customers/${customerId}`, { method: 'DELETE' })
+}
+
+// ── Apps ────────────────────────────────────────────────────────────────────
+
+export type ConfidenceLevel = 'low' | 'medium' | 'high'
+
+export interface AppSummary {
+  id:            string
+  name:          string
+  slug:          string
+  description:   string | null
+  webSdkEnabled: boolean
+  archivedAt:    string | null
+  createdAt:     string
+}
+
+export interface AppDetail extends AppSummary {
+  customerId:                 string
+  // Attestation
+  iosTeamId:                  string | null
+  iosBundleId:                string | null
+  androidPackageName:         string | null
+  androidSigningKeySha256:    string | null
+  // Web SDK
+  webRpId:                    string | null
+  webAllowedOrigins:          string[]
+  // Confidence policy
+  verifyMinConfidence:        ConfidenceLevel | null
+  signPayloadMinConfidence:   ConfidenceLevel | null
+  contextConfidenceOverrides: Record<string, ConfidenceLevel>
+  // Sandbox key prefixes (raw values returned only on create)
+  sandboxWriteKeyPrefix:      string | null
+  sandboxReadKeyPrefix:       string | null
+  updatedAt:                  string
+}
+
+export interface CreatedApp {
+  app: AppDetail
+  sandboxWriteKey: string
+  sandboxReadKey: string
+}
+
+export async function listApps(
+  customerId: string,
+  opts: { includeArchived?: boolean } = {},
+): Promise<{ apps: AppSummary[] }> {
+  const qs = opts.includeArchived ? '?includeArchived=true' : ''
+  return apiFetch<{ apps: AppSummary[] }>(`/v1/customers/${customerId}/apps${qs}`)
+}
+
+export async function getApp(customerId: string, appId: string): Promise<AppDetail> {
+  return apiFetch<AppDetail>(`/v1/customers/${customerId}/apps/${appId}`)
+}
+
+export async function createApp(
+  customerId: string,
+  data: { name: string; slug?: string; description?: string },
+): Promise<CreatedApp> {
+  return apiFetch<CreatedApp>(`/v1/customers/${customerId}/apps`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export type AppPatch = Partial<{
+  name:                       string
+  slug:                       string
+  description:                string | null
+  iosTeamId:                  string | null
+  iosBundleId:                string | null
+  androidPackageName:         string | null
+  androidSigningKeySha256:    string | null
+  webSdkEnabled:              boolean
+  webRpId:                    string | null
+  webAllowedOrigins:          string[]
+  verifyMinConfidence:        ConfidenceLevel | null
+  signPayloadMinConfidence:   ConfidenceLevel
+  contextConfidenceOverrides: Record<string, ConfidenceLevel>
+}>
+
+export async function updateApp(
+  customerId: string,
+  appId: string,
+  data: AppPatch,
+): Promise<AppDetail> {
+  return apiFetch<AppDetail>(`/v1/customers/${customerId}/apps/${appId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function archiveApp(customerId: string, appId: string): Promise<void> {
+  await apiFetch<void>(`/v1/customers/${customerId}/apps/${appId}/archive`, { method: 'POST' })
+}
+
+export async function unarchiveApp(customerId: string, appId: string): Promise<void> {
+  await apiFetch<void>(`/v1/customers/${customerId}/apps/${appId}/unarchive`, { method: 'POST' })
+}
+
+// ── Live keys (per-app) ─────────────────────────────────────────────────────
 
 export interface LiveKeyInfo {
   id:         string
@@ -104,42 +203,26 @@ export interface GeneratedLiveKeySingle {
 
 export type GeneratedLiveKeys = GeneratedLiveKeyPair | GeneratedLiveKeySingle
 
-export async function getCustomer(customerId: string): Promise<Customer> {
-  return apiFetch<Customer>(`/v1/customers/${customerId}`)
+export async function getLiveKeys(customerId: string, appId: string): Promise<{ keys: LiveKeyInfo[] }> {
+  return apiFetch<{ keys: LiveKeyInfo[] }>(`/v1/customers/${customerId}/apps/${appId}/live-keys`)
 }
 
-/**
- * Create one or more live keys. By default returns a write+read pair to
- * preserve the prior dashboard UX; pass `scope: 'write'` or `scope: 'read'`
- * to create a single key. The API caps active keys at 10 per customer and
- * returns 409 (key_limit_reached) on overflow.
- */
 export async function generateLiveKeys(
   customerId: string,
+  appId: string,
   scope: 'pair' | 'write' | 'read' = 'pair',
 ): Promise<GeneratedLiveKeys> {
-  return apiFetch<GeneratedLiveKeys>(`/v1/customers/${customerId}/live-keys`, {
+  return apiFetch<GeneratedLiveKeys>(`/v1/customers/${customerId}/apps/${appId}/live-keys`, {
     method: 'POST',
     body: JSON.stringify({ scope }),
   })
 }
 
-/** Mark a single live key deprecated. The schema's 14-day grace window
- *  applies — the key keeps working until deprecatedAt+14d so in-flight
- *  callers aren't immediately 401'd. */
-export async function revokeLiveKey(customerId: string, keyId: string): Promise<void> {
+export async function revokeLiveKey(customerId: string, appId: string, keyId: string): Promise<void> {
   await apiFetch<{ key: unknown }>(
-    `/v1/customers/${customerId}/live-keys/${keyId}`,
+    `/v1/customers/${customerId}/apps/${appId}/live-keys/${keyId}`,
     { method: 'DELETE' },
   )
-}
-
-export async function deleteAccount(customerId: string): Promise<void> {
-  await apiFetch<void>(`/v1/customers/${customerId}`, { method: 'DELETE' })
-}
-
-export async function getLiveKeys(customerId: string): Promise<{ keys: LiveKeyInfo[] }> {
-  return apiFetch<{ keys: LiveKeyInfo[] }>(`/v1/customers/${customerId}/live-keys`)
 }
 
 // ── Stats ────────────────────────────────────────────────────────────────────
@@ -147,8 +230,8 @@ export async function getLiveKeys(customerId: string): Promise<{ keys: LiveKeyIn
 export interface OverviewStats {
   verificationCount: number
   deviceCount:       number
-  highConfidencePct: number
-  successRatePct:    number
+  highConfidencePct: number | null
+  successRatePct:    number | null
   dailyBreakdown:    Array<{ date: string; high: number; low: number }>
 }
 
@@ -165,6 +248,25 @@ export async function getOverviewStats(
   )
 }
 
+export interface CustomerOverview {
+  appCount:          number
+  verificationCount: number
+  deviceCount:       number
+  successRatePct:    number | null
+  highConfidencePct: number | null
+  perApp:            Array<{ appId: string; verificationCount: number }>
+}
+
+export async function getCustomerOverview(
+  customerId: string,
+  env: 'sandbox' | 'production' = 'sandbox',
+  range: string = '7d',
+): Promise<CustomerOverview> {
+  return apiFetch<CustomerOverview>(
+    `/v1/customers/${customerId}/overview?env=${env}&range=${encodeURIComponent(range)}`,
+  )
+}
+
 // ── Verifications ────────────────────────────────────────────────────────────
 
 export interface VerificationRow {
@@ -175,11 +277,12 @@ export interface VerificationRow {
   biometric:   string
   durationMs:  number
   createdAt:   string
+  type?:       'verify' | 'sign'
 }
 
 export async function getVerifications(
   sandboxWriteKey: string,
-  params: { limit?: number; offset?: number; confidence?: string; platform?: string; range?: string; result?: string; env?: 'sandbox' | 'production' }
+  params: { limit?: number; offset?: number; confidence?: string; platform?: string; range?: string; result?: string; type?: string; env?: 'sandbox' | 'production' }
 ): Promise<{ rows: VerificationRow[] }> {
   const qs = new URLSearchParams()
   if (params.limit)      qs.set('limit',      String(params.limit))
@@ -188,6 +291,7 @@ export async function getVerifications(
   if (params.platform)   qs.set('platform',   params.platform)
   if (params.range)      qs.set('range',      params.range)
   if (params.result)     qs.set('result',     params.result)
+  if (params.type)       qs.set('type',       params.type)
   qs.set('env', params.env ?? 'sandbox')
 
   return apiFetch<{ rows: VerificationRow[] }>(

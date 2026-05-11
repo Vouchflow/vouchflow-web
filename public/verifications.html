@@ -463,6 +463,141 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     <span class="logo-word">vouchflow</span>
   </a>
   <div class="topbar-center">
+    <!-- ── App switcher (apps refactor, chunk 5) ─────────────────────────────── -->
+    <style>
+    .app-switcher { position: relative; }
+    .app-switcher-button {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--sans); font-size: 11px; font-weight: 500;
+      border: 1px solid var(--border); background: #fff; color: var(--ink);
+      border-radius: 5px; padding: 3px 8px; cursor: pointer;
+      margin-right: 6px;
+    }
+    .app-switcher-button:hover { background: var(--ground); }
+    .app-switcher-icon { display: flex; align-items: center; color: var(--ink-3); }
+    .app-switcher-name { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .app-switcher-chevron { color: var(--ink-3); }
+    .app-switcher-popover {
+      display: none; position: absolute; top: 100%; left: 0; margin-top: 4px;
+      width: 280px; background: #fff; border: 1px solid var(--border);
+      border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); z-index: 50;
+      overflow: hidden;
+    }
+    .app-switcher-popover.open { display: block; }
+    .app-switcher-search { padding: 8px; border-bottom: 1px solid var(--border); }
+    .app-switcher-search input {
+      width: 100%; box-sizing: border-box; font-family: var(--sans); font-size: 12px;
+      border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; outline: none;
+    }
+    .app-switcher-search input:focus { border-color: var(--ink-3); }
+    .app-switcher-list { max-height: 280px; overflow-y: auto; }
+    .app-switcher-item {
+      display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+      font-size: 13px; color: var(--ink); cursor: pointer; user-select: none;
+    }
+    .app-switcher-item:hover { background: var(--ground); }
+    .app-switcher-item-active { color: var(--ink); font-weight: 500; }
+    .app-switcher-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+    .app-switcher-dot-empty { width: 6px; height: 6px; flex-shrink: 0; }
+    .app-switcher-name-meta { color: var(--ink-3); font-family: var(--mono); font-size: 10px; margin-left: auto; }
+    .app-switcher-empty { padding: 12px; font-size: 12px; color: var(--ink-3); text-align: center; }
+    .app-switcher-new {
+      display: block; padding: 9px 12px; font-size: 12px; color: var(--ink-2);
+      text-decoration: none; border-top: 1px solid var(--border); background: var(--ground);
+    }
+    .app-switcher-new:hover { color: var(--ink); background: #ECECEC; }
+    </style>
+    <div class="app-switcher" id="app-switcher">
+      <button class="app-switcher-button" id="app-switcher-button" type="button" onclick="toggleAppSwitcher()">
+        <span class="app-switcher-icon" aria-hidden="true">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+            <rect x="0.5" y="0.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1"/>
+            <rect x="6.5" y="0.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1" fill="currentColor"/>
+            <rect x="0.5" y="6.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1"/>
+            <rect x="6.5" y="6.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1"/>
+          </svg>
+        </span>
+        <span class="app-switcher-name" id="app-switcher-name">—</span>
+        <svg class="app-switcher-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="app-switcher-popover" id="app-switcher-popover" role="menu">
+        <div class="app-switcher-search">
+          <input type="text" id="app-switcher-search-input" placeholder="Search apps…" autocomplete="off"/>
+        </div>
+        <div class="app-switcher-list" id="app-switcher-list"></div>
+        <a href="/apps/new" class="app-switcher-new">+ New app</a>
+      </div>
+    </div>
+    <script>
+    // ── App switcher (chunk 5) ─────────────────────────────────────────────────
+    // Talks to /web/apps and /web/apps/current. Switching reloads the page so
+    // every dashboard component re-fetches with the new active App's data.
+    window.__vfApps = window.__vfApps || []
+    window.__vfCurrentAppId = window.__vfCurrentAppId || null
+    async function vfLoadAppSwitcher() {
+      try {
+        const sess = await fetch('/web/session').then(r => r.json())
+        window.__vfApps = sess.apps || []
+        window.__vfCurrentAppId = sess.appId
+        const current = window.__vfApps.find(a => a.id === sess.appId)
+        document.getElementById('app-switcher-name').textContent = current ? current.name : (sess.appName || '—')
+        vfRenderAppList('')
+      } catch (e) {
+        document.getElementById('app-switcher-name').textContent = '—'
+      }
+    }
+    function vfRenderAppList(filter) {
+      const list = document.getElementById('app-switcher-list')
+      if (!list) return
+      const q = filter.toLowerCase().trim()
+      const apps = window.__vfApps.filter(a => !a.archivedAt && (q === '' || a.name.toLowerCase().includes(q) || a.slug.toLowerCase().includes(q)))
+      if (apps.length === 0) { list.innerHTML = '<div class="app-switcher-empty">No apps match.</div>'; return }
+      list.innerHTML = apps.map(a => {
+        const active = a.id === window.__vfCurrentAppId
+        const dot = active ? '<span class="app-switcher-dot"></span>' : '<span class="app-switcher-dot-empty"></span>'
+        return `<div class="app-switcher-item ${active ? 'app-switcher-item-active' : ''}" onclick="vfSwitchApp('${a.id}')">${dot}<span>${(a.name||'').replace(/[<>&]/g,'')}</span><span class="app-switcher-name-meta">${(a.slug||'').replace(/[<>&]/g,'')}</span></div>`
+      }).join('')
+    }
+    function toggleAppSwitcher() {
+      const pop = document.getElementById('app-switcher-popover')
+      if (!pop) return
+      pop.classList.toggle('open')
+      if (pop.classList.contains('open')) {
+        setTimeout(() => document.getElementById('app-switcher-search-input')?.focus(), 0)
+      }
+    }
+    async function vfSwitchApp(appId) {
+      if (appId === window.__vfCurrentAppId) { toggleAppSwitcher(); return }
+      try {
+        const res = await fetch('/web/apps/current', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appId }),
+        })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          alert((err && err.error && err.error.message) || 'Could not switch app.')
+          return
+        }
+        window.location.reload()
+      } catch (e) {
+        alert('Network error switching apps.')
+      }
+    }
+    document.addEventListener('click', (e) => {
+      const sw = document.getElementById('app-switcher')
+      if (sw && !sw.contains(e.target)) {
+        document.getElementById('app-switcher-popover')?.classList.remove('open')
+      }
+    })
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('app-switcher-search-input')
+      if (input) input.addEventListener('input', (e) => vfRenderAppList(e.target.value))
+      vfLoadAppSwitcher()
+    })
+    </script>
     <div class="env-pill"><span class="env-dot"></span>sandbox</div>
   </div>
   <div class="topbar-right">
@@ -537,6 +672,12 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
         <option>All platforms</option>
         <option>iOS</option>
         <option>Android</option>
+        <option>Web</option>
+      </select>
+      <select class="filter-select" id="filter-type">
+        <option value="">All types</option>
+        <option value="verify">verify()</option>
+        <option value="sign">signPayload()</option>
       </select>
       <select class="filter-select">
         <option>All results</option>
@@ -922,17 +1063,22 @@ function renderDetailPanel(d) {
   document.getElementById('d-json').innerHTML = syntaxHighlight(JSON.stringify(d, null, 2));
 }
 
-// Filters
+// Filters — apps refactor adds a "type" filter (verify | sign) sitting
+// between platform and result. The filter id is set explicitly to avoid
+// brittle index lookups; legacy selects still index by position.
 function currentFilters() {
   const selects    = document.querySelectorAll('.filter-select');
   const confidence = selects[0]?.value ?? '';
   const platform   = selects[1]?.value ?? '';
-  const result     = selects[2]?.value ?? '';
+  const typeSel    = document.getElementById('filter-type');
+  const type       = typeSel?.value ?? '';
+  const result     = selects[3]?.value ?? '';
   const range      = document.querySelector('.range-btn.active')?.dataset.range ?? '7d';
   const filters    = { range };
   if (!confidence.toLowerCase().startsWith('all')) filters.confidence = confidence.toLowerCase();
   if (!platform.toLowerCase().startsWith('all'))   filters.platform   = platform.toLowerCase();
   if (!result.toLowerCase().startsWith('all'))     filters.result     = result.toLowerCase();
+  if (type)                                         filters.type       = type;
   return filters;
 }
 

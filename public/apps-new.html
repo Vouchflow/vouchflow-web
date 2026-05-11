@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>New App · Vouchflow</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --ink:#111;--ink-2:#333;--ink-3:#666;--ink-4:#999;
+  --surface:#fff;--ground:#f5f5f1;--border:#e0e0dc;
+  --sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --success:#1F7A45;--warn:#A66700;--danger:#B7372E;
+  --s-bg:#E8F4ED;--w-bg:#FFF8EE;--d-bg:#F9E4E2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);font-size:13px;color:var(--ink-2);background:var(--ground);line-height:1.5}
+a{color:var(--ink-2)}
+.wrap{max-width:560px;margin:48px auto;padding:0 20px}
+.logo-row{display:flex;justify-content:center;margin-bottom:32px}
+.logo-row a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-weight:500;font-size:15px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.step-progress{display:flex;border-bottom:1px solid var(--border);background:var(--ground)}
+.step-progress-item{flex:1;padding:14px 20px;font-size:11px;font-weight:500;color:var(--ink-4);text-transform:uppercase;letter-spacing:0.5px;text-align:center;position:relative}
+.step-progress-item.active{color:var(--ink);background:var(--surface)}
+.step-progress-item.done{color:var(--ink-3)}
+.step-progress-item:not(:last-child)::after{content:"";position:absolute;right:-1px;top:0;bottom:0;width:1px;background:var(--border)}
+.step{display:none;padding:32px 36px}
+.step.active{display:block}
+.step h2{font-size:18px;font-weight:500;color:var(--ink);margin-bottom:6px}
+.step p.lede{font-size:13px;color:var(--ink-3);margin-bottom:24px}
+.field{margin-bottom:18px}
+.field-label{display:block;font-size:11px;font-weight:500;color:var(--ink-2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.field-input{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:5px;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--surface);outline:none}
+.field-input:focus{border-color:var(--ink-3)}
+.field-hint{font-size:11px;color:var(--ink-3);margin-top:5px;font-weight:300}
+.btn{font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 16px;border-radius:5px;cursor:pointer;border:1px solid transparent;text-decoration:none;display:inline-flex;align-items:center;gap:6px;line-height:1}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:var(--ink-2)}
+.btn-primary:disabled{background:var(--ink-4);cursor:not-allowed}
+.btn-secondary{background:var(--surface);color:var(--ink-2);border-color:var(--border)}
+.btn-secondary:hover{background:var(--ground)}
+.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+.callout{background:#FEF7E6;border:1px solid #F0DEB8;border-radius:6px;padding:12px 14px;font-size:12px;color:var(--warn);margin-bottom:18px}
+.callout strong{color:#8a5500}
+.key-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;background:var(--ground);border:1px solid var(--border);border-radius:5px;font-family:var(--mono);font-size:12px}
+.key-row code{flex:1;overflow-x:auto;white-space:nowrap;color:var(--ink)}
+.key-label{font-size:10px;font-weight:500;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.5px;width:50px}
+.platform-row{display:flex;gap:10px;margin-top:12px}
+.platform-card{flex:1;border:1px solid var(--border);border-radius:6px;padding:14px;cursor:pointer;text-align:center;background:var(--surface);transition:border-color 0.15s}
+.platform-card:hover{border-color:var(--ink-3)}
+.platform-card.selected{border-color:var(--ink);background:var(--ground)}
+.platform-card-name{font-size:13px;font-weight:500;color:var(--ink);margin-top:6px}
+.platform-card-icon{font-size:18px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:5px;font-size:12px;opacity:0;transition:opacity 0.2s}
+.toast.show{opacity:1}
+.toast.error{background:var(--danger)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="logo-row">
+    <a href="/dashboard">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <circle cx="11" cy="11" r="10" stroke="#111" stroke-width="1.4"/>
+        <circle cx="11" cy="11" r="2.2" fill="#111"/>
+      </svg>
+      <span>vouchflow</span>
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="step-progress">
+      <div class="step-progress-item active" id="step-progress-1">1 · Basics</div>
+      <div class="step-progress-item" id="step-progress-2">2 · Sandbox keys</div>
+      <div class="step-progress-item" id="step-progress-3">3 · Platforms</div>
+    </div>
+
+    <!-- Step 1 — Basics -->
+    <div class="step active" id="step-1">
+      <h2>Create a new app</h2>
+      <p class="lede">An app is one set of attestation, API keys, and webhooks scoped to a single product surface — your iOS app, your Android app, your web app, or any combination.</p>
+      <div class="field">
+        <label class="field-label">Name</label>
+        <input class="field-input" id="input-name" type="text" placeholder="My iOS App" autofocus/>
+      </div>
+      <div class="field">
+        <label class="field-label">Slug</label>
+        <input class="field-input" id="input-slug" type="text" placeholder="my-ios-app" spellcheck="false" autocapitalize="off"/>
+        <div class="field-hint">Auto-generated from name. Lowercase a-z, 0-9, hyphens. Reserved: <code>new</code>, <code>archived</code>.</div>
+      </div>
+      <div class="field">
+        <label class="field-label">Description (optional)</label>
+        <input class="field-input" id="input-description" type="text" placeholder=""/>
+      </div>
+      <div class="actions">
+        <a href="/settings" class="btn btn-secondary">Cancel</a>
+        <button class="btn btn-primary" id="btn-create" type="button">Create app</button>
+      </div>
+    </div>
+
+    <!-- Step 2 — Sandbox keys -->
+    <div class="step" id="step-2">
+      <h2>Save your sandbox keys</h2>
+      <p class="lede">These are the only API keys you'll need until you're ready for production. Sandbox traffic doesn't bill or contribute to the network graph.</p>
+      <div class="callout"><strong>This is the only time you'll see these.</strong> Sandbox keys can't be regenerated — if you lose one, archive the app and create a fresh one.</div>
+      <div class="key-row">
+        <span class="key-label">write</span>
+        <code id="display-write-key"></code>
+        <button class="btn btn-secondary" type="button" onclick="vfCopy('display-write-key', this)">Copy</button>
+      </div>
+      <div class="key-row">
+        <span class="key-label">read</span>
+        <code id="display-read-key"></code>
+        <button class="btn btn-secondary" type="button" onclick="vfCopy('display-read-key', this)">Copy</button>
+      </div>
+      <div class="actions">
+        <span></span>
+        <button class="btn btn-primary" id="btn-saved-keys" type="button">I've saved them</button>
+      </div>
+    </div>
+
+    <!-- Step 3 — Platforms -->
+    <div class="step" id="step-3">
+      <h2>Choose your platforms</h2>
+      <p class="lede">Pick the platforms you'll ship the SDK on. You can configure attestation parameters per platform in the app's settings later.</p>
+      <div class="platform-row">
+        <div class="platform-card" data-platform="ios" onclick="vfTogglePlatform(this)">
+          <div class="platform-card-icon">📱</div>
+          <div class="platform-card-name">iOS</div>
+        </div>
+        <div class="platform-card" data-platform="android" onclick="vfTogglePlatform(this)">
+          <div class="platform-card-icon">🤖</div>
+          <div class="platform-card-name">Android</div>
+        </div>
+        <div class="platform-card" data-platform="web" onclick="vfTogglePlatform(this)">
+          <div class="platform-card-icon">🌐</div>
+          <div class="platform-card-name">Web</div>
+        </div>
+      </div>
+      <div class="field-hint" style="margin-top:14px">You can change this later — these checkboxes don't lock you in.</div>
+      <div class="actions">
+        <span></span>
+        <button class="btn btn-primary" id="btn-finish" type="button">Finish</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let __vfNewAppId = null;
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.toggle('error', !!isError); t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function vfShowStep(n) {
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById('step-' + i)?.classList.toggle('active', i === n);
+    const p = document.getElementById('step-progress-' + i);
+    if (p) {
+      p.classList.toggle('active', i === n);
+      p.classList.toggle('done', i < n);
+    }
+  }
+}
+function vfCopy(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent || '').then(
+    () => { const orig = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 1500); },
+    () => showToast('Copy failed', true),
+  );
+}
+function vfTogglePlatform(el) { el.classList.toggle('selected'); }
+// Auto-suggest slug while typing the name (only if user hasn't manually edited slug).
+const nameEl = document.getElementById('input-name');
+const slugEl = document.getElementById('input-slug');
+let slugManuallyEdited = false;
+slugEl?.addEventListener('input', () => { slugManuallyEdited = true; });
+nameEl?.addEventListener('input', () => {
+  if (slugManuallyEdited) return;
+  const s = (nameEl.value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50);
+  if (slugEl) slugEl.value = s;
+});
+
+document.getElementById('btn-create')?.addEventListener('click', async () => {
+  const name = nameEl.value.trim();
+  if (!name) { showToast('Name is required', true); return; }
+  const slug = slugEl.value.trim() || undefined;
+  const description = document.getElementById('input-description').value.trim() || undefined;
+  const btn = document.getElementById('btn-create');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    const res = await fetch('/web/apps', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, slug, description }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      showToast(body?.error?.message || 'Could not create app', true);
+      btn.disabled = false; btn.textContent = 'Create app';
+      return;
+    }
+    const created = await res.json();
+    __vfNewAppId = created.app.id;
+    document.getElementById('display-write-key').textContent = created.sandboxWriteKey;
+    document.getElementById('display-read-key').textContent  = created.sandboxReadKey;
+    vfShowStep(2);
+  } catch (e) {
+    showToast('Network error', true);
+    btn.disabled = false; btn.textContent = 'Create app';
+  }
+});
+
+document.getElementById('btn-saved-keys')?.addEventListener('click', () => vfShowStep(3));
+
+document.getElementById('btn-finish')?.addEventListener('click', async () => {
+  // Switch to the newly-created app, then redirect to /settings.
+  if (!__vfNewAppId) { window.location.href = '/settings'; return; }
+  try {
+    await fetch('/web/apps/current', {
+      method: 'PATCH', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ appId: __vfNewAppId }),
+    });
+  } catch {}
+  window.location.href = '/settings';
+});
+</script>
+
+</body>
+</html>

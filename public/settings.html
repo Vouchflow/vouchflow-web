@@ -512,6 +512,141 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     <span class="logo-word">vouchflow</span>
   </a>
   <div class="topbar-center">
+    <!-- ── App switcher (apps refactor, chunk 5) ─────────────────────────────── -->
+    <style>
+    .app-switcher { position: relative; }
+    .app-switcher-button {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--sans); font-size: 11px; font-weight: 500;
+      border: 1px solid var(--border); background: #fff; color: var(--ink);
+      border-radius: 5px; padding: 3px 8px; cursor: pointer;
+      margin-right: 6px;
+    }
+    .app-switcher-button:hover { background: var(--ground); }
+    .app-switcher-icon { display: flex; align-items: center; color: var(--ink-3); }
+    .app-switcher-name { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .app-switcher-chevron { color: var(--ink-3); }
+    .app-switcher-popover {
+      display: none; position: absolute; top: 100%; left: 0; margin-top: 4px;
+      width: 280px; background: #fff; border: 1px solid var(--border);
+      border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); z-index: 50;
+      overflow: hidden;
+    }
+    .app-switcher-popover.open { display: block; }
+    .app-switcher-search { padding: 8px; border-bottom: 1px solid var(--border); }
+    .app-switcher-search input {
+      width: 100%; box-sizing: border-box; font-family: var(--sans); font-size: 12px;
+      border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; outline: none;
+    }
+    .app-switcher-search input:focus { border-color: var(--ink-3); }
+    .app-switcher-list { max-height: 280px; overflow-y: auto; }
+    .app-switcher-item {
+      display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+      font-size: 13px; color: var(--ink); cursor: pointer; user-select: none;
+    }
+    .app-switcher-item:hover { background: var(--ground); }
+    .app-switcher-item-active { color: var(--ink); font-weight: 500; }
+    .app-switcher-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+    .app-switcher-dot-empty { width: 6px; height: 6px; flex-shrink: 0; }
+    .app-switcher-name-meta { color: var(--ink-3); font-family: var(--mono); font-size: 10px; margin-left: auto; }
+    .app-switcher-empty { padding: 12px; font-size: 12px; color: var(--ink-3); text-align: center; }
+    .app-switcher-new {
+      display: block; padding: 9px 12px; font-size: 12px; color: var(--ink-2);
+      text-decoration: none; border-top: 1px solid var(--border); background: var(--ground);
+    }
+    .app-switcher-new:hover { color: var(--ink); background: #ECECEC; }
+    </style>
+    <div class="app-switcher" id="app-switcher">
+      <button class="app-switcher-button" id="app-switcher-button" type="button" onclick="toggleAppSwitcher()">
+        <span class="app-switcher-icon" aria-hidden="true">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+            <rect x="0.5" y="0.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1"/>
+            <rect x="6.5" y="0.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1" fill="currentColor"/>
+            <rect x="0.5" y="6.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1"/>
+            <rect x="6.5" y="6.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1"/>
+          </svg>
+        </span>
+        <span class="app-switcher-name" id="app-switcher-name">—</span>
+        <svg class="app-switcher-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="app-switcher-popover" id="app-switcher-popover" role="menu">
+        <div class="app-switcher-search">
+          <input type="text" id="app-switcher-search-input" placeholder="Search apps…" autocomplete="off"/>
+        </div>
+        <div class="app-switcher-list" id="app-switcher-list"></div>
+        <a href="/apps/new" class="app-switcher-new">+ New app</a>
+      </div>
+    </div>
+    <script>
+    // ── App switcher (chunk 5) ─────────────────────────────────────────────────
+    // Talks to /web/apps and /web/apps/current. Switching reloads the page so
+    // every dashboard component re-fetches with the new active App's data.
+    window.__vfApps = window.__vfApps || []
+    window.__vfCurrentAppId = window.__vfCurrentAppId || null
+    async function vfLoadAppSwitcher() {
+      try {
+        const sess = await fetch('/web/session').then(r => r.json())
+        window.__vfApps = sess.apps || []
+        window.__vfCurrentAppId = sess.appId
+        const current = window.__vfApps.find(a => a.id === sess.appId)
+        document.getElementById('app-switcher-name').textContent = current ? current.name : (sess.appName || '—')
+        vfRenderAppList('')
+      } catch (e) {
+        document.getElementById('app-switcher-name').textContent = '—'
+      }
+    }
+    function vfRenderAppList(filter) {
+      const list = document.getElementById('app-switcher-list')
+      if (!list) return
+      const q = filter.toLowerCase().trim()
+      const apps = window.__vfApps.filter(a => !a.archivedAt && (q === '' || a.name.toLowerCase().includes(q) || a.slug.toLowerCase().includes(q)))
+      if (apps.length === 0) { list.innerHTML = '<div class="app-switcher-empty">No apps match.</div>'; return }
+      list.innerHTML = apps.map(a => {
+        const active = a.id === window.__vfCurrentAppId
+        const dot = active ? '<span class="app-switcher-dot"></span>' : '<span class="app-switcher-dot-empty"></span>'
+        return `<div class="app-switcher-item ${active ? 'app-switcher-item-active' : ''}" onclick="vfSwitchApp('${a.id}')">${dot}<span>${(a.name||'').replace(/[<>&]/g,'')}</span><span class="app-switcher-name-meta">${(a.slug||'').replace(/[<>&]/g,'')}</span></div>`
+      }).join('')
+    }
+    function toggleAppSwitcher() {
+      const pop = document.getElementById('app-switcher-popover')
+      if (!pop) return
+      pop.classList.toggle('open')
+      if (pop.classList.contains('open')) {
+        setTimeout(() => document.getElementById('app-switcher-search-input')?.focus(), 0)
+      }
+    }
+    async function vfSwitchApp(appId) {
+      if (appId === window.__vfCurrentAppId) { toggleAppSwitcher(); return }
+      try {
+        const res = await fetch('/web/apps/current', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appId }),
+        })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          alert((err && err.error && err.error.message) || 'Could not switch app.')
+          return
+        }
+        window.location.reload()
+      } catch (e) {
+        alert('Network error switching apps.')
+      }
+    }
+    document.addEventListener('click', (e) => {
+      const sw = document.getElementById('app-switcher')
+      if (sw && !sw.contains(e.target)) {
+        document.getElementById('app-switcher-popover')?.classList.remove('open')
+      }
+    })
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('app-switcher-search-input')
+      if (input) input.addEventListener('input', (e) => vfRenderAppList(e.target.value))
+      vfLoadAppSwitcher()
+    })
+    </script>
     <div class="env-pill"><span class="env-dot"></span>sandbox</div>
     <div style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.5px;border-radius:4px;padding:3px 8px;background:#F0F0F0;color:var(--ink-3);border:1px solid var(--border);">beta</div>
   </div>
@@ -584,17 +719,230 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   <!-- MAIN -->
   <main class="main">
 
-    <!-- TABS -->
+    <!-- TABS (apps refactor: "App" tab is new and default; "Webhooks" split
+         from the API Keys panel so per-app webhook management has room) -->
     <div class="settings-tabs">
-      <button class="settings-tab active" onclick="switchTab('api-keys')">API Keys</button>
+      <button class="settings-tab active" onclick="switchTab('app')">App</button>
+      <button class="settings-tab" onclick="switchTab('api-keys')">API Keys</button>
+      <button class="settings-tab" onclick="switchTab('webhooks')">Webhooks</button>
       <button class="settings-tab" onclick="switchTab('billing')">Billing</button>
       <button class="settings-tab" onclick="switchTab('account')">Account</button>
     </div>
 
     <div class="settings-content">
 
+      <!-- ── APP (apps refactor) ── -->
+      <!-- Per-app config: identity, attestation (iOS/Android), Web SDK, and
+           confidence policy. The App tab is the dashboard's primary surface
+           for everything scoped to a single app within the customer. -->
+      <div class="panel active" id="panel-app">
+
+        <!-- Identity -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">App identity</div>
+            <div class="section-sub">Customer-facing label and URL slug. Slug appears in some dashboard URLs and in support communications.</div>
+          </div>
+          <div class="section-body">
+            <div class="field">
+              <label class="field-label">Name</label>
+              <input class="field-input" id="input-app-name" type="text" placeholder="My iOS App"/>
+            </div>
+            <div class="field">
+              <label class="field-label">Slug</label>
+              <input class="field-input" id="input-app-slug" type="text" placeholder="my-ios-app" spellcheck="false" autocapitalize="off"/>
+              <div class="field-hint">Lowercase a-z, 0-9, hyphens. Reserved: <code>new</code>, <code>archived</code>.</div>
+            </div>
+            <div class="field">
+              <label class="field-label">Description</label>
+              <input class="field-input" id="input-app-description" type="text" placeholder="Optional"/>
+            </div>
+          </div>
+          <div class="section-footer">
+            <span class="section-footer-note"></span>
+            <button class="btn btn-primary btn-sm" id="btn-save-app-identity">Save</button>
+          </div>
+        </div>
+
+        <!-- iOS attestation -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">iOS attestation</div>
+            <div class="section-sub">Required before <code style="font-family:var(--mono);font-size:11px;background:#f0f0ec;padding:1px 4px;border-radius:3px;">confidence: high</code> can be returned for iOS verifications. Anything else falls back to <code style="font-family:var(--mono);font-size:11px;background:#f0f0ec;padding:1px 4px;border-radius:3px;">medium</code>. None of these are secrets; they're public identifiers.</div>
+          </div>
+          <div class="section-body">
+            <div class="field">
+              <label class="field-label">Team ID</label>
+              <input class="field-input" id="input-ios-team-id" type="text" placeholder="ABCDE12345" maxlength="10"/>
+              <div class="field-hint">10-character alphanumeric. Apple Developer Portal → Membership.</div>
+            </div>
+            <div class="field">
+              <label class="field-label">Bundle ID</label>
+              <input class="field-input" id="input-ios-bundle-id" type="text" placeholder="com.acme.app"/>
+              <div class="field-hint">Reverse-DNS bundle identifier from your Xcode project.</div>
+            </div>
+          </div>
+          <div class="section-footer">
+            <span class="section-footer-note"><a href="/docs/ios-sdk" style="color:var(--ink-2)">Why this matters →</a></span>
+            <button class="btn btn-primary btn-sm" id="btn-save-ios">Save</button>
+          </div>
+        </div>
+
+        <!-- Android attestation -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">Android attestation</div>
+            <div class="section-sub">Same idea as iOS. Without these set, Android verifications cap at <code style="font-family:var(--mono);font-size:11px;background:#f0f0ec;padding:1px 4px;border-radius:3px;">medium</code>.</div>
+          </div>
+          <div class="section-body">
+            <div class="field">
+              <label class="field-label">Package name</label>
+              <input class="field-input" id="input-android-package-name" type="text" placeholder="com.acme.app"/>
+              <div class="field-hint">Your app's <code>applicationId</code> from <code>build.gradle</code>.</div>
+            </div>
+            <div class="field">
+              <label class="field-label">Signing-cert SHA-256</label>
+              <input class="field-input" id="input-android-signing-key-sha256" type="text" placeholder="A1:B2:C3:..." spellcheck="false" autocapitalize="off"/>
+              <div class="field-hint">SHA-256 fingerprint of your release signing certificate. Run <code>keytool -list -v -keystore release.jks</code> or copy from Play Console → App signing. Colons and spaces are stripped automatically.</div>
+            </div>
+          </div>
+          <div class="section-footer">
+            <span class="section-footer-note"><a href="/docs/android-sdk" style="color:var(--ink-2)">Why this matters →</a></span>
+            <button class="btn btn-primary btn-sm" id="btn-save-android">Save</button>
+          </div>
+        </div>
+
+        <!-- Web SDK -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">Web SDK</div>
+            <div class="section-sub">WebAuthn-based verification for browser apps. Set the relying-party ID and at least one allowed origin, then enable.</div>
+          </div>
+          <div class="section-body">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Enable Web SDK</div>
+                <div class="toggle-desc">Required to accept enroll/verify calls from the browser SDK. RP ID must be set first.</div>
+              </div>
+              <button class="toggle" id="web-sdk-toggle" type="button" onclick="this.classList.toggle('on')"></button>
+            </div>
+            <div class="field" style="margin-top:16px">
+              <label class="field-label">Relying party ID (RP ID)</label>
+              <input class="field-input" id="input-web-rp-id" type="text" placeholder="app.example.com" spellcheck="false" autocapitalize="off"/>
+              <div class="field-hint">Your app's domain — no scheme, no path. Use <code>localhost</code> for development.</div>
+            </div>
+            <div class="field">
+              <label class="field-label">Allowed origins</label>
+              <div id="web-origins-list" style="display:flex;flex-direction:column;gap:6px"></div>
+              <button class="btn btn-secondary btn-sm" type="button" id="btn-add-origin" style="margin-top:8px">+ Add origin</button>
+              <div class="field-hint">Each origin must be <code>https://</code> (or <code>http://localhost</code> for development).</div>
+            </div>
+            <div class="field">
+              <label class="field-label">JWKs URL</label>
+              <div style="display:flex;align-items:center;gap:8px">
+                <code id="jwks-url" style="font-family:var(--mono);font-size:11px;background:var(--ground);padding:6px 10px;border-radius:4px;border:1px solid var(--border);flex:1">https://api.vouchflow.dev/.well-known/jwks.json</code>
+                <button class="btn btn-secondary btn-sm" type="button" onclick="vfCopyJwksUrl()">Copy</button>
+              </div>
+              <div class="field-hint">Customer backends fetch this to verify <code>signPayload</code> assertions. See <a href="/docs/backend" style="color:var(--ink-2)">backend integration →</a>.</div>
+            </div>
+          </div>
+          <div class="section-footer">
+            <span class="section-footer-note"></span>
+            <button class="btn btn-primary btn-sm" id="btn-save-web-sdk">Save</button>
+          </div>
+        </div>
+
+        <!-- Confidence policy -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">Confidence policy</div>
+            <div class="section-sub">Per-app floor for verify and signPayload calls. Per-context overrides cannot weaken below the signPayload default.</div>
+          </div>
+          <div class="section-body">
+            <div class="field">
+              <label class="field-label">Minimum for verify()</label>
+              <select class="field-input" id="select-verify-min" style="max-width:240px">
+                <option value="">— inherit account default —</option>
+                <option value="low">low</option>
+                <option value="medium">medium</option>
+                <option value="high">high</option>
+              </select>
+              <div class="field-hint">When unset, the account-wide minimum confidence (Account tab) applies.</div>
+            </div>
+            <div class="field">
+              <label class="field-label">Minimum for signPayload()</label>
+              <select class="field-input" id="select-sign-min" style="max-width:240px">
+                <option value="low">low</option>
+                <option value="medium">medium</option>
+                <option value="high" selected>high</option>
+              </select>
+              <div class="field-hint">signPayload always has a floor; it never inherits from verify policy.</div>
+            </div>
+            <div class="field">
+              <label class="field-label">Per-context overrides</label>
+              <div id="context-overrides-list" style="display:flex;flex-direction:column;gap:6px"></div>
+              <button class="btn btn-secondary btn-sm" type="button" id="btn-add-context-override" style="margin-top:8px">+ Add override</button>
+              <div class="field-hint">Raise the floor for specific contexts (e.g. <code>transfer</code>). Cannot weaken below the signPayload default.</div>
+            </div>
+          </div>
+          <div class="section-footer">
+            <span class="section-footer-note"></span>
+            <button class="btn btn-primary btn-sm" id="btn-save-confidence-policy">Save</button>
+          </div>
+        </div>
+
+        <!-- Archive -->
+        <div class="danger-section">
+          <div class="section-header">
+            <div class="section-title">Archive app</div>
+            <div class="section-sub">Archived apps reject SDK traffic with a clear error. Reversible — unarchive from the apps list.</div>
+          </div>
+          <div class="section-body">
+            <div class="toggle-row" style="border:none;padding-bottom:0">
+              <div class="toggle-info">
+                <div class="toggle-label" style="color:var(--danger)">Archive this app</div>
+                <div class="toggle-desc">Existing API keys stop working. Live keys are preserved (not deleted) so you can restore the app later.</div>
+              </div>
+              <button class="btn btn-danger" id="btn-archive-app">Archive</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── WEBHOOKS (apps refactor) ── -->
+      <!-- Per-app webhook endpoint list. Each endpoint receives only events
+           originating from this app — sibling apps within the same customer
+           do not see each other's traffic. -->
+      <div class="panel" id="panel-webhooks">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">Webhook endpoints</div>
+            <div class="section-sub">Per-app. Add an endpoint URL and choose which events should fire.</div>
+          </div>
+          <div class="section-body">
+            <div id="webhooks-list" style="display:flex;flex-direction:column;gap:0">
+              <div class="webhook-empty" style="padding:24px 0;text-align:center;color:var(--ink-3);font-size:12px">No webhooks yet.</div>
+            </div>
+            <div class="field" style="margin-top:20px">
+              <label class="field-label">Add an endpoint</label>
+              <input class="field-input" id="input-new-webhook-url" type="url" placeholder="https://your-server.example.com/vouchflow/webhook"/>
+              <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);cursor:pointer"><input type="checkbox" class="webhook-event-cb" value="verification.complete" checked/> verification.complete</label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);cursor:pointer"><input type="checkbox" class="webhook-event-cb" value="verification.fallback_complete"/> fallback_complete</label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);cursor:pointer"><input type="checkbox" class="webhook-event-cb" value="sign.complete"/> sign.complete</label>
+              </div>
+            </div>
+          </div>
+          <div class="section-footer">
+            <span class="section-footer-note">Webhooks are signed with the customer signing secret (API Keys tab).</span>
+            <button class="btn btn-primary btn-sm" id="btn-add-webhook">Add endpoint</button>
+          </div>
+        </div>
+      </div>
+
       <!-- ── API KEYS ── -->
-      <div class="panel active" id="panel-api-keys">
+      <div class="panel" id="panel-api-keys">
 
         <div class="info-banner">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;margin-top:2px"><circle cx="7" cy="7" r="6" stroke="#1A4F9E" stroke-width="1.3"/><rect x="6.3" y="6" width="1.4" height="4.5" rx="0.7" fill="#1A4F9E"/><rect x="6.3" y="3.5" width="1.4" height="1.4" rx="0.7" fill="#1A4F9E"/></svg>
@@ -851,39 +1199,7 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
           </div>
         </div>
 
-        <!-- App identity (attestation) -->
-        <div class="section">
-          <div class="section-header">
-            <div class="section-title">App identity (attestation)</div>
-            <div class="section-sub">Required before <code style="font-family:var(--mono);font-size:11px;background:#f0f0ec;padding:1px 4px;border-radius:3px;">confidence: high</code> can be returned. Tell Vouchflow which app's attestations are legitimate — anything else falls back to <code style="font-family:var(--mono);font-size:11px;background:#f0f0ec;padding:1px 4px;border-radius:3px;">medium</code>. None of these are secrets; they're public identifiers.</div>
-          </div>
-          <div class="section-body">
-            <div class="field">
-              <label class="field-label">iOS team ID</label>
-              <input class="field-input" id="input-ios-team-id" type="text" placeholder="ABCDE12345" maxlength="10"/>
-              <div class="field-hint">10-character alphanumeric. Apple Developer Portal → Membership.</div>
-            </div>
-            <div class="field">
-              <label class="field-label">iOS bundle ID</label>
-              <input class="field-input" id="input-ios-bundle-id" type="text" placeholder="com.acme.app"/>
-              <div class="field-hint">Reverse-DNS bundle identifier from your Xcode project.</div>
-            </div>
-            <div class="field">
-              <label class="field-label">Android package name</label>
-              <input class="field-input" id="input-android-package-name" type="text" placeholder="com.acme.app"/>
-              <div class="field-hint">Your app's <code>applicationId</code> from <code>build.gradle</code>.</div>
-            </div>
-            <div class="field">
-              <label class="field-label">Android signing-cert SHA-256</label>
-              <input class="field-input" id="input-android-signing-key-sha256" type="text" placeholder="A1:B2:C3:..." spellcheck="false" autocapitalize="off"/>
-              <div class="field-hint">SHA-256 fingerprint of your release signing certificate. Run <code>keytool -list -v -keystore release.jks</code> or copy from Play Console → App signing → "App signing key certificate". Colons and spaces are stripped automatically.</div>
-            </div>
-          </div>
-          <div class="section-footer">
-            <span class="section-footer-note"><a href="/docs/android#enrollment" style="color:var(--ink-2)">Why this matters →</a></span>
-            <button class="btn btn-primary btn-sm" id="btn-save-app-identity">Save changes</button>
-          </div>
-        </div>
+        <!-- App identity (attestation) moved to the App tab in the apps refactor -->
 
         <!-- Danger zone -->
         <div class="danger-section">
@@ -1062,12 +1378,29 @@ function renderAccount(session, usage, overview) {
   if (orgInput)   orgInput.value   = session.orgName ?? '';
   if (emailInput) emailInput.value = session.billingEmail ?? session.email ?? '';
 
-  // App identity (attestation) fields
+  // App tab fields (apps refactor) — attestation, Web SDK, identity all
+  // come from the current App via /web/session.
   const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? '' };
+  setVal('input-app-name',                   session.appName);
+  setVal('input-app-slug',                   session.appSlug);
   setVal('input-ios-team-id',                session.iosTeamId);
   setVal('input-ios-bundle-id',              session.iosBundleId);
   setVal('input-android-package-name',       session.androidPackageName);
   setVal('input-android-signing-key-sha256', session.androidSigningKeySha256);
+  setVal('input-web-rp-id',                  session.webRpId);
+  // Web SDK toggle reflects backend state
+  const wsToggle = document.getElementById('web-sdk-toggle');
+  if (wsToggle) wsToggle.classList.toggle('on', !!session.webSdkEnabled);
+  // Origins editor
+  if (typeof vfRenderOrigins === 'function') vfRenderOrigins(session.webAllowedOrigins ?? []);
+  // Confidence policy
+  const verifyMin = document.getElementById('select-verify-min');
+  if (verifyMin) verifyMin.value = session.verifyMinConfidence ?? '';
+  const signMin = document.getElementById('select-sign-min');
+  if (signMin) signMin.value = session.signPayloadMinConfidence ?? 'high';
+  if (typeof vfRenderOverrides === 'function') vfRenderOverrides(session.contextConfidenceOverrides ?? {});
+  // Webhooks list — kick off load asynchronously
+  if (typeof vfLoadWebhooks === 'function') vfLoadWebhooks();
 
   // Sidenav usage
   const count = usage?.verificationCount ?? 0;
@@ -1319,28 +1652,233 @@ document.getElementById('btn-save-network').addEventListener('click', async () =
   }
 });
 
-document.getElementById('btn-save-app-identity').addEventListener('click', async () => {
-  // Empty string → null (clear); non-empty → save
-  const norm = (v) => (v === '' || v == null ? null : v);
-  const iosTeamId               = norm(document.getElementById('input-ios-team-id')?.value?.trim());
-  const iosBundleId             = norm(document.getElementById('input-ios-bundle-id')?.value?.trim());
-  const androidPackageName      = norm(document.getElementById('input-android-package-name')?.value?.trim());
-  const androidSigningKeySha256 = norm(document.getElementById('input-android-signing-key-sha256')?.value?.trim());
+// ── App tab handlers (apps refactor) ─────────────────────────────────────
+// All app-scoped fields PATCH /web/apps/current. The web layer routes that
+// to /v1/customers/:id/apps/:appId.
+const norm = (v) => (v === '' || v == null ? null : v);
+
+async function patchCurrentApp(payload, successMsg) {
+  // Resolve the current app id from the session, then PATCH the app-scoped
+  // endpoint. The /web/apps/current endpoint is GET-only (returns detail);
+  // PATCH targets /web/apps/:appId so we can route through the explicit
+  // app-id endpoint and avoid a redirect.
+  const sess = await fetch('/web/session').then(r => r.json()).catch(() => ({}));
+  const appId = sess?.appId;
+  if (!appId) { showToast('No active app', true); return false; }
   try {
-    const res = await fetch('/web/account', {
+    const res = await fetch(`/web/apps/${appId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ iosTeamId, iosBundleId, androidPackageName, androidSigningKeySha256 }),
+      body: JSON.stringify(payload),
     });
     if (res.ok) {
-      showToast('App identity saved');
+      showToast(successMsg || 'Saved');
+      return true;
+    }
+    const body = await res.json().catch(() => null);
+    showToast(body?.error?.message || 'Failed to save — check formatting', true);
+    return false;
+  } catch {
+    showToast('Network error', true);
+    return false;
+  }
+}
+
+document.getElementById('btn-save-app-identity')?.addEventListener('click', async () => {
+  const name        = norm(document.getElementById('input-app-name')?.value?.trim());
+  const slug        = norm(document.getElementById('input-app-slug')?.value?.trim());
+  const description = norm(document.getElementById('input-app-description')?.value?.trim());
+  const payload = {};
+  if (name        !== null) payload.name        = name;
+  if (slug        !== null) payload.slug        = slug;
+  payload.description = description;
+  await patchCurrentApp(payload, 'App identity saved');
+});
+
+document.getElementById('btn-save-ios')?.addEventListener('click', async () => {
+  await patchCurrentApp({
+    iosTeamId:   norm(document.getElementById('input-ios-team-id')?.value?.trim()),
+    iosBundleId: norm(document.getElementById('input-ios-bundle-id')?.value?.trim()),
+  }, 'iOS attestation saved');
+});
+
+document.getElementById('btn-save-android')?.addEventListener('click', async () => {
+  await patchCurrentApp({
+    androidPackageName:      norm(document.getElementById('input-android-package-name')?.value?.trim()),
+    androidSigningKeySha256: norm(document.getElementById('input-android-signing-key-sha256')?.value?.trim()),
+  }, 'Android attestation saved');
+});
+
+// ── Web SDK section: origins editor + save ──────────────────────────────
+function vfRenderOrigins(origins) {
+  const list = document.getElementById('web-origins-list');
+  if (!list) return;
+  list.innerHTML = '';
+  for (const o of origins) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:6px;align-items:center';
+    row.innerHTML = `
+      <input class="field-input vf-origin-input" type="text" value="${escapeHtml(o)}" placeholder="https://app.example.com" style="flex:1;font-family:var(--mono);font-size:12px"/>
+      <button type="button" class="btn btn-secondary btn-sm vf-origin-remove">Remove</button>
+    `;
+    list.appendChild(row);
+  }
+}
+document.getElementById('btn-add-origin')?.addEventListener('click', () => {
+  const list = document.getElementById('web-origins-list');
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;align-items:center';
+  row.innerHTML = `
+    <input class="field-input vf-origin-input" type="text" placeholder="https://app.example.com" style="flex:1;font-family:var(--mono);font-size:12px"/>
+    <button type="button" class="btn btn-secondary btn-sm vf-origin-remove">Remove</button>
+  `;
+  list?.appendChild(row);
+});
+document.addEventListener('click', (e) => {
+  const t = e.target;
+  if (t instanceof HTMLElement && t.classList.contains('vf-origin-remove')) {
+    t.parentElement?.remove();
+  }
+});
+document.getElementById('btn-save-web-sdk')?.addEventListener('click', async () => {
+  const webSdkEnabled = document.getElementById('web-sdk-toggle')?.classList.contains('on') ?? false;
+  const webRpId       = norm(document.getElementById('input-web-rp-id')?.value?.trim());
+  const inputs = document.querySelectorAll('.vf-origin-input');
+  const webAllowedOrigins = Array.from(inputs).map(i => (i.value || '').trim()).filter(Boolean);
+  await patchCurrentApp({ webSdkEnabled, webRpId, webAllowedOrigins }, 'Web SDK saved');
+});
+function vfCopyJwksUrl() {
+  const el = document.getElementById('jwks-url');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent || '').then(
+    () => showToast('JWKs URL copied'),
+    () => showToast('Copy failed', true),
+  );
+}
+
+// ── Confidence policy: per-context overrides editor ─────────────────────
+function vfRenderOverrides(overrides) {
+  const list = document.getElementById('context-overrides-list');
+  if (!list) return;
+  list.innerHTML = '';
+  for (const [ctx, level] of Object.entries(overrides ?? {})) {
+    vfAppendOverrideRow(ctx, level);
+  }
+}
+function vfAppendOverrideRow(ctx, level) {
+  const list = document.getElementById('context-overrides-list');
+  if (!list) return;
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;align-items:center';
+  row.innerHTML = `
+    <input class="field-input vf-ctx-name" type="text" value="${escapeHtml(ctx ?? '')}" placeholder="context name (e.g. transfer)" style="flex:1"/>
+    <select class="field-input vf-ctx-level" style="width:120px">
+      <option value="low">low</option><option value="medium">medium</option><option value="high">high</option>
+    </select>
+    <button type="button" class="btn btn-secondary btn-sm vf-ctx-remove">Remove</button>
+  `;
+  list.appendChild(row);
+  const sel = row.querySelector('.vf-ctx-level');
+  if (sel) sel.value = level || 'high';
+}
+document.getElementById('btn-add-context-override')?.addEventListener('click', () => vfAppendOverrideRow('', 'high'));
+document.addEventListener('click', (e) => {
+  const t = e.target;
+  if (t instanceof HTMLElement && t.classList.contains('vf-ctx-remove')) {
+    t.parentElement?.remove();
+  }
+});
+document.getElementById('btn-save-confidence-policy')?.addEventListener('click', async () => {
+  const verifyMin = document.getElementById('select-verify-min')?.value || null;
+  const signMin   = document.getElementById('select-sign-min')?.value || 'high';
+  const overrides = {};
+  document.querySelectorAll('#context-overrides-list > div').forEach(row => {
+    const name  = row.querySelector('.vf-ctx-name')?.value?.trim();
+    const level = row.querySelector('.vf-ctx-level')?.value;
+    if (name && level) overrides[name] = level;
+  });
+  await patchCurrentApp({
+    verifyMinConfidence:        verifyMin || null,
+    signPayloadMinConfidence:   signMin,
+    contextConfidenceOverrides: overrides,
+  }, 'Confidence policy saved');
+});
+
+// ── Archive ─────────────────────────────────────────────────────────────
+document.getElementById('btn-archive-app')?.addEventListener('click', async () => {
+  const ok = window.confirm(
+    'Archive this app?\n\nExisting API keys stop working immediately. You can unarchive from the apps list later.'
+  );
+  if (!ok) return;
+  const sess = await fetch('/web/session').then(r => r.json()).catch(() => ({}));
+  const appId = sess?.appId;
+  if (!appId) { showToast('No active app', true); return; }
+  try {
+    const res = await fetch(`/web/apps/${appId}/archive`, { method: 'POST', credentials: 'include' });
+    if (res.ok) {
+      showToast('App archived');
+      // /web archive handler switches to another app — reload to re-render.
+      setTimeout(() => window.location.reload(), 700);
     } else {
       const body = await res.json().catch(() => null);
-      showToast(body?.error?.message || 'Failed to save — check formatting', true);
+      showToast(body?.error?.message || 'Could not archive app', true);
     }
   } catch {
     showToast('Network error', true);
+  }
+});
+
+// ── Webhooks tab: list + add + remove ───────────────────────────────────
+async function vfLoadWebhooks() {
+  const list = document.getElementById('webhooks-list');
+  if (!list) return;
+  try {
+    const res = await fetch('/web/webhooks');
+    const body = await res.json();
+    const webhooks = body.webhooks ?? [];
+    if (webhooks.length === 0) {
+      list.innerHTML = '<div class="webhook-empty" style="padding:24px 0;text-align:center;color:var(--ink-3);font-size:12px">No webhooks yet.</div>';
+      return;
+    }
+    list.innerHTML = webhooks.map(w => `
+      <div class="webhook-row" data-id="${escapeHtml(w.id)}">
+        <span class="webhook-status-dot active"></span>
+        <span class="webhook-url">${escapeHtml(w.url)}</span>
+        <span class="webhook-events">${escapeHtml((w.events ?? []).join(', '))}</span>
+        <button class="btn btn-secondary btn-sm vf-webhook-remove" data-id="${escapeHtml(w.id)}">Remove</button>
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="webhook-empty">Could not load webhooks.</div>';
+  }
+}
+document.getElementById('btn-add-webhook')?.addEventListener('click', async () => {
+  const url = document.getElementById('input-new-webhook-url')?.value?.trim();
+  if (!url || !/^https?:\/\//.test(url)) { showToast('Enter a valid URL', true); return; }
+  const events = Array.from(document.querySelectorAll('.webhook-event-cb:checked')).map(cb => cb.value);
+  if (events.length === 0) { showToast('Select at least one event', true); return; }
+  try {
+    const res = await fetch('/web/webhooks', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, events }),
+    });
+    if (res.ok) { showToast('Webhook added'); document.getElementById('input-new-webhook-url').value = ''; vfLoadWebhooks(); }
+    else { const b = await res.json().catch(() => null); showToast(b?.error?.message || 'Failed', true); }
+  } catch { showToast('Network error', true); }
+});
+document.addEventListener('click', async (e) => {
+  const t = e.target;
+  if (t instanceof HTMLElement && t.classList.contains('vf-webhook-remove')) {
+    if (!window.confirm('Remove this webhook endpoint?')) return;
+    const id = t.dataset.id;
+    if (!id) return;
+    try {
+      const res = await fetch(`/web/webhooks/${id}`, { method: 'DELETE', credentials: 'include' });
+      if (res.ok) { showToast('Webhook removed'); vfLoadWebhooks(); }
+      else { showToast('Could not remove', true); }
+    } catch { showToast('Network error', true); }
   }
 });
 
