@@ -71,7 +71,9 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
 .avatar-menu-item.danger:hover { background: #FEF1F1; }
 
 /* ── LAYOUT ── */
-.layout { display: flex; padding-top: var(--top-h); height: 100vh; overflow: hidden; }
+/* 100dvh respects the visible viewport on mobile (iOS Safari shrinks the
+   visible area when the URL bar is showing; 100vh would clip content). */
+.layout { display: flex; padding-top: var(--top-h); height: 100dvh; min-height: 100vh; overflow: hidden; }
 
 /* ── SIDENAV ── */
 .sidenav {
@@ -115,8 +117,10 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   display: flex;
   flex-direction: column;
   min-width: 0;
-  height: calc(100vh - var(--top-h));
+  height: calc(100dvh - var(--top-h));
+  min-height: calc(100vh - var(--top-h));
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ── SETTINGS TABS ── */
@@ -579,7 +583,11 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
       <div class="usage-sub">Beta · unlimited · no billing</div>
     </div>
   </nav>
-  <main class="main" style="padding:24px 32px">
+  <main class="main">
+    <!-- .settings-content gives us responsive horizontal padding (36px on
+         desktop, 20px 16px on mobile) and a max-width cap for readability,
+         matching the convention used across the dashboard. -->
+    <div class="settings-content">
     <!-- Page header -->
     <div style="margin-bottom:18px">
       <a href="/settings" style="font-size:11px;color:var(--ink-3);text-decoration:none">← All apps</a>
@@ -1151,17 +1159,12 @@ async function copySandboxKey(scope) {
   navigator.clipboard.writeText(v).then(() => showToast('Sandbox key copied'));
 }
 
-// Webhooks (per-app)
+// Webhooks (per-app). Calls /web/apps/:appId/webhooks which proxies through
+// to the admin-keyed /v1/customers/:id/apps/:appId/webhooks endpoint added
+// in the chunk-2 round of the apps refactor.
 async function loadAppWebhooks() {
   const list = document.getElementById('webhooks-list');
   if (!list) return;
-  try {
-    const res = await fetch(`/v1/customers/_/apps/${APP_ID}/webhooks`); // placeholder; not used
-  } catch {}
-  // Use the existing /web/webhooks proxy — but this is global per session.
-  // For per-app webhooks we need an explicit endpoint. As a transitional
-  // measure, /web/webhooks reflects whatever the API returns for the
-  // current session app; passing appId via the URL is the canonical path.
   try {
     const res = await fetch(`/web/apps/${APP_ID}/webhooks`);
     if (!res.ok) { list.innerHTML = '<div class="webhook-empty" style="padding:24px 0;text-align:center;color:var(--ink-3);font-size:12px">No webhooks yet.</div>'; return; }

@@ -160,7 +160,7 @@ describe('apps-new.html: 3-step create flow (unchanged)', () => {
   })
 })
 
-describe('verifications.html: type filter + Web platform', () => {
+describe('verifications.html: type filter + Web platform + env filter', () => {
   const html = read('verifications.html')
   it('has the type filter select', () => {
     expect(html).toContain('id="filter-type"')
@@ -172,6 +172,12 @@ describe('verifications.html: type filter + Web platform', () => {
   })
   it('currentFilters() includes type', () => {
     expect(html).toContain('filters.type')
+  })
+  it('has env filter (sandbox / production) wired to /web/env', () => {
+    expect(html).toContain('id="filter-env"')
+    expect(html).toContain('id="filter-env-production"')
+    expect(html).toContain("'/web/env'")
+    expect(html).toContain('vfInitEnvFilter')
   })
 })
 

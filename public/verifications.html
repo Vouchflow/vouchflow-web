@@ -624,6 +624,14 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
         <option value="verify">verify()</option>
         <option value="sign">signPayload()</option>
       </select>
+      <!-- Env filter: switches between sandbox and production data. Mirrors
+           the dashboard's env-toggle and writes back to the session via
+           PATCH /web/env so all pages stay in sync. The "production"
+           option is disabled when the current app has no live keys. -->
+      <select class="filter-select" id="filter-env">
+        <option value="sandbox">sandbox</option>
+        <option value="production" id="filter-env-production">production</option>
+      </select>
       <select class="filter-select">
         <option>All results</option>
         <option>Verified</option>
@@ -1033,6 +1041,42 @@ document.querySelectorAll('.filter-select').forEach(sel => {
     loadVerifications(currentFilters());
   });
 });
+
+// Env filter — mirrors the dashboard's env-toggle. Persists to the session
+// so the dashboard, reputation, and stats pages all reflect the same env.
+async function vfInitEnvFilter() {
+  try {
+    const sess = await fetch('/web/session').then(r => r.json());
+    const sel  = document.getElementById('filter-env');
+    const prod = document.getElementById('filter-env-production');
+    if (!sel) return;
+    sel.value = sess.env === 'production' ? 'production' : 'sandbox';
+    if (prod) {
+      const liveAvailable = (sess.liveKeyCount ?? 0) > 0;
+      prod.disabled = !liveAvailable;
+      prod.title = liveAvailable ? '' : 'No live key configured for this app';
+    }
+  } catch {}
+}
+document.getElementById('filter-env')?.addEventListener('change', async (e) => {
+  const next = e.target.value;
+  try {
+    const res = await fetch('/web/env', {
+      method: 'PATCH', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ env: next }),
+    });
+    if (!res.ok) {
+      // Roll back the dropdown if the server rejected (e.g. no live keys).
+      const sess = await fetch('/web/session').then(r => r.json()).catch(() => null);
+      e.target.value = sess?.env === 'production' ? 'production' : 'sandbox';
+      return;
+    }
+    currentPage = 0;
+    loadVerifications(currentFilters());
+  } catch {}
+});
+document.addEventListener('DOMContentLoaded', vfInitEnvFilter);
 
 // Search (client-side)
 document.querySelector('.search-box input').addEventListener('input', (e) => {

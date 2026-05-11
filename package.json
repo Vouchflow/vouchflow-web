@@ -7,7 +7,11 @@
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "audit": "playwright test",
+    "audit:public": "playwright test audit/public-pages.spec.ts",
+    "audit:authed": "playwright test audit/authed-pages.spec.ts",
+    "audit:a11y": "playwright test audit/links-and-a11y.spec.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^9",
@@ -21,6 +25,7 @@
     "resend": "^3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/node": "^20",
     "@vitest/coverage-v8": "^4.1.6",
     "tsx": "^4",
