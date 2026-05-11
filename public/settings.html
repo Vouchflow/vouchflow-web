@@ -511,7 +511,7 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     </svg>
     <span class="logo-word">vouchflow</span>
   </a>
-  <div class="topbar-center"><div class="env-pill"><span class="env-dot"></span>sandbox</div>
+  <div class="topbar-center">
     <div style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.5px;border-radius:4px;padding:3px 8px;background:#F0F0F0;color:var(--ink-3);border:1px solid var(--border);">beta</div>
   </div>
   <div class="topbar-right">
@@ -1011,7 +1011,23 @@ async function vfLoadApps() {
     if (!res.ok) { list.innerHTML = '<div class="apps-empty" style="padding:32px 24px;text-align:center;color:var(--ink-3)">Failed to load apps.</div>'; return; }
     const { apps } = await res.json();
     if (!apps || apps.length === 0) {
-      list.innerHTML = '<div class="apps-empty" style="padding:32px 24px;text-align:center;color:var(--ink-3);font-size:13px">No apps yet — <a href="/apps/new" style="color:var(--ink-2)">create your first one →</a></div>';
+      // Empty state. The user has no apps (likely also no archived apps,
+      // since this branch reflects whichever filter is currently set).
+      // Hide the footer note so the empty CTA is visually centered.
+      list.innerHTML = `
+        <div class="apps-empty" style="padding:56px 24px;text-align:center;color:var(--ink-3)">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin-bottom:14px;opacity:0.5">
+            <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="23" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="3" y="23" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="23" y="23" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/>
+          </svg>
+          <div style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:6px">Create your first app</div>
+          <div style="font-size:12px;color:var(--ink-3);margin-bottom:18px;max-width:340px;margin-left:auto;margin-right:auto">
+            An app holds its own attestation, API keys, and webhooks. Most customers ship with one app per product surface.
+          </div>
+          <a class="btn btn-primary btn-sm" href="/apps/new" style="text-decoration:none">+ New app</a>
+        </div>`;
       const note = document.getElementById('apps-list-footer-note'); if (note) note.textContent = '';
       return;
     }
