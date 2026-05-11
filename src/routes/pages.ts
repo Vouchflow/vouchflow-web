@@ -24,6 +24,7 @@ export default async function pageRoutes(fastify: FastifyInstance) {
   fastify.get('/api-reference',       async (_, reply) => reply.sendFile('api-reference.html'))
   fastify.get('/terms',         async (_, reply) => reply.sendFile('terms.html'))
   fastify.get('/privacy',       async (_, reply) => reply.sendFile('privacy.html'))
+  fastify.get('/contact',       async (_, reply) => reply.sendFile('contact.html'))
 
   // Protected
   const guard = { preHandler: requireSession }
