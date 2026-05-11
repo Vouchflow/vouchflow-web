@@ -139,6 +139,63 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   .topbar-logo { width: auto; padding: 0 16px; border-right: none; }
   .coming-diagram { display: none; }
 }
+
+/* ── App filter chip (option B) ─────────────────────────────────────────
+   Sits in the topbar alongside the env pill. Lets multi-app customers
+   switch which app's data the dashboard/verifications/reputation pages
+   are scoped to. The chip mirrors .env-pill styling. */
+.app-chip {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.3px; border-radius: 4px; padding: 3px 8px;
+  background: var(--surface); color: var(--ink-2);
+  border: 1px solid var(--border); cursor: pointer; user-select: none;
+  height: 22px; max-width: 200px;
+}
+.app-chip:hover { border-color: var(--ink-3); color: var(--ink); }
+.app-chip-name { font-family: var(--sans); font-size: 11px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.app-chip-icon { flex-shrink: 0; color: var(--ink-3); }
+.app-chip-chevron { flex-shrink: 0; color: var(--ink-3); }
+.app-chip-popover {
+  display: none; position: absolute; top: calc(100% + 6px); left: 0;
+  min-width: 240px; max-width: 320px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+  z-index: 200; padding: 4px;
+}
+.app-chip-popover.open { display: block; }
+.app-chip-search {
+  width: 100%; padding: 7px 9px; font-family: var(--sans); font-size: 12px;
+  border: 1px solid var(--border); border-radius: 4px; outline: none;
+  margin-bottom: 4px;
+}
+.app-chip-search:focus { border-color: var(--ink-3); }
+.app-chip-list { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; }
+.app-chip-item {
+  display: flex; align-items: center; gap: 8px; padding: 7px 9px;
+  font-size: 12px; color: var(--ink-2); cursor: pointer; border-radius: 4px;
+  text-decoration: none;
+}
+.app-chip-item:hover { background: var(--ground); color: var(--ink); }
+.app-chip-item.active { background: var(--ground); color: var(--ink); font-weight: 500; }
+.app-chip-item-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  background: transparent; border: 1px solid var(--ink-4);
+}
+.app-chip-item.active .app-chip-item-dot { background: var(--success); border-color: var(--success); }
+.app-chip-item-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-chip-item-slug { font-family: var(--mono); font-size: 10px; color: var(--ink-3); flex-shrink: 0; }
+.app-chip-empty { padding: 12px 9px; font-size: 11px; color: var(--ink-3); text-align: center; }
+.app-chip-footer {
+  border-top: 1px solid var(--border); margin-top: 4px; padding: 6px 4px 2px;
+}
+.app-chip-footer a {
+  display: block; padding: 7px 9px; font-size: 12px; color: var(--ink-2);
+  text-decoration: none; border-radius: 4px;
+}
+.app-chip-footer a:hover { background: var(--ground); color: var(--ink); }
+
 </style>
 </head>
 <body>
@@ -160,7 +217,31 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     </svg>
     <span class="logo-word">vouchflow</span>
   </a>
-  <div class="topbar-center"><div class="env-pill"><span class="env-dot"></span>sandbox</div>
+  <div class="topbar-center">
+  <!-- App filter chip (option B): scopes data on this page to a single app.
+       Click → popover with searchable app list → reload page with new app. -->
+  <div class="app-chip" id="app-chip" onclick="vfToggleAppChip(event)">
+    <svg class="app-chip-icon" width="11" height="11" viewBox="0 0 11 11" fill="none">
+      <rect x="0.5" y="0.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1"/>
+      <rect x="6.5" y="0.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1" fill="currentColor"/>
+      <rect x="0.5" y="6.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1"/>
+      <rect x="6.5" y="6.5" width="4" height="4" rx="0.8" stroke="currentColor" stroke-width="1"/>
+    </svg>
+    <span class="app-chip-name" id="app-chip-name">—</span>
+    <svg class="app-chip-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
+      <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
+    <div class="app-chip-popover" id="app-chip-popover" onclick="event.stopPropagation()">
+      <input type="text" class="app-chip-search" id="app-chip-search" placeholder="Search apps…" autocomplete="off" oninput="vfFilterAppChip()" onclick="event.stopPropagation()"/>
+      <div class="app-chip-list" id="app-chip-list">
+        <div class="app-chip-empty">Loading…</div>
+      </div>
+      <div class="app-chip-footer">
+        <a href="/apps/new">+ New app</a>
+      </div>
+    </div>
+  </div>
+  <div class="env-pill"><span class="env-dot"></span>sandbox</div>
   </div>
   <div class="topbar-right">
     <span class="topbar-org" id="topbar-org"></span>
@@ -311,6 +392,92 @@ async function loadUsage() {
 }
 
 document.addEventListener('DOMContentLoaded', () => { loadSession(); loadUsage(); });
+
+// ── App filter chip (option B) ──────────────────────────────────────────
+// Loads the user's apps and the currently-active app id from /web/session,
+// renders the chip + popover, switches via PATCH /web/apps/current.
+let __vfAppChipApps = [];
+let __vfAppChipCurrentId = null;
+function vfToggleAppChip(e) {
+  e.stopPropagation();
+  const pop = document.getElementById('app-chip-popover');
+  if (!pop) return;
+  pop.classList.toggle('open');
+  if (pop.classList.contains('open')) {
+    const s = document.getElementById('app-chip-search');
+    setTimeout(() => s?.focus(), 0);
+  }
+}
+function vfFilterAppChip() {
+  const q = (document.getElementById('app-chip-search')?.value || '').toLowerCase().trim();
+  vfRenderAppChipList(__vfAppChipApps.filter(a =>
+    !q || a.name.toLowerCase().includes(q) || a.slug.toLowerCase().includes(q)
+  ));
+}
+function vfRenderAppChipList(apps) {
+  const list = document.getElementById('app-chip-list');
+  if (!list) return;
+  if (!apps.length) {
+    list.innerHTML = '<div class="app-chip-empty">No apps match.</div>';
+    return;
+  }
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  list.innerHTML = apps.map(a => `
+    <div class="app-chip-item ${a.id === __vfAppChipCurrentId ? 'active' : ''}" data-app-id="${esc(a.id)}" onclick="vfSelectAppChip('${esc(a.id)}')">
+      <span class="app-chip-item-dot"></span>
+      <span class="app-chip-item-name">${esc(a.name)}</span>
+      <span class="app-chip-item-slug">${esc(a.slug)}</span>
+    </div>`).join('');
+}
+async function vfSelectAppChip(appId) {
+  if (appId === __vfAppChipCurrentId) {
+    document.getElementById('app-chip-popover')?.classList.remove('open');
+    return;
+  }
+  try {
+    const res = await fetch('/web/apps/current', {
+      method: 'PATCH', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ appId }),
+    });
+    if (!res.ok) return;
+    // Reload so all data on the page reflects the newly-active app.
+    window.location.reload();
+  } catch {}
+}
+async function vfLoadAppChip() {
+  try {
+    const [sessRes, appsRes] = await Promise.all([
+      fetch('/web/session'),
+      fetch('/web/apps'),
+    ]);
+    if (!sessRes.ok || !appsRes.ok) return;
+    const sess = await sessRes.json();
+    const { apps } = await appsRes.json();
+    __vfAppChipCurrentId = sess.appId || null;
+    // Single-app customers don't need a switcher — hide the chip entirely.
+    if (!apps || apps.length <= 1) {
+      const chip = document.getElementById('app-chip');
+      if (chip) chip.style.display = 'none';
+      // Still update the name in case some page reads it.
+      const name = document.getElementById('app-chip-name');
+      if (name && sess.appName) name.textContent = sess.appName;
+      return;
+    }
+    __vfAppChipApps = apps;
+    const name = document.getElementById('app-chip-name');
+    if (name) name.textContent = sess.appName || (apps.find(a => a.id === sess.appId)?.name) || '—';
+    vfRenderAppChipList(apps);
+  } catch (e) {}
+}
+document.addEventListener('click', (e) => {
+  const chip = document.getElementById('app-chip');
+  if (chip && !chip.contains(e.target)) {
+    document.getElementById('app-chip-popover')?.classList.remove('open');
+  }
+});
+document.addEventListener('DOMContentLoaded', vfLoadAppChip);
+
 </script>
 </body>
 </html>

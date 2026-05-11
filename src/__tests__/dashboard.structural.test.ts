@@ -19,6 +19,28 @@ describe('app switcher: removed (Option A — list view replaces it)', () => {
   }
 })
 
+describe('app filter chip (option B): present on data pages, absent on others', () => {
+  for (const page of ['dashboard.html', 'verifications.html', 'reputation.html']) {
+    it(`${page} has the app filter chip + popover + loader`, () => {
+      const html = read(page)
+      expect(html, 'chip').toContain('id="app-chip"')
+      expect(html, 'popover').toContain('id="app-chip-popover"')
+      expect(html, 'list container').toContain('id="app-chip-list"')
+      expect(html, 'search input').toContain('id="app-chip-search"')
+      expect(html, '+ New app link in popover').toContain('href="/apps/new"')
+      expect(html, 'loader fn').toContain('async function vfLoadAppChip')
+      expect(html, 'switch fn').toContain('async function vfSelectAppChip')
+      expect(html, 'PATCH /web/apps/current').toContain("'/web/apps/current'")
+    })
+  }
+  for (const page of ['settings.html', 'onboarding.html']) {
+    it(`${page} does NOT carry the chip (settings is the apps list itself; onboarding is single-app)`, () => {
+      const html = read(page)
+      expect(html, `${page} has no chip`).not.toContain('id="app-chip"')
+    })
+  }
+})
+
 describe('settings.html: Option A tab structure', () => {
   const html = read('settings.html')
   it('has three tabs: Apps | Billing | Account', () => {
