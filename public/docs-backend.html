@@ -160,10 +160,10 @@
         </tbody>
       </table>
 
-      <p>Keys are created and rotated in the dashboard under Settings → API Keys. Raw key values are shown exactly once on creation; the dashboard only stores a SHA-256 hash.</p>
+      <p>API keys are automatically generated when you create an app via <code>POST /apps</code>. Each app receives four keys at creation: a write and read key pair for both sandbox and live environments (<code>sandboxWriteKey</code>, <code>sandboxReadKey</code>, <code>liveWriteKey</code>, <code>liveReadKey</code>). Keys are displayed once at creation; the dashboard stores only a SHA-256 hash afterward.</p>
 
       <h2 class="section-anchor" id="key-rotation">Key rotation</h2>
-      <p>When you deprecate a key, the old key remains valid for <strong>14 days</strong>. During this window, responses include the header:</p>
+      <p>Live environment keys can be rotated in the dashboard under Settings → API Keys. Sandbox keys cannot be rotated. When you rotate a live key, the old key remains valid for <strong>14 days</strong>. During this window, responses include the header:</p>
       <div class="code-block standalone">
         <div class="code-header"><span class="code-lang">HTTP response header</span><button class="code-copy">Copy</button></div>
         <pre><span class="t">Vouchflow-Key-Deprecated: true</span></pre>
@@ -368,9 +368,21 @@
 
       <!-- IDEMPOTENCY -->
       <h2 class="section-anchor" id="idempotency">Idempotency</h2>
-      <p>The <code>POST /v1/enroll</code> endpoint supports idempotency keys to make enrollment safe to retry. If a request fails mid-flight (timeout, network error), resending with the same key returns the original response instead of creating a duplicate enrollment.</p>
+      <p>Several endpoints support idempotency to make operations safe to retry. If a request fails mid-flight (timeout, network error), resending with the same idempotency key returns the cached response instead of creating a duplicate operation or returning an error.</p>
 
-      <h2 class="section-anchor" id="idempotency-key">Idempotency key format</h2>
+      <h2 class="section-anchor" id="idempotent-endpoints">Idempotent endpoints</h2>
+      <table>
+        <thead><tr><th>Endpoint</th><th>Idempotency mechanism</th><th>Retry behavior</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST /v1/enroll</code></td><td>Request body field: <code>idempotency_key</code></td><td>Returns original enrollment response</td></tr>
+          <tr><td><code>POST /v1/sign/:session_id/complete</code></td><td>Session ID in URL (automatic)</td><td>Returns cached 200 response</td></tr>
+          <tr><td><code>POST /v1/verify/:session_id/complete</code></td><td>Session ID in URL (automatic)</td><td>Returns cached 200 response</td></tr>
+        </tbody>
+      </table>
+
+      <p>For <code>/sign/:session_id/complete</code> and <code>/verify/:session_id/complete</code>, idempotency is automatic—no additional field is required. Once a session is completed, retrying the same request returns the original result with a 200 status code instead of a 409 conflict.</p>
+
+      <h2 class="section-anchor" id="idempotency-key">Idempotency key format (enrollment)</h2>
       <div class="code-block standalone">
         <div class="code-header"><span class="code-lang">JSON field</span><button class="code-copy">Copy</button></div>
         <pre><span class="t">{</span>
@@ -382,8 +394,8 @@
       <ul>
         <li>Format: <code>ik_</code> prefix followed by a lowercase UUID v4</li>
         <li>TTL: 24 hours — after that, the same key is treated as a new request</li>
-        <li>The SDK generates idempotency keys automatically; you only need to set them if making direct API calls</li>
-        <li>If a request is in-flight and you send the same key again, you receive a <code>409 Conflict</code> until the first request completes, then the cached response on subsequent calls</li>
+        <li>The SDK generates idempotency keys automatically for enrollment; you only need to set them if making direct API calls</li>
+        <li>If an enrollment request is in-flight and you send the same key again, you receive a <code>409 Conflict</code> until the first request completes, then the cached response on subsequent calls</li>
       </ul>
 
       <div class="callout">

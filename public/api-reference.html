@@ -609,7 +609,7 @@ pre {
     <div style="background:var(--surface); border-bottom:1px solid var(--border); padding: 52px 52px 40px; margin-left:0;">
       <div class="page-eyebrow">API Reference</div>
       <h1 class="page-title">REST API</h1>
-      <p class="page-lead">All requests are authenticated using your API key. The SDK handles enrollment and verification automatically — use the REST API directly for backend integrations and the reputation endpoint.</p>
+      <p class="page-lead">All requests are authenticated using your API key. <strong>The official SDKs (iOS, Android, Web) handle enrollment and verification ceremonies automatically</strong> — use them instead of calling these endpoints directly. Direct REST API usage is for: server-side reputation lookups (<code>GET /device/:token/reputation</code>), webhook management, or building custom SDKs for unsupported platforms.</p>
       <div class="base-url">
         <span class="base-url-label">Base URL</span>
         <span class="base-url-value">https://api.vouchflow.dev/v1</span>
@@ -624,11 +624,22 @@ pre {
           <span class="endpoint-path">/v1/enroll</span>
         </div>
         <div class="endpoint-name">Enroll a device</div>
-        <p class="endpoint-desc">Registers a device's public key with Vouchflow. Called automatically by the iOS and Android SDKs on first use. Call directly only if implementing a custom SDK or testing enrollment flows from your backend.</p>
+        <p class="endpoint-desc">Registers a device's public key with Vouchflow. Called automatically by the iOS, Android, and Web SDKs on first use.</p>
 
         <div class="callout warning">
-          <strong>⚠ App Attest required (iOS)</strong>
-          Enrollment on iOS requires the App Attest entitlement. Without it, the platform attestation step fails and confidence is capped at <code>medium</code>.
+          <strong>⚠️ Most customers should never call this endpoint directly</strong>
+          The official SDKs handle enrollment automatically. Direct calls bypass SDK state management and can cause duplicate enrollments or attestation failures. Only call this endpoint if you're:
+          <ul style="margin: 8px 0 0 20px; padding: 0;">
+            <li>Building a custom SDK for an unsupported platform (e.g., React Native, Flutter, Unity)</li>
+            <li>Running automated backend tests</li>
+            <li>Debugging enrollment issues server-side</li>
+          </ul>
+          For standard integrations, use <code>sdk.enroll()</code> (iOS/Android) or the SDK's automatic enrollment on first <code>verify()</code> call.
+        </div>
+
+        <div class="callout">
+          <strong>App Attest required for high confidence (iOS)</strong>
+          Enrollment on iOS requires the App Attest entitlement for <code>confidence: high</code>. Without it, the platform attestation step fails and confidence is capped at <code>medium</code>.
         </div>
 
         <div class="params-label">Request body</div>
@@ -716,7 +727,12 @@ pre {
           <span class="endpoint-path">/v1/verify</span>
         </div>
         <div class="endpoint-name">Verify a device</div>
-        <p class="endpoint-desc">Validates a signed challenge-response from an enrolled device. Returns a confidence signal proving the same physical device is present. This is the core API call — everything else supports it.</p>
+        <p class="endpoint-desc">Initiates a verification ceremony. The SDK calls this automatically when you invoke <code>sdk.verify()</code> — you should use the SDK method rather than calling this endpoint directly. For custom SDK implementations or backend testing, this endpoint starts a verification session and returns a challenge that must be signed by the device within 60 seconds.</p>
+
+        <div class="callout">
+          <strong>SDK handles this automatically</strong>
+          Call <code>await vouchflow.verify()</code> (iOS/Android/Web) instead of using this REST endpoint directly. The SDK manages the full ceremony: init → sign challenge → complete → return result.
+        </div>
 
         <div class="params-label">Request body</div>
         <table class="params-table">
@@ -884,11 +900,16 @@ pre {
           <span class="tier-badge">web beta</span>
         </div>
         <div class="endpoint-name">Initiate a payload-signing session</div>
-        <p class="endpoint-desc">Starts a high-assurance signing session over an arbitrary canonicalized JSON payload. Returns a server-issued challenge that must be signed by the device's WebAuthn credential and submitted to <code>POST /v1/sign/:session_id/complete</code> within 60 seconds. Web platform only — calls against <code>ios</code> / <code>android</code> devices return <code>422 unsupported_platform</code>.</p>
+        <p class="endpoint-desc">Starts a high-assurance signing session over an arbitrary canonicalized JSON payload. Returns a server-issued challenge that must be signed by the device's WebAuthn credential and submitted to <code>POST /v1/sign/:session_id/complete</code> within 60 seconds.</p>
+
+        <div class="callout">
+          <strong>SDK handles this automatically</strong>
+          Call <code>await vouchflow.signPayload({ payload, context })</code> (Web SDK) instead of using this REST endpoint directly. The SDK manages the full ceremony: init → WebAuthn assertion → complete → return JWS assertion. For mobile platforms (iOS/Android), use native signing APIs.
+        </div>
 
         <div class="callout info">
           <strong>Idempotency strongly recommended</strong>
-          Pass a unique <code>idempotency_key</code> per logical signing operation. The SDK retries POSTs up to 3× on 5xx; without a key, a dropped response would mint two valid JWS assertions with different <code>iat</code> over the same payload.
+          Pass a unique <code>idempotency_key</code> per logical signing operation. The SDK generates this automatically. If implementing a custom SDK, generate a cryptographically random 16-byte value per call. Without it, network retries on 5xx errors would mint multiple valid JWS assertions with different <code>iat</code> over the same payload.
         </div>
 
         <div class="params-label">Request body</div>
@@ -1003,6 +1024,11 @@ pre {
         </div>
         <div class="endpoint-name">Complete a payload-signing session</div>
         <p class="endpoint-desc">Submits the WebAuthn assertion produced over the challenge returned by <code>POST /v1/sign</code>. The server validates the assertion (UV flag, origin, signature, RP ID hash, counter), records the verification, and returns a JWS assertion signed by Vouchflow's verifier key. Customers verify this JWS against <code>GET /v1/.well-known/jwks.json</code>; the SDK exposes it as <code>SignResult.assertion</code>.</p>
+
+        <div class="callout info">
+          <strong>Automatic idempotency</strong>
+          This endpoint is idempotent by design. Once a session is completed, retrying the same request with the same <code>session_id</code> returns the cached response with a 200 status code, not a 409 conflict. This makes network retries safe.
+        </div>
 
         <div class="params-label">Request body</div>
         <table class="params-table">
