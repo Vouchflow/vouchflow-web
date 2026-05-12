@@ -54,6 +54,7 @@
       <a class="nav-item active" href="/docs/ios-sdk#enrollment"><span class="nav-dot"></span>Enrollment</a>
       <a class="nav-item active" href="/docs/ios-sdk#cached-token"><span class="nav-dot"></span>Checking enrollment status</a>
       <a class="nav-item active" href="/docs/ios-sdk#verify"><span class="nav-dot"></span>Verification</a>
+      <a class="nav-item active" href="/docs/ios-sdk#sign"><span class="nav-dot"></span>Payload signing</a>
       <a class="nav-item active" href="/docs/ios-sdk#errors"><span class="nav-dot"></span>Error handling</a>
       <a class="nav-item active" href="/docs/ios-sdk#app-attest"><span class="nav-dot"></span>App Attest setup</a>
     </div>
@@ -299,9 +300,79 @@
 
       <hr/>
 
+      <!-- PAYLOAD SIGNING -->
+      <h2 class="section-anchor" id="sign">Payload signing</h2>
+      <p><code>signPayload()</code> produces a Vouchflow-attested JWS over any JSON-serializable payload — useful for mandate signing, transaction approval, or any scenario requiring a cryptographically verifiable signature tied to a specific device and biometric presentation.</p>
+
+      <p>The SDK canonicalizes the payload using <a href="https://tools.ietf.org/html/rfc8785" target="_blank">RFC 8785 JCS</a> before signing, ensuring byte-for-byte reproducibility regardless of JSON encoding. The default <code>minimumConfidence</code> is <code>.high</code> — signing is high-assurance by default.</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">Swift — signPayload</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">let</span><span class="t"> signed = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">signPayload</span><span class="t">(</span>
+  <span class="n">context</span><span class="t">:           </span><span class="s">"mandate_signing"</span><span class="t">,  </span><span class="c">// arbitrary, audited per session</span>
+  <span class="n">payload</span><span class="t">:           [</span><span class="s">"v"</span><span class="t">: </span><span class="num">1</span><span class="t">, </span><span class="s">"id"</span><span class="t">: </span><span class="s">"mand_abc"</span><span class="t">, </span><span class="s">"scope"</span><span class="t">: </span><span class="s">"send"</span><span class="t">],</span>
+  <span class="n">minimumConfidence</span><span class="t">: .</span><span class="n">high</span><span class="t">               </span><span class="c">// default</span>
+<span class="t">)</span>
+
+<span class="c">// signed.payload          — canonicalized JSON string the user actually signed</span>
+<span class="c">// signed.assertion        — Vouchflow-signed JWS your backend verifies</span>
+<span class="c">// signed.signature        — raw Secure Enclave signature, base64 (rarely needed)</span>
+<span class="c">// signed.algorithm        — "ES256" (Secure Enclave uses P-256)</span>
+<span class="c">// signed.deviceToken      — same opaque token as verify()</span>
+<span class="c">// signed.signingDeviceId  — sdv_… stable per-credential identifier</span>
+<span class="c">// signed.signedAt         — ISO 8601 timestamp</span>
+<span class="c">// signed.confidence       — "high" | "medium" | "low"</span>
+<span class="c">// signed.sessionId        — session_id for webhook correlation</span>
+
+<span class="c">// Send assertion to your backend for verification</span>
+<span class="k">let</span><span class="t"> response = </span><span class="k">try await</span><span class="t"> URLSession.shared.</span><span class="f">data</span><span class="t">(for: </span><span class="f">request</span><span class="t">(</span>
+  <span class="n">path</span><span class="t">: </span><span class="s">"/api/mandates"</span><span class="t">,</span>
+  <span class="n">body</span><span class="t">: [</span><span class="s">"mandate"</span><span class="t">: signed.payload, </span><span class="s">"assertion"</span><span class="t">: signed.assertion]</span>
+<span class="t">))</span></pre>
+      </div>
+
+      <p><strong>Server-side verification.</strong> The <code>assertion</code> is a JWS signed by Vouchflow's verifier key. Your backend verifies it using <code>jose</code> against Vouchflow's JWKS endpoint — no iOS-specific knowledge required:</p>
+
+      <div class="code-block standalone">
+        <div class="code-header"><span class="code-lang">TypeScript — Node.js backend</span><button class="code-copy">Copy</button></div>
+        <pre><span class="k">import</span><span class="t"> { jwtVerify, createRemoteJWKSet } </span><span class="k">from</span><span class="t"> </span><span class="s">'jose'</span>
+<span class="k">import</span><span class="t"> crypto </span><span class="k">from</span><span class="t"> </span><span class="s">'node:crypto'</span>
+
+<span class="k">const</span><span class="t"> JWKS = </span><span class="f">createRemoteJWKSet</span><span class="t">(</span>
+  <span class="k">new</span><span class="t"> </span><span class="f">URL</span><span class="t">(</span><span class="s">'https://api.vouchflow.dev/v1/.well-known/jwks.json'</span><span class="t">)</span>
+<span class="t">)</span>
+
+<span class="c">// Verify the Vouchflow-signed JWS</span>
+<span class="k">const</span><span class="t"> { payload } = </span><span class="k">await</span><span class="t"> </span><span class="f">jwtVerify</span><span class="t">(assertion, JWKS, {</span>
+  <span class="n">issuer</span><span class="t">: </span><span class="s">'https://vouchflow.dev'</span><span class="t">,</span>
+  <span class="n">audience</span><span class="t">: YOUR_CUSTOMER_ID,</span>
+<span class="t">})</span>
+
+<span class="c">// Verify payload_sha256 matches your canonical payload</span>
+<span class="k">const</span><span class="t"> expectedHash = crypto.</span><span class="f">createHash</span><span class="t">(</span><span class="s">'sha256'</span><span class="t">)</span>
+  <span class="t">.</span><span class="f">update</span><span class="t">(payload.canonicalized_payload)</span>
+  <span class="t">.</span><span class="f">digest</span><span class="t">(</span><span class="s">'hex'</span><span class="t">)</span>
+
+<span class="k">if</span><span class="t"> (payload.payload_sha256 !== expectedHash) {</span>
+  <span class="k">throw new</span><span class="t"> </span><span class="f">Error</span><span class="t">(</span><span class="s">'Payload mismatch'</span><span class="t">)</span>
+<span class="t">}</span>
+
+<span class="c">// payload.context          — "mandate_signing" from SDK call</span>
+<span class="c">// payload.confidence       — "high" | "medium" | "low"</span>
+<span class="c">// payload.signing_device_id— sdv_… stable credential identifier</span>
+<span class="c">// payload.device_token     — device's opaque token</span></pre>
+      </div>
+
+      <div class="callout">
+        <strong>When to use signPayload vs verify</strong>
+        Use <code>verify()</code> for authentication and presence checks. Use <code>signPayload()</code> when you need a cryptographic signature over specific data (contracts, transaction details, approval records). The signed payload becomes a permanent audit record that can be verified independently of Vouchflow.
+      </div>
+
+      <hr/>
+
       <!-- ERROR HANDLING -->
       <h2 class="section-anchor" id="errors">Error handling</h2>
-      <p>All errors thrown by <code>verify()</code> conform to <code>VouchflowError</code>. Handle the cases you care about; let others propagate or fall to a generic handler.</p>
+      <p>All errors thrown by <code>verify()</code> and <code>signPayload()</code> conform to <code>VouchflowError</code>. Handle the cases you care about; let others propagate or fall to a generic handler.</p>
 
       <div class="code-block standalone">
         <div class="code-header"><span class="code-lang">Swift — full error handling</span><button class="code-copy">Copy</button></div>

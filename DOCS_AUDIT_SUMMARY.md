@@ -89,16 +89,42 @@ All documentation files are **already accurate** and reflect current behavior:
 - ❌ No mentions of "revoke" for API keys (only for devices, which is correct)
 - ❌ No outdated POST /apps response examples
 
+## UPDATE: Missing Feature Documentation Found ❌
+
+### Second Pass: Feature Coverage Audit
+After the initial audit, a **critical gap** was discovered:
+
+**MISSING: Payload Signing Documentation for iOS and Android**
+
+- ❌ iOS SDK docs had no `signPayload()` documentation
+- ❌ Android SDK docs had no `signPayload()` documentation
+- ✅ Web SDK docs correctly documented `signPayload()`
+- ✅ Server implementation supports iOS/Android signing (confirmed in `/v1/sign`)
+
+**Root Cause of Initial Miss:**
+The first audit focused on checking existing documentation for accuracy relative to recent changes (live key refactor, ceremony idempotency). It did NOT audit for **missing features** - i.e., features that exist in the codebase but are undocumented.
+
+### What Was Added (Second Pass) ✅
+Added comprehensive payload signing documentation to both iOS and Android SDK docs:
+- Complete `signPayload()` API reference with examples
+- Server-side JWS verification guide
+- Backend code samples (Node.js + jose)
+- Guidance on when to use `signPayload()` vs `verify()`
+- Navigation links in sidebar
+
 ## Recommendations
 
-### 1. No Immediate Changes Required ✅
-The documentation is already accurate and does not require updates to reflect the live key management refactor.
+### 1. ✅ COMPLETED: Added Missing Payload Signing Docs
+Added comprehensive payload signing sections to:
+- docs-ios.html: Full signPayload() documentation
+- docs-android.html: Full signPayload() documentation
 
 ### 2. Consider Future Enhancements
-While accurate, the following could be added for completeness:
+While now feature-complete, the following could be added:
 - API reference section for POST /apps (currently not documented in api-reference.html)
 - Explicit mention in iOS/Android docs that apps receive live keys at creation
-- Dashboard UI screenshots showing rotation interface (if screenshots are added)
+- Dashboard UI screenshots showing rotation interface
+- More payload signing examples (transaction approval, contract signing use cases)
 
 ### 3. Monitoring
 Watch for future docs that might reference:
@@ -108,11 +134,18 @@ Watch for future docs that might reference:
 
 ## Conclusion
 
-**STATUS: DOCUMENTATION AUDIT COMPLETE ✅**
+**STATUS: DOCUMENTATION AUDIT COMPLETE ✅ (with fixes applied)**
 
-All VouchFlow documentation is accurate and aligned with current platform behavior. The backend documentation was already updated to reflect the 4-key auto-generation model, and SDK documentation correctly describes scope usage without making outdated claims about key management.
+### Initial Finding:
+All VouchFlow documentation was accurate and aligned with current platform behavior regarding the live key management refactor.
 
-No changes required at this time.
+### Critical Gap Discovered & Fixed:
+- **Found:** Payload signing (signPayload) completely missing from iOS and Android SDK docs
+- **Fixed:** Added comprehensive documentation with code samples, backend verification guides, and navigation
+- **Impact:** High - this is a major feature that was completely undocumented for mobile platforms
+
+### Final Status:
+Documentation is now accurate AND complete. All features are documented across all platforms.
 
 ## Files Verified
 - ✅ public/docs-introduction.html
