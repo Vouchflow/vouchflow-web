@@ -100,11 +100,13 @@ a{color:var(--ink-2)}
       </div>
     </div>
 
-    <!-- Step 2 — Sandbox keys -->
+    <!-- Step 2 — All four keys (sandbox write+read, live write+read) -->
     <div class="step" id="step-2">
-      <h2>Save your sandbox keys</h2>
-      <p class="lede">These are the only API keys you'll need until you're ready for production. Sandbox traffic doesn't bill or contribute to the network graph.</p>
-      <div class="callout"><strong>This is the only time you'll see these.</strong> Sandbox keys can't be regenerated — if you lose one, archive the app and create a fresh one.</div>
+      <h2>Save your API keys</h2>
+      <p class="lede">Each app ships with a sandbox pair (development) and a live pair (production). Live keys can be rotated later — sandbox cannot.</p>
+      <div class="callout"><strong>This is the only time you'll see the raw values.</strong> Live keys can be rotated from the app's settings page if needed.</div>
+
+      <div style="margin-top:18px;font-size:12px;font-weight:500;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.4px">Sandbox</div>
       <div class="key-row">
         <span class="key-label">write</span>
         <code id="display-write-key"></code>
@@ -115,6 +117,19 @@ a{color:var(--ink-2)}
         <code id="display-read-key"></code>
         <button class="btn btn-secondary" type="button" onclick="vfCopy('display-read-key', this)">Copy</button>
       </div>
+
+      <div style="margin-top:18px;font-size:12px;font-weight:500;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.4px">Live (production)</div>
+      <div class="key-row">
+        <span class="key-label">write</span>
+        <code id="display-live-write-key"></code>
+        <button class="btn btn-secondary" type="button" onclick="vfCopy('display-live-write-key', this)">Copy</button>
+      </div>
+      <div class="key-row">
+        <span class="key-label">read</span>
+        <code id="display-live-read-key"></code>
+        <button class="btn btn-secondary" type="button" onclick="vfCopy('display-live-read-key', this)">Copy</button>
+      </div>
+
       <div class="actions">
         <span></span>
         <button class="btn btn-primary" id="btn-saved-keys" type="button">I've saved them</button>
@@ -208,8 +223,10 @@ document.getElementById('btn-create')?.addEventListener('click', async () => {
     }
     const created = await res.json();
     __vfNewAppId = created.app.id;
-    document.getElementById('display-write-key').textContent = created.sandboxWriteKey;
-    document.getElementById('display-read-key').textContent  = created.sandboxReadKey;
+    document.getElementById('display-write-key').textContent      = created.sandboxWriteKey;
+    document.getElementById('display-read-key').textContent       = created.sandboxReadKey;
+    document.getElementById('display-live-write-key').textContent = created.liveWriteKey ?? '(unavailable)';
+    document.getElementById('display-live-read-key').textContent  = created.liveReadKey  ?? '(unavailable)';
     vfShowStep(2);
   } catch (e) {
     showToast('Network error', true);

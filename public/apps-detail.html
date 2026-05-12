@@ -646,10 +646,17 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
       <div class="section-footer"><span class="section-footer-note">Sandbox keys are prefixed <code style="font-family:var(--mono);font-size:10px;background:#eee;padding:1px 5px;border-radius:3px">vsk_sandbox_</code> · cannot be regenerated</span></div>
     </div>
 
+    <!--
+      Live keys: at-most-one canonical write + read key per app.
+      - The write key is the key your iOS / Android / Web SDK ships with.
+      - The read key is for your backend (server-side queries, dashboards).
+      - Rotation generates a new key + demotes the old one to a 14-day grace
+        window. Both work during grace; only the new one survives after.
+    -->
     <div class="section">
       <div class="section-header">
         <div class="section-title">Live keys</div>
-        <div class="section-sub">For production traffic. Up to 10 active keys per app.</div>
+        <div class="section-sub">For production traffic. One write key (mobile SDKs) and one read key (backend).</div>
       </div>
       <div class="section-body">
         <div id="live-keys-just-created" style="display:none;background:var(--s-bg);border:1px solid #B8E8CC;border-radius:6px;padding:12px 14px;margin-bottom:14px">
@@ -659,18 +666,24 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
           </div>
           <div id="just-created-rows"></div>
         </div>
-        <div id="live-keys-list"></div>
-        <div id="live-keys-empty" style="padding:18px 0;text-align:center;color:var(--ink-3);font-size:12px">No live keys yet.</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:14px">
-          <select id="select-new-key-scope" class="field-input" style="height:32px;padding:0 8px;font-size:13px;width:auto">
-            <option value="pair">Write + Read pair</option>
-            <option value="write">Write key only</option>
-            <option value="read">Read key only</option>
-          </select>
-          <button class="btn btn-primary btn-sm" id="btn-create-live-key">Create key</button>
+
+        <!-- Active live keys (canonical) -->
+        <div id="live-keys-active"></div>
+
+        <!-- Empty state — visible when the app has no keys yet (e.g. backfilled
+             apps, or apps where canonical keys were demoted via legacy revocation). -->
+        <div id="live-keys-empty" style="display:none;padding:24px 0;text-align:center;color:var(--ink-3);font-size:12px">
+          <div style="margin-bottom:10px">No live keys yet.</div>
+          <button class="btn btn-primary btn-sm" id="btn-generate-initial-keys">Generate live keys</button>
+        </div>
+
+        <!-- Recently rotated — deprecated keys still in their 14-day grace -->
+        <div id="live-keys-grace-section" style="display:none;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+          <div class="section-sub" style="margin-bottom:10px">Recently rotated · still valid during 14-day grace</div>
+          <div id="live-keys-grace"></div>
         </div>
       </div>
-      <div class="section-footer"><span class="section-footer-note" id="live-keys-footer-note">Maximum 10 active keys per app.</span></div>
+      <div class="section-footer"><span class="section-footer-note" id="live-keys-footer-note">Rotate a key to generate a fresh one.</span></div>
     </div>
 
     <!-- iOS attestation -->
@@ -1028,63 +1041,121 @@ document.getElementById('btn-unarchive-app')?.addEventListener('click', async ()
   } catch { showToast('Network error', true); }
 });
 
-// Live keys
-function renderLiveKeys(keys) {
-  const list = document.getElementById('live-keys-list');
-  const empty = document.getElementById('live-keys-empty');
-  const note  = document.getElementById('live-keys-footer-note');
-  const createBtn = document.getElementById('btn-create-live-key');
-  const scopeSel  = document.getElementById('select-new-key-scope');
-  if (!list) return;
-  list.innerHTML = '';
-  if (!keys || keys.length === 0) {
-    if (empty) empty.style.display = '';
-    if (note) note.textContent = 'Maximum ' + MAX_ACTIVE_KEYS + ' active keys per app.';
-    if (createBtn) { createBtn.disabled = false; createBtn.textContent = 'Create key'; }
-    if (scopeSel) scopeSel.disabled = false;
-    return;
+// ── Live keys (at-most-one canonical write + read; rotate to refresh) ──
+
+// Group GET /live-keys response into:
+//   active.write  — most recent active key with scope 'write' (or null)
+//   active.read   — most recent active key with scope 'read'  (or null)
+//   active.pair   — most recent active key with scope 'pair'  (or null)
+//   deprecated    — every deprecated key still in 14-day grace
+function partitionKeys(keys) {
+  const out = { write: null, read: null, pair: null, deprecated: [] };
+  for (const k of (keys ?? [])) {
+    if (k.deprecated) {
+      // Drop entries past their grace window — they're rejected at auth.
+      const cutoff = new Date(new Date(k.deprecatedAt).getTime() + 14 * 24 * 3600 * 1000);
+      if (cutoff > new Date()) out.deprecated.push(k);
+      continue;
+    }
+    if (k.scope === 'write' && !out.write) out.write = k;
+    else if (k.scope === 'read'  && !out.read)  out.read  = k;
+    else if (k.scope === 'pair'  && !out.pair)  out.pair  = k;
   }
-  if (empty) empty.style.display = 'none';
-  for (const k of keys) {
-    const row = document.createElement('div');
-    row.className = 'key-row';
-    row.dataset.keyId = k.id;
-    const prefix = k.scope === 'write' ? 'vsk_live_' : 'vsk_live_read_';
-    const created = new Date(k.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const lastUsed = k.lastUsedAt ? 'Last used ' + new Date(k.lastUsedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Never used';
-    row.innerHTML = `
+  return out;
+}
+
+function renderActiveKeyRow(k, scopeLabel, prefix) {
+  const created  = new Date(k.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const lastUsed = k.lastUsedAt
+    ? 'last used ' + new Date(k.lastUsedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : 'never used';
+  return `
+    <div class="key-row" data-key-id="${escapeHtml(k.id)}">
       <span class="key-env live">live</span>
+      <span class="key-scope">${escapeHtml(scopeLabel)}</span>
+      <span class="key-value">${escapeHtml(prefix)}••••••••••••••••••••••••••••••••</span>
+      <span class="key-created">created ${escapeHtml(created)} · ${escapeHtml(lastUsed)}</span>
+      <div class="key-actions">
+        <button class="btn btn-secondary btn-sm" data-action="rotate" data-scope="${escapeHtml(scopeLabel)}">Rotate</button>
+      </div>
+    </div>`;
+}
+function renderDeprecatedKeyRow(k) {
+  const expires = new Date(new Date(k.deprecatedAt).getTime() + 14 * 24 * 3600 * 1000);
+  const days    = Math.max(0, Math.ceil((expires - new Date()) / (24 * 3600 * 1000)));
+  const prefix  = k.scope === 'write' ? 'vsk_live_' : (k.scope === 'read' ? 'vsk_live_read_' : 'vsk_live_');
+  return `
+    <div class="key-row deprecated" data-key-id="${escapeHtml(k.id)}" style="opacity:0.7">
+      <span class="key-env" style="background:var(--ground);color:var(--ink-3);border:1px solid var(--border)">grace</span>
       <span class="key-scope">${escapeHtml(k.scope)}</span>
       <span class="key-value">${escapeHtml(prefix)}••••••••••••••••••••••••••••••••</span>
-      <span class="key-created">Created ${escapeHtml(created)} · ${escapeHtml(lastUsed)}</span>
-      <div class="key-actions"><button class="btn btn-secondary btn-sm" data-action="revoke" data-key-id="${escapeHtml(k.id)}">Revoke</button></div>`;
-    list.appendChild(row);
-  }
-  const atCap = keys.length >= MAX_ACTIVE_KEYS;
-  if (note) note.textContent = atCap
-    ? 'At the maximum of ' + MAX_ACTIVE_KEYS + ' active keys. Revoke one to create another.'
-    : (keys.length + ' of ' + MAX_ACTIVE_KEYS + ' active keys.');
-  if (createBtn) createBtn.disabled = atCap;
-  if (scopeSel)  scopeSel.disabled  = atCap;
+      <span class="key-created">expires in ${days} day${days === 1 ? '' : 's'} · ${expires.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+    </div>`;
 }
-function showFreshKeys(generated) {
+
+function renderLiveKeys(keys) {
+  const active     = document.getElementById('live-keys-active');
+  const empty      = document.getElementById('live-keys-empty');
+  const graceWrap  = document.getElementById('live-keys-grace-section');
+  const grace      = document.getElementById('live-keys-grace');
+  const note       = document.getElementById('live-keys-footer-note');
+  if (!active) return;
+  const p = partitionKeys(keys);
+
+  // No active keys at all — show empty state with "Generate" CTA.
+  if (!p.write && !p.read && !p.pair) {
+    active.innerHTML = '';
+    if (empty) empty.style.display = '';
+    if (note)  note.textContent = 'Click Generate to create your first live keys.';
+  } else {
+    if (empty) empty.style.display = 'none';
+    let html = '';
+    if (p.pair) {
+      // Pair key — single canonical row covering both scopes. Rotation
+      // splits it into separate write+read keys (server-side auto-split).
+      html += renderActiveKeyRow(p.pair, 'pair', 'vsk_live_');
+    } else {
+      if (p.write) html += renderActiveKeyRow(p.write, 'write', 'vsk_live_');
+      else         html += `<div class="key-row" style="color:var(--ink-3);font-size:12px;padding:12px 0">
+                              <span class="key-scope">write</span>
+                              <span class="key-value">— missing —</span>
+                              <div class="key-actions"><button class="btn btn-primary btn-sm" data-action="generate-missing" data-scope="write">Generate</button></div>
+                            </div>`;
+      if (p.read) html += renderActiveKeyRow(p.read, 'read', 'vsk_live_read_');
+      else        html += `<div class="key-row" style="color:var(--ink-3);font-size:12px;padding:12px 0">
+                              <span class="key-scope">read</span>
+                              <span class="key-value">— missing —</span>
+                              <div class="key-actions"><button class="btn btn-primary btn-sm" data-action="generate-missing" data-scope="read">Generate</button></div>
+                            </div>`;
+    }
+    active.innerHTML = html;
+    if (note) note.textContent = 'Rotate a key when it leaks or rotates on schedule. Old key keeps working for 14 days.';
+  }
+
+  // Recently-rotated section.
+  if (p.deprecated.length === 0) {
+    if (graceWrap) graceWrap.style.display = 'none';
+  } else {
+    if (graceWrap) graceWrap.style.display = '';
+    if (grace) grace.innerHTML = p.deprecated.map(renderDeprecatedKeyRow).join('');
+  }
+}
+
+function showFreshKeys(rows) {
+  // rows is an array of { rawKey, scope } shown one-time after creation.
   const wrap  = document.getElementById('live-keys-just-created');
-  const inner = document.getElementById('just-created-rows'); if (!wrap || !inner) return;
-  const rowFor = (raw, scope) => `
+  const inner = document.getElementById('just-created-rows');
+  if (!wrap || !inner) return;
+  inner.innerHTML = rows.map(r => `
     <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-family:var(--mono);font-size:12px">
       <span class="key-env live">live</span>
-      <span class="key-scope">${escapeHtml(scope)}</span>
-      <code style="flex:1;background:#fff;padding:4px 8px;border:1px solid #e0e0dc;border-radius:4px;overflow-x:auto">${escapeHtml(raw)}</code>
-      <button class="btn btn-secondary btn-sm" data-action="copy-fresh" data-raw="${escapeHtml(raw)}">Copy</button>
-    </div>`;
-  let html = '';
-  if (generated.writeKey && generated.readKey) {
-    html += rowFor(generated.writeKey.rawKey, 'write');
-    html += rowFor(generated.readKey.rawKey, 'read');
-  } else if (generated.key) html += rowFor(generated.key.rawKey, generated.key.scope);
-  inner.innerHTML = html;
+      <span class="key-scope">${escapeHtml(r.scope)}</span>
+      <code style="flex:1;background:#fff;padding:4px 8px;border:1px solid #e0e0dc;border-radius:4px;overflow-x:auto">${escapeHtml(r.rawKey)}</code>
+      <button class="btn btn-secondary btn-sm" data-action="copy-fresh" data-raw="${escapeHtml(r.rawKey)}">Copy</button>
+    </div>`).join('');
   wrap.style.display = '';
 }
+
 async function loadLiveKeys() {
   try {
     const res = await fetch(`/web/apps/${APP_ID}/live-keys`);
@@ -1092,49 +1163,92 @@ async function loadLiveKeys() {
     else renderLiveKeys([]);
   } catch { renderLiveKeys([]); }
 }
-async function createLiveKey() {
-  const scope = document.getElementById('select-new-key-scope')?.value ?? 'pair';
-  const btn = document.getElementById('btn-create-live-key');
-  if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
+
+async function rotateLiveKey(scope) {
+  // Confirmation: rotation immediately invalidates the previous key after
+  // the 14-day grace, and the raw value is shown only once.
+  const ok = window.confirm(
+    `Rotate the ${scope} key?\n\n` +
+    `A new ${scope} key will be generated and shown once. ` +
+    `The current ${scope} key will keep working for 14 days, then stop.`
+  );
+  if (!ok) return;
   try {
-    const res = await fetch(`/web/apps/${APP_ID}/live-keys`, {
+    const res = await fetch(`/web/apps/${APP_ID}/live-keys/rotate`, {
       method: 'POST', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ scope }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => null);
-      const code = body?.error?.code;
-      showToast(code === 'key_limit_reached' ? 'Limit reached — revoke a key first' : (body?.error?.message || 'Failed to create key'), true);
+      showToast(body?.error?.message || 'Failed to rotate key', true);
       return;
     }
-    showFreshKeys(await res.json());
+    const body = await res.json();
+    const fresh = [];
+    fresh.push({ rawKey: body.key.rawKey, scope: body.key.scope });
+    if (body.companion) fresh.push({ rawKey: body.companion.rawKey, scope: body.companion.scope });
+    showFreshKeys(fresh);
+    showToast('Key rotated · save the raw value above');
     await loadLiveKeys();
   } catch { showToast('Network error', true); }
-  finally { if (btn) { btn.disabled = false; btn.textContent = 'Create key'; } }
 }
-async function revokeLiveKey(keyId) {
-  if (!window.confirm('Revoke this key?\n\nThe key keeps working for 14 days as a grace period for in-flight callers, then stops.')) return;
+
+async function generateInitialLiveKeys() {
+  const btn = document.getElementById('btn-generate-initial-keys');
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
   try {
-    const res = await fetch(`/web/apps/${APP_ID}/live-keys/${keyId}`, { method: 'DELETE', credentials: 'include' });
-    if (res.ok) { showToast('Key revoked'); await loadLiveKeys(); }
-    else showToast('Failed to revoke', true);
+    const res = await fetch(`/web/apps/${APP_ID}/live-keys/generate`, {
+      method: 'POST', credentials: 'include',
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      showToast(body?.error?.message || 'Failed to generate', true);
+      return;
+    }
+    const body = await res.json();
+    showFreshKeys([
+      { rawKey: body.liveWriteKey, scope: 'write' },
+      { rawKey: body.liveReadKey,  scope: 'read'  },
+    ]);
+    showToast('Live keys generated · save the raw values above');
+    await loadLiveKeys();
   } catch { showToast('Network error', true); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = 'Generate live keys'; } }
 }
-document.getElementById('btn-create-live-key')?.addEventListener('click', createLiveKey);
+
+document.getElementById('btn-generate-initial-keys')?.addEventListener('click', generateInitialLiveKeys);
 document.getElementById('btn-dismiss-just-created')?.addEventListener('click', () => {
   document.getElementById('live-keys-just-created').style.display = 'none';
 });
+// Delegated handler covers the rotate, generate-missing-scope, and
+// copy-fresh actions on the live-keys section.
 document.getElementById('live-keys-section')?.addEventListener('click', async (e) => {
   const t = e.target;
   if (!(t instanceof HTMLElement)) return;
   const action = t.dataset.action;
-  if (action === 'revoke') {
-    const keyId = t.dataset.keyId; if (keyId) await revokeLiveKey(keyId);
+  if (action === 'rotate') {
+    const scope = t.dataset.scope;
+    if (scope === 'write' || scope === 'read' || scope === 'pair') {
+      // Pair-key rotation server-side auto-splits into write+read; we
+      // submit the rotation request as 'write' (auto-split is symmetric).
+      await rotateLiveKey(scope === 'pair' ? 'write' : scope);
+    }
+  } else if (action === 'generate-missing') {
+    const scope = t.dataset.scope;
+    if (scope === 'write' || scope === 'read') {
+      // Use the same rotation endpoint — when the prior active key for
+      // this scope doesn't exist, the server treats it as a fresh creation
+      // (deprecated stays null in the response).
+      await rotateLiveKey(scope);
+    }
   } else if (action === 'copy-fresh') {
     const raw = t.dataset.raw; if (!raw) return;
-    try { await navigator.clipboard.writeText(raw); const orig = t.textContent; t.textContent = 'Copied!'; setTimeout(() => t.textContent = orig, 1500); }
-    catch { showToast('Copy failed — select manually', true); }
+    try {
+      await navigator.clipboard.writeText(raw);
+      const orig = t.textContent; t.textContent = 'Copied!';
+      setTimeout(() => t.textContent = orig, 1500);
+    } catch { showToast('Copy failed — select manually', true); }
   }
 });
 
