@@ -108,11 +108,21 @@ describe('apps-detail.html: per-app detail page', () => {
     expect(html).toContain('id="input-app-slug"')
     expect(html).toContain('id="input-app-description"')
   })
-  it('has API keys section with sandbox + live keys', () => {
+  it('has API keys section with sandbox + live (rotate-only) keys', () => {
     expect(html).toContain('id="sandbox-write-prefix"')
     expect(html).toContain('id="sandbox-read-prefix"')
-    expect(html).toContain('id="live-keys-list"')
-    expect(html).toContain('id="btn-create-live-key"')
+    // The live-keys refactor introduces at-most-one canonical key per scope.
+    // Active keys render in #live-keys-active; rotation triggers via the
+    // delegated handler on data-action="rotate". The "Generate live keys"
+    // button is the empty-state CTA for backfilled apps with no keys yet.
+    expect(html).toContain('id="live-keys-active"')
+    expect(html).toContain('id="btn-generate-initial-keys"')
+    expect(html).toContain('id="live-keys-grace-section"')
+    expect(html).toContain('data-action="rotate"')
+    expect(html).toContain('async function rotateLiveKey')
+    // The legacy create-key UI is gone.
+    expect(html).not.toContain('id="btn-create-live-key"')
+    expect(html).not.toContain('id="select-new-key-scope"')
   })
   it('has iOS attestation inputs', () => {
     expect(html).toContain('id="input-ios-team-id"')
@@ -148,7 +158,7 @@ describe('apps-detail.html: per-app detail page', () => {
   })
 })
 
-describe('apps-new.html: 3-step create flow (unchanged)', () => {
+describe('apps-new.html: 3-step create flow + live-keys reveal', () => {
   const html = read('apps-new.html')
   it('exists and has all three steps', () => {
     expect(html).toContain('id="step-1"')
@@ -157,6 +167,12 @@ describe('apps-new.html: 3-step create flow (unchanged)', () => {
   })
   it('POSTs to /web/apps and redirects on finish', () => {
     expect(html).toContain("fetch('/web/apps'")
+  })
+  it('reveals all four keys at creation: sandbox + live, write + read', () => {
+    expect(html).toContain('id="display-write-key"')
+    expect(html).toContain('id="display-read-key"')
+    expect(html).toContain('id="display-live-write-key"')
+    expect(html).toContain('id="display-live-read-key"')
   })
 })
 

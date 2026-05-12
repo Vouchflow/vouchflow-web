@@ -7,5 +7,7 @@ export default defineConfig({
     pool: { type: 'forks', maxWorkers: 1, minWorkers: 1 },
     fileParallelism: false,
     setupFiles: ['./src/__tests__/helpers/setup.ts'],
+    // Playwright lives under audit/ — it has its own config + runner.
+    exclude: ['audit/**', 'node_modules/**', 'dist/**'],
   },
 })
