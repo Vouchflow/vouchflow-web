@@ -770,32 +770,26 @@ hr {
 
       <div class="page-eyebrow">Get started</div>
       <h1 class="page-title">Quickstart</h1>
-      <p class="page-lead">From install to your first verified device in under 30 minutes. No SMS, no WebAuthn, no fallback logic to write.</p>
+      <p class="page-lead">From install to your first verified device in under 5 minutes. Works with iOS Secure Enclave, Android Keystore, and WebAuthn. No SMS, no fallback logic to write—enrollment happens automatically.</p>
 
       <!-- STEP LIST -->
       <ol class="steps">
         <li class="step">
           <div class="step-body">
             <div class="step-title">Install the SDK</div>
-            <div class="step-desc">Add Vouchflow to your iOS or Android project.</div>
+            <div class="step-desc">Add Vouchflow to your iOS, Android, or Web project.</div>
           </div>
         </li>
         <li class="step">
           <div class="step-body">
-            <div class="step-title">Initialise with your API key</div>
-            <div class="step-desc">Your sandbox key is pre-filled below — safe to commit during development.</div>
-          </div>
-        </li>
-        <li class="step">
-          <div class="step-body">
-            <div class="step-title">Enroll a device</div>
-            <div class="step-desc">The SDK generates a hardware-bound keypair. Call once; the SDK manages state automatically.</div>
+            <div class="step-title">Initialize with your API key</div>
+            <div class="step-desc">Your sandbox write key is pre-filled below—safe to commit during development.</div>
           </div>
         </li>
         <li class="step">
           <div class="step-body">
             <div class="step-title">Run your first verification</div>
-            <div class="step-desc">A signed challenge-response proves the same physical device is present.</div>
+            <div class="step-desc">Call <code>verify()</code>—enrollment happens automatically on first use. The SDK manages all state.</div>
           </div>
         </li>
       </ol>
@@ -827,8 +821,8 @@ hr {
 <span class="t">]</span></pre>
         </div>
         <div class="callout warning">
-          <strong>⚠ Required before calling enroll()</strong>
-          Add the App Attest entitlement to your app target. Without it, enrollment will fail on physical devices. See App Attest setup →
+          <strong>⚠ App Attest required for high confidence (iOS)</strong>
+          Add the App Attest entitlement to your app target. Without it, automatic enrollment on first <code>verify()</code> will succeed but confidence is capped at <code>.medium</code>. See <a href="/docs/ios-sdk#app-attest">App Attest setup →</a>
         </div>
       </div>
 
