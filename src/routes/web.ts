@@ -12,9 +12,11 @@ import {
   createWebhook,
   deleteWebhook,
   updateCustomer,
-  generateLiveKeys,
   getLiveKeys,
+  generateLiveKeys,
   revokeLiveKey,
+  rotateLiveKey,
+  generateInitialLiveKeys,
   deleteAccount,
   listApps,
   getApp,
@@ -304,6 +306,32 @@ export default async function webRoutes(fastify: FastifyInstance) {
         return { ok: true }
       } catch (err) {
         return relayApiError(fastify, reply, err, 'revoke_live_key_failed')
+      }
+    }
+  )
+
+  // POST /web/apps/:appId/live-keys/rotate — rotate a live key (creates new, deprecates old)
+  fastify.post<{ Params: { appId: string }; Body: { scope: 'write' | 'read' } }>(
+    '/web/apps/:appId/live-keys/rotate',
+    async (request, reply) => {
+      const customerId = request.session.get('customerId') as string
+      try {
+        return await rotateLiveKey(customerId, request.params.appId, request.body.scope)
+      } catch (err) {
+        return relayApiError(fastify, reply, err, 'rotate_live_key_failed')
+      }
+    }
+  )
+
+  // POST /web/apps/:appId/live-keys/generate — generate initial live keys (write + read pair)
+  fastify.post<{ Params: { appId: string } }>(
+    '/web/apps/:appId/live-keys/generate',
+    async (request, reply) => {
+      const customerId = request.session.get('customerId') as string
+      try {
+        return await generateInitialLiveKeys(customerId, request.params.appId)
+      } catch (err) {
+        return relayApiError(fastify, reply, err, 'generate_initial_live_keys_failed')
       }
     }
   )
