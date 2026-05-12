@@ -1160,6 +1160,10 @@ async function loadLiveKeys() {
 }
 
 async function rotateLiveKey(scope) {
+  if (!APP_ID) {
+    showToast('No app selected', true);
+    return;
+  }
   // Confirmation: rotation immediately invalidates the previous key after
   // the 14-day grace, and the raw value is shown only once.
   const ok = window.confirm(
@@ -1186,10 +1190,17 @@ async function rotateLiveKey(scope) {
     showFreshKeys(fresh);
     showToast('Key rotated · save the raw value above');
     await loadLiveKeys();
-  } catch { showToast('Network error', true); }
+  } catch (err) {
+    console.error('Rotate error:', err);
+    showToast('Network error', true);
+  }
 }
 
 async function generateInitialLiveKeys() {
+  if (!APP_ID) {
+    showToast('No app selected', true);
+    return;
+  }
   const btn = document.getElementById('btn-generate-initial-keys');
   if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
   try {
@@ -1208,7 +1219,10 @@ async function generateInitialLiveKeys() {
     ]);
     showToast('Live keys generated · save the raw values above');
     await loadLiveKeys();
-  } catch { showToast('Network error', true); }
+  } catch (err) {
+    console.error('Generate error:', err);
+    showToast('Network error', true);
+  }
   finally { if (btn) { btn.disabled = false; btn.textContent = 'Generate live keys'; } }
 }
 
