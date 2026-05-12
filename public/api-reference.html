@@ -568,7 +568,7 @@ pre {
       </a>
       <a class="nav-item" href="#jwks">
         <span class="nav-method get">GET</span>
-        /v1/.well-known/jwks.json
+        /.well-known/jwks.json
       </a>
       <a class="nav-item" href="#device">
         <span class="nav-method get">GET</span>
@@ -1023,7 +1023,7 @@ pre {
           <span class="tier-badge">web beta</span>
         </div>
         <div class="endpoint-name">Complete a payload-signing session</div>
-        <p class="endpoint-desc">Submits the WebAuthn assertion produced over the challenge returned by <code>POST /v1/sign</code>. The server validates the assertion (UV flag, origin, signature, RP ID hash, counter), records the verification, and returns a JWS assertion signed by Vouchflow's verifier key. Customers verify this JWS against <code>GET /v1/.well-known/jwks.json</code>; the SDK exposes it as <code>SignResult.assertion</code>.</p>
+        <p class="endpoint-desc">Submits the WebAuthn assertion produced over the challenge returned by <code>POST /v1/sign</code>. The server validates the assertion (UV flag, origin, signature, RP ID hash, counter), records the verification, and returns a JWS assertion signed by Vouchflow's verifier key. Customers verify this JWS against <code>GET /.well-known/jwks.json</code>; the SDK exposes it as <code>SignResult.assertion</code>.</p>
 
         <div class="callout info">
           <strong>Automatic idempotency</strong>
@@ -1144,12 +1144,12 @@ pre {
       </div>
     </div>
 
-    <!-- ── ENDPOINT 2.7: GET /v1/.well-known/jwks.json (Web SDK) ── -->
+    <!-- ── ENDPOINT 2.7: GET /.well-known/jwks.json (Web SDK) ── -->
     <div class="endpoint-row" id="jwks">
       <div class="endpoint-spec">
         <div class="endpoint-title-row">
           <span class="method-badge get">GET</span>
-          <span class="endpoint-path">/v1/.well-known/jwks.json</span>
+          <span class="endpoint-path">/.well-known/jwks.json</span>
           <span class="tier-badge">web beta</span>
         </div>
         <div class="endpoint-name">Vouchflow verifier JWKS</div>
@@ -1178,7 +1178,7 @@ pre {
         </div>
         <div class="ex-copy-row"><button class="ex-copy">Copy</button></div>
         <div class="ex-section-label">REQUEST</div>
-        <pre><span class="kw">curl</span> <span class="t">https://api.vouchflow.dev/v1/.well-known/jwks.json</span></pre>
+        <pre><span class="kw">curl</span> <span class="t">https://api.vouchflow.dev/.well-known/jwks.json</span></pre>
         <hr class="ex-divider"/>
         <div class="status-pill ok"><span class="status-dot"></span>200 OK</div>
         <div class="ex-section-label">RESPONSE</div>

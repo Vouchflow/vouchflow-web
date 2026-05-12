@@ -89,7 +89,7 @@
       <a class="nav-item" href="/api-reference#enroll"><span class="nav-dot"></span>POST /v1/enroll</a>
       <a class="nav-item" href="/api-reference#verify"><span class="nav-dot"></span>POST /v1/verify</a>
       <a class="nav-item" href="/api-reference#sign"><span class="nav-dot"></span>POST /v1/sign</a>
-      <a class="nav-item" href="/api-reference#jwks"><span class="nav-dot"></span>GET /v1/.well-known/jwks.json</a>
+      <a class="nav-item" href="/api-reference#jwks"><span class="nav-dot"></span>GET /.well-known/jwks.json</a>
       <a class="nav-item" href="/api-reference#device"><span class="nav-dot"></span>GET /v1/device/:token/reputation</a>
       <a class="nav-item" href="/api-reference#webhooks-create"><span class="nav-dot"></span>POST /v1/webhooks</a>
       <a class="nav-item" href="/api-reference#webhooks-list"><span class="nav-dot"></span>GET /v1/customers/:id/webhooks</a>
@@ -352,7 +352,7 @@
 <span class="k">import</span><span class="t"> </span><span class="n">crypto</span><span class="t"> </span><span class="k">from</span><span class="t"> </span><span class="s">'node:crypto'</span>
 
 <span class="k">const</span><span class="t"> JWKS = </span><span class="f">createRemoteJWKSet</span><span class="t">(</span>
-  <span class="k">new</span><span class="t"> </span><span class="f">URL</span><span class="t">(</span><span class="s">'https://api.vouchflow.dev/v1/.well-known/jwks.json'</span><span class="t">),</span>
+  <span class="k">new</span><span class="t"> </span><span class="f">URL</span><span class="t">(</span><span class="s">'https://api.vouchflow.dev/.well-known/jwks.json'</span><span class="t">),</span>
 <span class="t">)</span>
 
 <span class="k">export async function</span><span class="t"> </span><span class="f">verifyVouchflowAssertion</span><span class="t">(</span>
