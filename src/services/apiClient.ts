@@ -126,6 +126,11 @@ export interface CreatedApp {
   app: AppDetail
   sandboxWriteKey: string
   sandboxReadKey: string
+  // Auto-generated at creation since the live-keys refactor — each app now
+  // ships with one canonical write + read key. These are returned raw
+  // exactly once; subsequent GETs only return prefixes.
+  liveWriteKey:    string
+  liveReadKey:     string
 }
 
 export async function listApps(
@@ -188,26 +193,73 @@ export async function unarchiveApp(customerId: string, appId: string): Promise<v
 // ── Live keys (per-app) ─────────────────────────────────────────────────────
 
 export interface LiveKeyInfo {
-  id:         string
-  scope:      'write' | 'read'
-  createdAt:  string
-  lastUsedAt: string | null
+  id:           string
+  scope:        'write' | 'read' | 'pair'
+  createdAt:    string
+  lastUsedAt:   string | null
+  deprecated:   boolean
+  deprecatedAt: string | null
 }
+
+// Returned by GET — now includes deprecated keys (for the "Recently rotated"
+// section in the dashboard). Auth-time the 14-day grace from deprecatedAt
+// keeps deprecated keys working until expiry.
+export interface ListLiveKeysResponse { keys: LiveKeyInfo[] }
+
+// Rotation creates a new active key + demotes the prior active key of the
+// same scope to deprecated state. The 14-day grace is enforced server-side.
+export interface RotatedLiveKey {
+  key:        { id: string; rawKey: string; scope: 'write' | 'read'; createdAt: string }
+  // For pair-key auto-split: when the prior active was a pair, rotation
+  // also generates the *other* scope so both write+read are reset to fresh
+  // active keys. companion is non-null in that case.
+  companion:  { id: string; rawKey: string; scope: 'write' | 'read'; createdAt: string } | null
+  // The key that was demoted (null if the app had no active key of this
+  // scope yet — e.g. first rotation on a backfilled app with no live keys).
+  deprecated: { id: string; scope: string; deprecatedAt: string } | null
+}
+
+export interface GeneratedInitialLiveKeys {
+  liveWriteKey: string
+  liveReadKey:  string
+}
+
+export async function getLiveKeys(customerId: string, appId: string): Promise<ListLiveKeysResponse> {
+  return apiFetch<ListLiveKeysResponse>(`/v1/customers/${customerId}/apps/${appId}/live-keys`)
+}
+
+export async function rotateLiveKey(
+  customerId: string,
+  appId: string,
+  scope: 'write' | 'read',
+): Promise<RotatedLiveKey> {
+  return apiFetch<RotatedLiveKey>(
+    `/v1/customers/${customerId}/apps/${appId}/live-keys/rotate`,
+    { method: 'POST', body: JSON.stringify({ scope }) },
+  )
+}
+
+export async function generateInitialLiveKeys(
+  customerId: string,
+  appId: string,
+): Promise<GeneratedInitialLiveKeys> {
+  return apiFetch<GeneratedInitialLiveKeys>(
+    `/v1/customers/${customerId}/apps/${appId}/live-keys/generate`,
+    { method: 'POST' },
+  )
+}
+
+// ── Legacy live-keys endpoints (kept for back-compat with existing /web
+// proxy routes; the dashboard now uses rotate + generate exclusively). ───
 
 export interface GeneratedLiveKeyPair {
   writeKey: { id: string; rawKey: string; scope: 'write'; createdAt: string }
   readKey:  { id: string; rawKey: string; scope: 'read';  createdAt: string }
 }
-
 export interface GeneratedLiveKeySingle {
-  key: { id: string; rawKey: string; scope: 'write' | 'read'; createdAt: string }
+  key: { id: string; rawKey: string; scope: 'write' | 'read' | 'pair'; createdAt: string }
 }
-
 export type GeneratedLiveKeys = GeneratedLiveKeyPair | GeneratedLiveKeySingle
-
-export async function getLiveKeys(customerId: string, appId: string): Promise<{ keys: LiveKeyInfo[] }> {
-  return apiFetch<{ keys: LiveKeyInfo[] }>(`/v1/customers/${customerId}/apps/${appId}/live-keys`)
-}
 
 export async function generateLiveKeys(
   customerId: string,
