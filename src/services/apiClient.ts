@@ -195,6 +195,9 @@ export async function unarchiveApp(customerId: string, appId: string): Promise<v
 export interface LiveKeyInfo {
   id:           string
   scope:        'write' | 'read' | 'pair'
+  /** Last 4 chars of the raw key, for identification. Null for keys created
+   *  before the keyLast4 column existed (raw value unrecoverable). */
+  keyLast4:     string | null
   createdAt:    string
   lastUsedAt:   string | null
   deprecated:   boolean

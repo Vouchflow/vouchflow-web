@@ -124,6 +124,21 @@ describe('apps-detail.html: per-app detail page', () => {
     expect(html).not.toContain('id="btn-create-live-key"')
     expect(html).not.toContain('id="select-new-key-scope"')
   })
+  it('binds the rotate handler to the section that holds the live keys', () => {
+    // Regression: id="live-keys-section" must sit on the Live keys <div>, not
+    // the Sandbox <div>. The delegated rotate handler binds to
+    // #live-keys-section; if the id is on the wrong section, the rotate
+    // buttons (rendered into #live-keys-active) never receive the click.
+    const sectionIdx = html.indexOf('id="live-keys-section"')
+    const activeIdx  = html.indexOf('id="live-keys-active"')
+    const sandboxIdx = html.indexOf('id="sandbox-write-prefix"')
+    expect(sectionIdx).toBeGreaterThan(-1)
+    // #live-keys-active must live inside #live-keys-section…
+    expect(activeIdx).toBeGreaterThan(sectionIdx)
+    expect(html.slice(sectionIdx, activeIdx)).not.toContain('<div class="section"')
+    // …and the id must not be on the sandbox section.
+    expect(sectionIdx).toBeGreaterThan(sandboxIdx)
+  })
   it('has iOS attestation inputs', () => {
     expect(html).toContain('id="input-ios-team-id"')
     expect(html).toContain('id="input-ios-bundle-id"')

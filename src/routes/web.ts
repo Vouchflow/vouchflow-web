@@ -33,7 +33,10 @@ import type { AppPatch } from '../services/apiClient.js'
 
 function maskKey(key: string): string {
   if (!key) return ''
-  return key.slice(0, 12) + '••••••••••••••••••••••••••••••••'
+  // Show the prefix and the last 4 chars so a key stays identifiable (e.g.
+  // after rotation) without revealing the secret. The middle is masked.
+  if (key.length < 16) return '••••••••'
+  return key.slice(0, 12) + '••••••••' + key.slice(-4)
 }
 
 /** Forwards 4xx errors verbatim, 500s on 5xx. Used everywhere a /web route

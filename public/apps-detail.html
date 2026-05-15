@@ -618,7 +618,7 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     </div>
 
     <!-- API keys (sandbox + live) -->
-    <div class="section" id="live-keys-section">
+    <div class="section" id="sandbox-keys-section">
       <div class="section-header">
         <div class="section-title">Sandbox keys</div>
         <div class="section-sub">For development and testing. Verifications don't bill or enter the network graph.</div>
@@ -653,7 +653,7 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
       - Rotation generates a new key + demotes the old one to a 14-day grace
         window. Both work during grace; only the new one survives after.
     -->
-    <div class="section">
+    <div class="section" id="live-keys-section">
       <div class="section-header">
         <div class="section-title">Live keys</div>
         <div class="section-sub">For production traffic. One write key (mobile SDKs) and one read key (backend).</div>
@@ -1069,7 +1069,7 @@ function renderActiveKeyRow(k, scopeLabel, prefix) {
     <div class="key-row" data-key-id="${escapeHtml(k.id)}">
       <span class="key-env live">live</span>
       <span class="key-scope">${escapeHtml(scopeLabel)}</span>
-      <span class="key-value">${escapeHtml(prefix)}••••••••••••••••••••••••••••••••</span>
+      <span class="key-value">${escapeHtml(prefix)}••••••••${escapeHtml(k.keyLast4 || '••••')}</span>
       <div class="key-actions">
         <button class="btn btn-secondary btn-sm" data-action="rotate" data-scope="${escapeHtml(scopeLabel)}">Rotate</button>
       </div>
@@ -1083,7 +1083,7 @@ function renderDeprecatedKeyRow(k) {
     <div class="key-row deprecated" data-key-id="${escapeHtml(k.id)}" style="opacity:0.7">
       <span class="key-env" style="background:var(--ground);color:var(--ink-3);border:1px solid var(--border)">grace</span>
       <span class="key-scope">${escapeHtml(k.scope)}</span>
-      <span class="key-value">${escapeHtml(prefix)}••••••••••••••••••••••••••••••••</span>
+      <span class="key-value">${escapeHtml(prefix)}••••••••${escapeHtml(k.keyLast4 || '••••')}</span>
       <span class="key-created">expires in ${days} day${days === 1 ? '' : 's'} · ${expires.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
     </div>`;
 }
