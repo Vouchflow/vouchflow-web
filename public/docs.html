@@ -816,7 +816,7 @@ hr {
 <span class="t">dependencies: [</span>
     <span class="t">.</span><span class="f">package</span><span class="t">(</span>
         <span class="n">url</span><span class="t">: </span><span class="s">"https://github.com/Vouchflow/ios-sdk"</span><span class="t">,</span>
-        <span class="n">from</span><span class="t">: </span><span class="s">"2.0.0"</span>
+        <span class="n">from</span><span class="t">: </span><span class="s">"2.1.2"</span>
     <span class="t">)</span>
 <span class="t">]</span></pre>
         </div>
@@ -833,7 +833,7 @@ hr {
             <button class="code-copy">Copy</button>
           </div>
           <pre><span class="t">dependencies {</span>
-    <span class="t">implementation(</span><span class="s">"dev.vouchflow:android-sdk:2.0.0"</span><span class="t">)</span>
+    <span class="t">implementation(</span><span class="s">"dev.vouchflow:android-sdk:2.1.2"</span><span class="t">)</span>
 <span class="t">}</span></pre>
         </div>
         <div class="callout warning">
@@ -864,9 +864,9 @@ hr {
   <span class="n">rpName</span><span class="t">:      </span><span class="s">'Example'</span><span class="t">,</span>
 <span class="t">})</span></pre>
         </div>
-        <div class="callout warning">
-          <strong>⚠ Web SDK — Private Beta</strong>
-          Sandbox-only access during private beta. See the <a href="/docs/web-sdk" style="color:var(--ink)">full Web SDK docs →</a> for verification, payload signing, React hooks, and the email-OTP fallback flow.
+        <div class="callout">
+          <strong>Web SDK keys</strong>
+          Use a write-scoped sandbox key while testing, then a live write key in production. See the <a href="/docs/web-sdk" style="color:var(--ink)">full Web SDK docs →</a> for verification, payload signing, React hooks, and the email-OTP fallback flow.
         </div>
       </div>
 
@@ -910,12 +910,11 @@ hr {
   <span class="c">// result.deviceToken — pass to your server</span>
   <span class="f">proceedWithSignup</span><span class="t">()</span>
 
-<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricCancelled</span><span class="t">(</span><span class="k">let</span><span class="t"> sessionId) {</span>
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricCancelled</span><span class="t">(_) {</span>
   <span class="f">showRetry</span><span class="t">()</span>
 
-<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricFailed</span><span class="t">(</span><span class="k">let</span><span class="t"> sessionId) {</span>
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricFailed</span><span class="t">(_) {</span>
   <span class="k">let</span><span class="t"> fallback = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">requestFallback</span><span class="t">(</span>
-    <span class="n">sessionId</span><span class="t">: sessionId,</span>
     <span class="n">email</span><span class="t">: currentUserEmail,</span>
     <span class="n">reason</span><span class="t">: .</span><span class="n">biometricFailed</span>
   <span class="t">)</span>

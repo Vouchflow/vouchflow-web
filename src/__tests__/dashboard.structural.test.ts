@@ -255,8 +255,8 @@ describe('onboarding.html: Web platform tab in step 1 and step 2', () => {
     expect(html).toContain('id="ios-verify"')
     expect(html).toContain('id="android-verify"')
   })
-  it('Web snippet has a sandbox-read-key placeholder for injection', () => {
-    expect(html).toContain('class="vf-sandbox-read-key"')
+  it('Web snippet has a sandbox-write-key placeholder for injection', () => {
+    expect(html).toContain('class="vf-sandbox-write-key"')
   })
 })
 

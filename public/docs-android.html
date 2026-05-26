@@ -170,9 +170,9 @@
 
       <div class="code-block standalone">
         <div class="code-header"><span class="code-lang">Kotlin — Application class</span><button class="code-copy">Copy</button></div>
-        <pre><span class="k">import</span> <span class="t">com.vouchflow.sdk.Vouchflow</span>
-<span class="k">import</span> <span class="t">com.vouchflow.sdk.VouchflowConfig</span>
-<span class="k">import</span> <span class="t">com.vouchflow.sdk.VouchflowEnvironment</span>
+        <pre><span class="k">import</span> <span class="t">dev.vouchflow.sdk.Vouchflow</span>
+<span class="k">import</span> <span class="t">dev.vouchflow.sdk.VouchflowConfig</span>
+<span class="k">import</span> <span class="t">dev.vouchflow.sdk.VouchflowEnvironment</span>
 
 <span class="k">class</span> <span class="t">MyApp : Application() {</span>
   <span class="k">override fun</span> <span class="f">onCreate</span><span class="t">() {</span>
@@ -233,7 +233,7 @@
 
       <div class="code-block standalone">
         <div class="code-header"><span class="code-lang">Kotlin</span><button class="code-copy">Copy</button></div>
-        <pre><span class="k">import</span> <span class="t">com.vouchflow.sdk.*</span>
+        <pre><span class="k">import</span> <span class="t">dev.vouchflow.sdk.*</span>
 
 <span class="c">// In a ViewModel or coroutine scope:</span>
 <span class="k">try</span><span class="t"> {</span>
@@ -276,6 +276,7 @@
       <div class="code-block standalone">
         <div class="code-header"><span class="code-lang">Kotlin — signPayload</span><button class="code-copy">Copy</button></div>
         <pre><span class="k">val</span><span class="t"> signed = Vouchflow.shared.</span><span class="f">signPayload</span><span class="t">(</span>
+  <span class="n">activity</span><span class="t">          = requireActivity(),</span>
   <span class="n">context</span><span class="t">           = </span><span class="s">"mandate_signing"</span><span class="t">,  </span><span class="c">// arbitrary, audited per session</span>
   <span class="n">payload</span><span class="t">           = </span><span class="f">mapOf</span><span class="t">(</span><span class="s">"v"</span><span class="t"> to </span><span class="num">1</span><span class="t">, </span><span class="s">"id"</span><span class="t"> to </span><span class="s">"mand_abc"</span><span class="t">, </span><span class="s">"scope"</span><span class="t"> to </span><span class="s">"send"</span><span class="t">),</span>
   <span class="n">minimumConfidence</span><span class="t"> = Confidence.</span><span class="n">HIGH</span><span class="t">         </span><span class="c">// default</span>
@@ -317,7 +318,7 @@
 
 <span class="c">// Verify payload_sha256 matches your canonical payload</span>
 <span class="k">const</span><span class="t"> expectedHash = crypto.</span><span class="f">createHash</span><span class="t">(</span><span class="s">'sha256'</span><span class="t">)</span>
-  <span class="t">.</span><span class="f">update</span><span class="t">(payload.canonicalized_payload)</span>
+  <span class="t">.</span><span class="f">update</span><span class="t">(canonicalizedPayload)</span>
   <span class="t">.</span><span class="f">digest</span><span class="t">(</span><span class="s">'hex'</span><span class="t">)</span>
 
 <span class="k">if</span><span class="t"> (payload.payload_sha256 !== expectedHash) {</span>
@@ -352,7 +353,6 @@
 
 <span class="t">} </span><span class="k">catch</span><span class="t"> (e: VouchflowError.BiometricFailed) {</span>
   <span class="k">val</span><span class="t"> fb = Vouchflow.shared.</span><span class="f">requestFallback</span><span class="t">(</span>
-    <span class="n">sessionId</span> <span class="t">= e.sessionId,</span>
     <span class="n">email</span>     <span class="t">= currentUser.email,</span>
     <span class="n">reason</span>    <span class="t">= FallbackReason.BIOMETRIC_FAILED</span>
   <span class="t">)</span>

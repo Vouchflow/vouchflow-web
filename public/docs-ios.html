@@ -143,7 +143,7 @@
         <pre><span class="t">dependencies: [</span>
     <span class="t">.</span><span class="f">package</span><span class="t">(</span>
         <span class="n">url</span><span class="t">: </span><span class="s">"https://github.com/Vouchflow/ios-sdk"</span><span class="t">,</span>
-        <span class="n">from</span><span class="t">: </span><span class="s">"2.0.0"</span><span class="c"> // use latest release tag</span>
+        <span class="n">from</span><span class="t">: </span><span class="s">"2.1.2"</span><span class="c"> // use latest release tag</span>
     <span class="t">)</span>
 <span class="t">]</span></pre>
       </div>
@@ -309,8 +309,8 @@
       <div class="code-block standalone">
         <div class="code-header"><span class="code-lang">Swift — signPayload</span><button class="code-copy">Copy</button></div>
         <pre><span class="k">let</span><span class="t"> signed = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">signPayload</span><span class="t">(</span>
+  <span class="t">[</span><span class="s">"v"</span><span class="t">: </span><span class="num">1</span><span class="t">, </span><span class="s">"id"</span><span class="t">: </span><span class="s">"mand_abc"</span><span class="t">, </span><span class="s">"scope"</span><span class="t">: </span><span class="s">"send"</span><span class="t">],</span>
   <span class="n">context</span><span class="t">:           </span><span class="s">"mandate_signing"</span><span class="t">,  </span><span class="c">// arbitrary, audited per session</span>
-  <span class="n">payload</span><span class="t">:           [</span><span class="s">"v"</span><span class="t">: </span><span class="num">1</span><span class="t">, </span><span class="s">"id"</span><span class="t">: </span><span class="s">"mand_abc"</span><span class="t">, </span><span class="s">"scope"</span><span class="t">: </span><span class="s">"send"</span><span class="t">],</span>
   <span class="n">minimumConfidence</span><span class="t">: .</span><span class="n">high</span><span class="t">               </span><span class="c">// default</span>
 <span class="t">)</span>
 
@@ -350,7 +350,7 @@
 
 <span class="c">// Verify payload_sha256 matches your canonical payload</span>
 <span class="k">const</span><span class="t"> expectedHash = crypto.</span><span class="f">createHash</span><span class="t">(</span><span class="s">'sha256'</span><span class="t">)</span>
-  <span class="t">.</span><span class="f">update</span><span class="t">(payload.canonicalized_payload)</span>
+  <span class="t">.</span><span class="f">update</span><span class="t">(canonicalizedPayload)</span>
   <span class="t">.</span><span class="f">digest</span><span class="t">(</span><span class="s">'hex'</span><span class="t">)</span>
 
 <span class="k">if</span><span class="t"> (payload.payload_sha256 !== expectedHash) {</span>
@@ -380,27 +380,22 @@
   <span class="k">let</span><span class="t"> result = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">verify</span><span class="t">(context: .</span><span class="n">login</span><span class="t">)</span>
   <span class="f">proceed</span><span class="t">(result)</span>
 
-<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricCancelled</span><span class="t">(</span><span class="k">let</span><span class="t"> sessionId) {</span>
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricCancelled</span><span class="t">(_) {</span>
   <span class="c">// User dismissed the biometric prompt. Offer retry.</span>
   <span class="f">showRetryPrompt</span><span class="t">()</span>
 
-<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricFailed</span><span class="t">(</span><span class="k">let</span><span class="t"> sessionId) {</span>
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricFailed</span><span class="t">(_) {</span>
   <span class="c">// Wrong biometric, lockout, or hardware error. Offer fallback.</span>
   <span class="k">let</span><span class="t"> fb = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">requestFallback</span><span class="t">(</span>
-    <span class="n">sessionId</span><span class="t">: sessionId,</span>
     <span class="n">email</span><span class="t">: currentUser.email,</span>
     <span class="n">reason</span><span class="t">: .</span><span class="n">biometricFailed</span>
   <span class="t">)</span>
   <span class="f">showOTPInput</span><span class="t">(expiresAt: fb.expiresAt)</span>
 
 <span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricUnavailable</span><span class="t"> {</span>
-  <span class="c">// No biometric enrolled or no hardware. Proceed to fallback directly.</span>
-  <span class="k">let</span><span class="t"> fb = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">requestFallback</span><span class="t">(</span>
-    <span class="n">sessionId</span><span class="t">: currentSessionId,</span>
-    <span class="n">email</span><span class="t">: currentUser.email,</span>
-    <span class="n">reason</span><span class="t">: .</span><span class="n">biometricUnavailable</span>
-  <span class="t">)</span>
-  <span class="f">showOTPInput</span><span class="t">(expiresAt: fb.expiresAt)</span>
+  <span class="c">// No biometric enrolled or no hardware. Use your own email OTP flow,</span>
+  <span class="c">// or call initiateSessionForFallbackTesting() only in test harnesses.</span>
+  <span class="f">showDeviceNotSupportedMessage</span><span class="t">()</span>
 
 <span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">minimumConfidenceUnmet</span><span class="t"> {</span>
   <span class="c">// Device cannot reach the required confidence threshold.</span>
@@ -436,7 +431,7 @@
       </table>
 
       <h2 class="section-anchor" id="fallback">Fallback flow</h2>
-      <p>When biometric fails or is unavailable, call <code>requestFallback(sessionId:email:reason:)</code> to trigger an email OTP. After the user enters the code, call <code>submitFallbackOtp(sessionId:otp:)</code>.</p>
+      <p>After <code>verify()</code> reaches the biometric step and then throws <code>biometricFailed</code> or <code>biometricCancelled</code>, call <code>requestFallback(email:reason:)</code> to trigger an email OTP. The SDK keeps the active verification session internally. After the user enters the code, call <code>submitFallbackOTP(sessionId:otp:)</code>.</p>
 
       <div class="code-block standalone">
         <div class="code-header"><span class="code-lang">Swift — OTP submission</span><button class="code-copy">Copy</button></div>

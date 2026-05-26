@@ -426,7 +426,7 @@
         <li class="step">
           <div class="step-body">
             <div class="step-title">Initiate fallback</div>
-            <div class="step-desc">Call <code>requestFallback(sessionId:email:reason:)</code> (iOS) or <code>requestFallback(sessionId, email, reason)</code> (Android). The SDK sends the email address to Vouchflow, which delivers a 6-digit OTP and immediately discards the address. A SHA-256 hash of the email is retained only for rate-limiting.</div>
+            <div class="step-desc">Call <code>requestFallback(email:reason:)</code> (iOS) or <code>requestFallback(email, reason)</code> (Android) after catching a biometric fallback error. The SDK keeps the active verification session internally. It sends the email address to Vouchflow, which delivers a 6-digit OTP and immediately discards the address. A SHA-256 hash of the email is retained only for rate-limiting.</div>
           </div>
         </li>
         <li class="step">

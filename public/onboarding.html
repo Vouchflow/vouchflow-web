@@ -679,7 +679,7 @@ code {
                   <pre><span class="t">dependencies: [</span>
   <span class="t">.</span><span class="f">package</span><span class="t">(</span>
     <span class="n">url</span><span class="t">: </span><span class="s">"https://github.com/Vouchflow/ios-sdk"</span><span class="t">,</span>
-    <span class="n">from</span><span class="t">: </span><span class="s">"2.0.0"</span>
+    <span class="n">from</span><span class="t">: </span><span class="s">"2.1.2"</span>
   <span class="t">)</span>
 <span class="t">]</span>
 <span class="c">// Add VouchflowSDK to your app target</span></pre>
@@ -708,7 +708,7 @@ code {
                     <button class="step-code-copy" onclick="copyCode(this)">Copy</button>
                   </div>
                   <pre><span class="t">dependencies {</span>
-  <span class="t">  implementation(</span><span class="s">"dev.vouchflow:android-sdk:2.0.0"</span><span class="t">)</span>
+  <span class="t">  implementation(</span><span class="s">"dev.vouchflow:android-sdk:2.1.2"</span><span class="t">)</span>
 <span class="t">}</span></pre>
                 </div>
                 <div class="step-callout" style="margin-top:8px;">
@@ -733,14 +733,14 @@ code {
                   <pre><span class="k">import</span><span class="t"> { </span><span class="n">Vouchflow</span><span class="t"> } </span><span class="k">from</span><span class="t"> </span><span class="s">'@vouchflow/web'</span>
 
 <span class="k">await</span><span class="t"> Vouchflow.</span><span class="f">configure</span><span class="t">({</span>
-  <span class="n">apiKey</span><span class="t">: </span><span class="s">'<span class="vf-sandbox-read-key">your sandbox read key</span>'</span><span class="t">,</span>
+  <span class="n">apiKey</span><span class="t">: </span><span class="s">'<span class="vf-sandbox-write-key">your sandbox write key</span>'</span><span class="t">,</span>
   <span class="n">rpId</span><span class="t">:   </span><span class="s">'localhost'</span><span class="t">, </span><span class="c">// or your production domain</span>
   <span class="n">rpName</span><span class="t">: </span><span class="s">'Your App'</span><span class="t">,</span>
 <span class="t">})</span></pre>
                 </div>
                 <div class="step-callout" style="margin-top:8px;">
                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="6.5" cy="6.5" r="5.5" stroke="#C87D20" stroke-width="1.2"/><rect x="5.9" y="3.5" width="1.2" height="4" rx="0.6" fill="#C87D20"/><rect x="5.9" y="9" width="1.2" height="1.2" rx="0.6" fill="#C87D20"/></svg>
-                  <span>Web SDK uses WebAuthn. The <strong>read</strong> sandbox key is safe to embed in browser code; never embed the write key. Set the RP ID + allowed origins in <a href="/settings#tab-app" style="color:var(--ink-2)">App settings</a> before going to production.</span>
+                  <span>Web SDK uses WebAuthn. Use the app's <strong>write</strong> sandbox key for browser SDK calls; keep read keys server-side for reputation queries. Set the RP ID + allowed origins in <a href="/settings#tab-app" style="color:var(--ink-2)">App settings</a> before going to production.</span>
                 </div>
               </div>
 
@@ -848,13 +848,17 @@ code {
   <span class="c">// result.deviceToken    — pass to your server</span>
   <span class="f">proceedWithSignup</span><span class="t">()</span>
 
-<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricCancelled</span><span class="t">(</span><span class="k">let</span><span class="t"> sessionId) {</span>
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricCancelled</span><span class="t">(_) {</span>
   <span class="c">// User tapped Cancel — show retry</span>
   <span class="f">showRetry</span><span class="t">()</span>
 
-<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricFailed</span><span class="t">(</span><span class="k">let</span><span class="t"> sessionId) {</span>
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricFailed</span><span class="t">(_) {</span>
   <span class="c">// Offer email fallback</span>
-  <span class="f">showEmailFallback</span><span class="t">(sessionId: sessionId)</span>
+  <span class="k">let</span><span class="t"> fallback = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">requestFallback</span><span class="t">(</span>
+    <span class="n">email</span><span class="t">: currentUserEmail,</span>
+    <span class="n">reason</span><span class="t">: .</span><span class="n">biometricFailed</span>
+  <span class="t">)</span>
+  <span class="f">showOTPInput</span><span class="t">(expiresAt: fallback.expiresAt)</span>
 
 <span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">minimumConfidenceUnmet</span><span class="t"> {</span>
   <span class="c">// Device posture issue — do not offer fallback</span>
@@ -1064,7 +1068,7 @@ const panelContent = {
           <pre><span class="t">dependencies: [</span>
   <span class="t">.</span><span class="f">package</span><span class="t">(</span>
     <span class="n">url</span><span class="t">: </span><span class="s">"https://github.com/Vouchflow/ios-sdk"</span><span class="t">,</span>
-    <span class="n">from</span><span class="t">: </span><span class="s">"2.0.0"</span>
+    <span class="n">from</span><span class="t">: </span><span class="s">"2.1.2"</span>
   <span class="t">)</span>
 <span class="t">]</span></pre>
         </div>
@@ -1076,10 +1080,10 @@ const panelContent = {
         <div class="panel-code">
           <div class="panel-code-header"><span class="panel-code-lang">build.gradle.kts</span><button class="panel-copy" onclick="this.textContent='Copied';setTimeout(()=>this.textContent='Copy',1500)">Copy</button></div>
           <pre><span class="t">dependencies {</span>
-  <span class="t">  implementation(</span><span class="s">"dev.vouchflow:android-sdk:2.0.0"</span><span class="t">)</span>
+  <span class="t">  implementation(</span><span class="s">"dev.vouchflow:android-sdk:2.1.2"</span><span class="t">)</span>
 <span class="t">}</span></pre>
         </div>
-        <div class="panel-note">Minimum SDK: API 26 (Android 8.0). Hardware-backed Keystore is available on most devices from API 23+, but hardware attestation requires API 26.</div>
+        <div class="panel-note">Minimum SDK: API 28 (Android 9.0). Hardware-backed Keystore is available on most devices from API 23+, but hardware attestation requires API 26.</div>
       </div>`
   },
   init: {
@@ -1087,21 +1091,22 @@ const panelContent = {
     html: `
       <div class="panel-section">
         <div class="panel-section-title">iOS</div>
-        <div class="panel-text">Call <code>VouchFlow.configure()</code> once in your <code>AppDelegate</code> or <code>@main</code> struct, before any verification calls.</div>
+        <div class="panel-text">Call <code>Vouchflow.configure(...)</code> once in your <code>AppDelegate</code> or <code>@main</code> struct, before any verification calls.</div>
         <div class="panel-code">
           <div class="panel-code-header"><span class="panel-code-lang">Swift</span><button class="panel-copy" onclick="this.textContent='Copied';setTimeout(()=>this.textContent='Copy',1500)">Copy</button></div>
-          <pre><span class="k">import</span> <span class="t">VouchFlow</span>
+          <pre><span class="k">import</span> <span class="t">VouchflowSDK</span>
 
 <span class="t">@main</span>
 <span class="k">struct</span> <span class="t">MyApp: App {</span>
   <span class="k">init</span><span class="t">() {</span>
-    <span class="t">VouchFlow.</span><span class="f">configure</span><span class="t">(</span>
-      <span class="n">apiKey</span><span class="t">: </span><span class="s">"vsk_sandbox_4xK9mN2pL8..."</span>
-    <span class="t">)</span>
+    <span class="k">try</span><span class="t">? Vouchflow.</span><span class="f">configure</span><span class="t">(VouchflowConfig(</span>
+      <span class="n">apiKey</span><span class="t">: </span><span class="s">"vsk_sandbox_4xK9mN2pL8..."</span><span class="t">,</span>
+      <span class="n">environment</span><span class="t">: .</span><span class="n">sandbox</span>
+    <span class="t">))</span>
   <span class="t">}</span>
 <span class="t">}</span></pre>
         </div>
-        <div class="panel-note">Your sandbox key is safe to commit during development. Move it to a build configuration variable or environment variable before shipping to production.</div>
+        <div class="panel-note">Use a write-scoped sandbox key while testing. Move production keys into build configuration before shipping.</div>
       </div>`
   },
   enroll: {
@@ -1122,25 +1127,28 @@ const panelContent = {
     html: `
       <div class="panel-section">
         <div class="panel-section-title">Full example with error handling</div>
-        <div class="panel-text">Always handle all three result cases. <code>biometricCancelled</code> should show a retry button — it means the user tapped cancel, not that verification failed.</div>
+        <div class="panel-text">Handle the success result and the thrown error cases that matter to your UX. <code>biometricCancelled</code> should show a retry button — it means the user tapped cancel, not that verification failed.</div>
         <div class="panel-code">
           <div class="panel-code-header"><span class="panel-code-lang">Swift</span><button class="panel-copy" onclick="this.textContent='Copied';setTimeout(()=>this.textContent='Copy',1500)">Copy</button></div>
-          <pre><span class="t">VouchFlow.</span><span class="f">verify</span><span class="t">(context: </span><span class="k">self</span><span class="t">) { result </span><span class="k">in</span>
-  <span class="k">switch</span><span class="t"> result {</span>
-  <span class="k">case</span><span class="t"> .</span><span class="n">verified</span><span class="t">:</span>
-    <span class="f">proceedWithSignup</span><span class="t">()</span>
-  <span class="k">case</span><span class="t"> .</span><span class="n">degraded</span><span class="t">:</span>
-    <span class="f">showEmailFallback</span><span class="t">()</span>
-  <span class="k">case</span><span class="t"> .</span><span class="f">failed</span><span class="t">(</span><span class="k">let</span><span class="t"> error):</span>
-    <span class="k">switch</span><span class="t"> error {</span>
-    <span class="k">case</span><span class="t"> .</span><span class="n">biometricCancelled</span><span class="t">:</span>
-      <span class="f">showRetryButton</span><span class="t">()</span>
-    <span class="k">case</span><span class="t"> .</span><span class="n">minimumConfidenceUnmet</span><span class="t">:</span>
-      <span class="f">handleLowConfidence</span><span class="t">()</span>
-    <span class="k">default</span><span class="t">:</span>
-      <span class="f">showGenericError</span><span class="t">(error)</span>
-    <span class="t">}</span>
-  <span class="t">}</span>
+          <pre><span class="k">do</span><span class="t"> {</span>
+  <span class="k">let</span><span class="t"> result = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">verify</span><span class="t">(context: .</span><span class="n">login</span><span class="t">)</span>
+  <span class="f">proceedWithSignup</span><span class="t">(result)</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricCancelled</span><span class="t">(_) {</span>
+  <span class="f">showRetryButton</span><span class="t">()</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">biometricFailed</span><span class="t">(_) {</span>
+  <span class="k">let</span><span class="t"> fallback = </span><span class="k">try await</span><span class="t"> Vouchflow.shared.</span><span class="f">requestFallback</span><span class="t">(</span>
+    <span class="n">email</span><span class="t">: currentUser.email,</span>
+    <span class="n">reason</span><span class="t">: .</span><span class="n">biometricFailed</span>
+  <span class="t">)</span>
+  <span class="f">showOTPInput</span><span class="t">(expiresAt: fallback.expiresAt)</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> VouchflowError.</span><span class="n">minimumConfidenceUnmet</span><span class="t"> {</span>
+  <span class="f">handleLowConfidence</span><span class="t">()</span>
+
+<span class="t">} </span><span class="k">catch</span><span class="t"> {</span>
+  <span class="f">showGenericError</span><span class="t">(error)</span>
 <span class="t">}</span></pre>
         </div>
         <div class="panel-note">Run this on a physical device. The result appears in your dashboard within seconds. Your sandbox key is already pre-filled.</div>
@@ -1236,14 +1244,13 @@ async function loadSession() {
         `"${session.sandboxWriteKey}"`
       );
     }
-    // Apps refactor: Web SDK install snippet uses the *read* sandbox key
-    // (safe to embed in browser code; write keys are server-side only).
-    // Session returns masked keys; the unmasked read key isn't exposed via
-    // /web/session, so we leave the placeholder text instructing the user
-    // to copy from the API Keys tab. Best-effort substitution:
-    if (session.sandboxReadKey) {
-      const placeholders = document.querySelectorAll('.vf-sandbox-read-key');
-      placeholders.forEach(p => { p.textContent = session.sandboxReadKey; });
+    // Apps refactor: Web SDK install snippet uses the app's write sandbox key.
+    // Session may include the unmasked key immediately after app creation; when
+    // it does not, leave the placeholder instructing the user to copy it from
+    // the API Keys tab. Best-effort substitution:
+    if (session.sandboxWriteKey) {
+      const placeholders = document.querySelectorAll('.vf-sandbox-write-key');
+      placeholders.forEach(p => { p.textContent = session.sandboxWriteKey; });
     }
   } catch (err) {
     console.error('Failed to load session', err);

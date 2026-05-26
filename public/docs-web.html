@@ -137,9 +137,9 @@
       <h1 class="page-title">Web SDK reference</h1>
       <p class="page-lead">The Web SDK wraps WebAuthn, IndexedDB-backed device state, and Vouchflow's verification protocol into a single async call. Adds high-assurance payload signing — a primitive the mobile SDKs don't expose. Modern evergreen browsers only; WebAuthn was added in 2018.</p>
 
-      <div class="callout warning">
-        <strong>Web SDK — Private Beta</strong>
-        Sandbox-only access; production GA targeted Phase 3 of the rollout. The package on npm is unlisted and the API key prefix must be <code>vsk_sandbox_…</code>. Contact us via <a href="/signup" style="color:#C87D20">/signup</a> to request invite.
+      <div class="callout">
+        <strong>Web SDK keys</strong>
+        Use a write-scoped key (<code>vsk_sandbox_…</code> while testing, <code>vsk_live_…</code> in production) because browser ceremonies create enrollments and verification sessions. Keep read-scoped keys server-side for reputation lookups.
       </div>
 
       <!-- INSTALLATION -->
@@ -193,7 +193,7 @@
       <table>
         <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>apiKey</code></td><td><code>string</code></td><td>Yes</td><td><strong>Write-scoped</strong> sandbox key (<code>vsk_sandbox_</code>) from <a href="/settings">Settings → API Keys</a>. Production keys are not yet provisioned for web during the private beta.</td></tr>
+          <tr><td><code>apiKey</code></td><td><code>string</code></td><td>Yes</td><td><strong>Write-scoped</strong> key from <a href="/settings">Settings → API Keys</a>. Use <code>vsk_sandbox_</code> for sandbox and <code>vsk_live_</code> for production; read keys will fail SDK write operations.</td></tr>
           <tr><td><code>environment</code></td><td><code>'sandbox' | 'production'</code></td><td>Yes</td><td>Required, never inferred from the key prefix. Switching environments wipes local device state automatically so a sandbox device_token never gets posted to production.</td></tr>
           <tr><td><code>rpId</code></td><td><code>string</code></td><td>Yes</td><td>WebAuthn relying party ID. Must equal the current origin's registrable domain or a subdomain.</td></tr>
           <tr><td><code>rpName</code></td><td><code>string</code></td><td>Yes</td><td>Display name shown by the browser in the WebAuthn ceremony UI.</td></tr>
@@ -599,7 +599,7 @@
           <tr><td><code>device_not_found</code></td><td>Local device record points to a server-side device that no longer exists</td><td>Call <code>forget()</code> and re-enroll</td></tr>
           <tr><td><code>minimum_confidence_unmet</code></td><td>Device cannot meet the requested <code>minConfidence</code></td><td>Block or degrade; <code>err.actualConfidence</code> is set</td></tr>
           <tr><td><code>rate_limit_exceeded</code></td><td>Hit the per-IP or per-session limiter</td><td>Back off and retry</td></tr>
-          <tr><td><code>unauthorized</code></td><td>API key missing, malformed, or wrong scope</td><td>Check <code>vsk_sandbox_</code> prefix and write scope</td></tr>
+          <tr><td><code>unauthorized</code></td><td>API key missing, malformed, or wrong scope</td><td>Check the environment, key prefix, and write scope</td></tr>
           <tr><td><code>invalid_otp</code></td><td>Email OTP code was wrong or expired</td><td>Prompt for re-entry up to the lockout limit</td></tr>
           <tr><td><code>fallback_locked</code></td><td>Too many wrong OTP attempts; fallback is locked</td><td>Surface a generic auth failure</td></tr>
           <tr><td><code>network_error</code></td><td>Fetch failed or 5xx from the API</td><td><code>retryable: true</code> — back off and retry</td></tr>
