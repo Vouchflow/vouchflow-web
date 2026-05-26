@@ -1,8 +1,8 @@
 import type { FastifyInstance } from 'fastify'
-import { requireSession } from '../middleware/requireSession.js'
+import { hasAuthenticatedSession, requireSession } from '../middleware/requireSession.js'
 
 function redirectIfLoggedIn(request: any, reply: any, done: () => void) {
-  if (request.session.get('customerId')) {
+  if (hasAuthenticatedSession(request)) {
     return reply.redirect('/dashboard')
   }
   done()

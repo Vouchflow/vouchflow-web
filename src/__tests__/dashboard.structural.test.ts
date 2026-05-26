@@ -8,6 +8,36 @@ import { resolve } from 'node:path'
 const PUBLIC = resolve(__dirname, '../../public')
 function read(p: string): string { return readFileSync(resolve(PUBLIC, p), 'utf8') }
 
+describe('docs auth topbar script', () => {
+  const pages = [
+    'docs.html',
+    'docs-introduction.html',
+    'docs-ios.html',
+    'docs-android.html',
+    'docs-web.html',
+    'docs-backend.html',
+    'docs-concepts.html',
+    'docs-guides.html',
+  ]
+
+  it('uses one shared script on every docs page', () => {
+    for (const page of pages) {
+      const html = read(page)
+      expect(html).toContain('<script src="/docs-auth.js"></script>')
+      expect(html).not.toContain('function initDocsAuth')
+      expect(html).not.toContain('function docsSignOut')
+      expect(html).not.toContain('function toggleDocsMenu')
+    }
+  })
+
+  it('shared script owns /web/me and signout behavior', () => {
+    const js = read('docs-auth.js')
+    expect(js).toContain("fetch('/web/me'")
+    expect(js).toContain("fetch('/auth/signout'")
+    expect(js).toContain('escapeHtml')
+  })
+})
+
 describe('app switcher: removed (Option A — list view replaces it)', () => {
   for (const page of ['dashboard.html', 'verifications.html', 'reputation.html', 'settings.html', 'onboarding.html']) {
     it(`${page} no longer carries the topbar app switcher`, () => {

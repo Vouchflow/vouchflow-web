@@ -862,7 +862,10 @@ function renderAvatar(el, s) {
 }
 
 // ── App detail logic ─────────────────────────────────────────────────────
-const APP_ID = window.__VF_APP_ID__ = (location.pathname.match(/\/settings\/apps\/([^/]+)/) || [])[1] || null;
+const APP_DETAIL_PATH_PREFIX = '/settings/apps/';
+const APP_ID = window.__VF_APP_ID__ = location.pathname.startsWith(APP_DETAIL_PATH_PREFIX)
+  ? decodeURIComponent(location.pathname.slice(APP_DETAIL_PATH_PREFIX.length).split('/')[0] || '')
+  : null;
 
 let currentApp = null;
 const MAX_ACTIVE_KEYS = 10;
