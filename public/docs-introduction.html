@@ -198,7 +198,7 @@
       <table>
         <thead><tr><th></th><th>Sandbox</th><th>Production</th></tr></thead>
         <tbody>
-          <tr><td>Base URL</td><td><code>sandbox.api.vouchflow.dev</code></td><td><code>api.vouchflow.dev</code></td></tr>
+          <tr><td>Base URL</td><td><code>api.vouchflow.dev</code></td><td><code>api.vouchflow.dev</code></td></tr>
           <tr><td>API keys</td><td>Sandbox keys from dashboard</td><td>Production keys from dashboard</td></tr>
           <tr><td>Attestation</td><td>Not required; returns <code>attestation_verified: false</code></td><td>Required for <code>confidence: high</code></td></tr>
           <tr><td>Simulator</td><td>Fully supported; returns <code>confidence: medium</code></td><td>Blocked; returns <code>AttestationUnavailable</code></td></tr>
@@ -206,6 +206,7 @@
           <tr><td>Rate limits</td><td>Relaxed</td><td>Standard (see API Reference)</td></tr>
         </tbody>
       </table>
+      <p>Sandbox and production requests both use the production API host. The key prefix selects the isolated sandbox or live data plane server-side.</p>
 
       <div class="callout warning">
         <strong>Physical device required in production</strong>
