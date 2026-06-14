@@ -133,6 +133,9 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   border-radius: 6px; padding: 7px 12px;
   font-family: var(--sans); font-size: 12px; color: var(--ink-3);
   width: 220px; cursor: text;
+  /* Without flex-shrink: 0 the toolbar's flex layout crushed this from 220
+     down to ~92px, leaving "Search d..." truncated in the placeholder. */
+  flex-shrink: 0;
 }
 .search-box input {
   background: none; border: none; outline: none;
@@ -174,6 +177,10 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
 .log-table-wrap {
   flex: 1;
   overflow-y: auto;
+  /* Detail-panel takes 380px of the row; the table's monospace device IDs
+     push it past the remaining width, which (without overflow-x) clipped
+     the BIOMETRIC column behind the panel. Allow horizontal scroll. */
+  overflow-x: auto;
   min-width: 0;
 }
 .log-table-wrap::-webkit-scrollbar { width: 0; }
@@ -593,7 +600,7 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
     <div class="sidenav-footer">
       <div class="usage-label"><span>Sandbox usage</span><strong id="usage-strong">— / ∞</strong></div>
       <div class="usage-track"><div class="usage-fill"></div></div>
-      <div class="usage-sub">Free tier · resets monthly</div>
+      <div class="usage-sub">Beta · unlimited · no billing</div>
     </div>
   </nav>
 
