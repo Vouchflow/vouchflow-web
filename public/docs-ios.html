@@ -484,9 +484,9 @@
         Apple's <code>appattest-environment</code> entitlement only accepts <code>development</code> or <code>production</code> — these are Apple's own strings, not Vouchflow's sandbox/production. Map them like this: <code>development</code> for debug, simulator, and Vouchflow sandbox builds; <code>production</code> for App Store and TestFlight builds. Mismatching the value (e.g. <code>production</code> in a debug build) causes attestation to fail silently and confidence is capped at <code>medium</code>.
       </div>
 
-      <div class="callout">
+      <div class="callout" id="register-app-identity">
         <strong>You must register your app's identity</strong>
-        Set <code>iosTeamId</code> (your 10-character Apple Developer Team ID) and <code>iosBundleId</code> (your app's bundle identifier) in <a href="/settings">Settings → Account → App identity (attestation)</a>. App Attest assertions prove the key was minted on a real Apple device, but each assertion identifies the requesting app via <code>&lt;TEAM_ID&gt;.&lt;BUNDLE_ID&gt;</code> — the server has to match that against values you've registered. Without them, an attacker who pulled an attested key out of any other iOS app could submit it as if it came from yours. Until you register, all iOS devices fall back to <code>confidence_ceiling: medium</code>.
+        Set <code>iosTeamId</code> (your 10-character Apple Developer Team ID — Apple Developer portal → Membership) and <code>iosBundleId</code> (your app's reverse-DNS bundle identifier from Xcode → Target → General → Bundle Identifier) in the <strong>iOS attestation</strong> section of your app's settings page. App Attest assertions prove the key was minted on a real Apple device, but each assertion identifies the requesting app via <code>&lt;TEAM_ID&gt;.&lt;BUNDLE_ID&gt;</code> — the server has to match that against values you've registered. Without them, an attacker who pulled an attested key out of any other iOS app could submit it as if it came from yours. Until you register, all iOS devices fall back to <code>confidence_ceiling: medium</code>.
       </div>
 
       <div class="page-nav">
