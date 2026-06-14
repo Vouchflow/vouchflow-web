@@ -119,6 +119,12 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   display: flex;
   align-items: center;
   gap: 10px;
+  /* Sum of children at desktop width (title + search + 5 filters + range +
+     export) lands ~1080px, which exceeds main width when the detail panel
+     is open. Allow wrap so Export/range fall to a second row instead of
+     getting clipped invisibly. row-gap matches the inline gap. */
+  flex-wrap: wrap;
+  row-gap: 10px;
   position: sticky;
   top: 0;
   z-index: 50;
