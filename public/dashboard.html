@@ -522,6 +522,10 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   .network-value { font-size: 32px; }
   .log-table th:nth-child(4),
   .log-table td:nth-child(4) { display: none; }
+  /* Device IDs are 30+ char monospace strings; even with one column hidden
+     they overflow the mobile viewport. Allow horizontal swipe rather than
+     clipping the right edge invisibly (was: just CONFIDENCE/Platform cut). */
+  .log-card { overflow-x: auto; }
   .onboarding-banner { flex-direction: column; align-items: flex-start; gap: 12px; }
   .ob-cta { width: 100%; text-align: center; }
   .chart-card { overflow-x: auto; }
@@ -817,12 +821,9 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
         <line x1="0" y1="100" x2="900" y2="100" stroke="#F0F0EC" stroke-width="1"/>
         <line x1="0" y1="140" x2="900" y2="140" stroke="#F0F0EC" stroke-width="1"/>
 
-        <!-- Y labels -->
-        <text x="0" y="18"  font-family="DM Mono,monospace" font-size="11" fill="#CCC">250</text>
-        <text x="0" y="58"  font-family="DM Mono,monospace" font-size="11" fill="#CCC">175</text>
-        <text x="0" y="98"  font-family="DM Mono,monospace" font-size="11" fill="#CCC">100</text>
-        <text x="0" y="138" font-family="DM Mono,monospace" font-size="11" fill="#CCC">25</text>
-
+        <!-- Y labels are rendered into #chart-bars by renderChart() against
+             the real maxVal of the dataset — no static placeholder here, or
+             the JS labels overlap them and the axis renders as gibberish. -->
         <g id="chart-bars"></g>
       </svg>
     </div>
