@@ -203,6 +203,10 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   font-family: var(--sans); font-size: 12px; font-weight: 500;
   border-radius: 6px; padding: 7px 14px; cursor: pointer;
   border: none; transition: all 0.15s; letter-spacing: 0.1px;
+  /* When .btn is applied to an <a> (e.g. archive/unarchive links) the
+     default link underline reads as wrong; suppress it here so the class
+     means "button" regardless of host element. */
+  text-decoration: none;
 }
 .btn-primary { background: var(--ink); color: white; }
 .btn-primary:hover { background: #333; }

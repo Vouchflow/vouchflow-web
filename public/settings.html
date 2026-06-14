@@ -199,6 +199,10 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   font-family: var(--sans); font-size: 12px; font-weight: 500;
   border-radius: 6px; padding: 7px 14px; cursor: pointer;
   border: none; transition: all 0.15s; letter-spacing: 0.1px;
+  /* When .btn is applied to an <a> (e.g. "+ New app" → /apps/new) we need
+     to override the default link underline so it reads as a button, not
+     an underlined link inside a black pill. */
+  text-decoration: none;
 }
 .btn-primary { background: var(--ink); color: white; }
 .btn-primary:hover { background: #333; }
