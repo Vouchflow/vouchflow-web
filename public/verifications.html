@@ -133,9 +133,12 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
   border-radius: 6px; padding: 7px 12px;
   font-family: var(--sans); font-size: 12px; color: var(--ink-3);
   width: 220px; cursor: text;
-  /* Without flex-shrink: 0 the toolbar's flex layout crushed this from 220
-     down to ~92px, leaving "Search d..." truncated in the placeholder. */
-  flex-shrink: 0;
+  /* Without a min-width the toolbar's flex layout crushed this from 220
+     down to ~92px, leaving "Search d..." truncated in the placeholder.
+     Hard flex-shrink: 0 pushed the Export CSV button off-screen on the
+     other side. min-width keeps it usable while letting the toolbar
+     find room for everything else. */
+  min-width: 180px;
 }
 .search-box input {
   background: none; border: none; outline: none;
