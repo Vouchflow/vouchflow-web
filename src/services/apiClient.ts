@@ -21,12 +21,27 @@ async function apiFetch<T>(
 ): Promise<T> {
   const url = `${config.apiBaseUrl}${path}`
 
+  // Resolve auth: undefined → ADMIN_KEY (internal admin call). Explicit empty
+  // string means the caller intended to pass a user key but had none — fail
+  // fast (don't silently send `Bearer ` which 401s, and don't fall back to
+  // ADMIN_KEY which would over-privilege the call across tenants).
+  let bearer: string
+  if (apiKey === undefined) {
+    bearer = config.adminKey
+  } else if (apiKey.trim() === '') {
+    throw new ApiError(401, {
+      error: { code: 'missing_api_key', message: 'No API key available for this request.' },
+    })
+  } else {
+    bearer = apiKey
+  }
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   }
 
-  headers['Authorization'] = `Bearer ${apiKey ?? config.adminKey}`
+  headers['Authorization'] = `Bearer ${bearer}`
 
   const res = await fetch(url, { ...options, headers })
 

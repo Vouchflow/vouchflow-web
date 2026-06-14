@@ -1194,17 +1194,24 @@ async function loadDashboard(range = '7d') {
       fetch('/web/usage',                   { credentials: 'include' }),
     ]);
 
-    if (overviewRes.redirected || overviewRes.status === 401) {
+    // Only force /signup when the SESSION itself is gone — otherwise a single
+    // data fetch returning 401 (e.g. a stale session missing a sandbox key)
+    // would redirect to /signup, which `redirectIfLoggedIn` would bounce back
+    // to /dashboard, looping forever. Per-fetch failures fall through to the
+    // empty-state rendering in the catch block.
+    if (sessionRes.redirected || sessionRes.status === 401) {
       window.location.href = '/signup';
       return;
     }
 
-    const [session, overview, verifications, usage] = await Promise.all([
-      sessionRes.json(),
-      overviewRes.json(),
-      verificationsRes.json(),
-      usageRes.json(),
-    ]);
+    const session = await sessionRes.json();
+    // Data fetches: empty defaults on non-OK so the page still renders. We
+    // surface this as a console error below for visibility but don't fail the
+    // whole load.
+    const overview      = overviewRes.ok      ? await overviewRes.json()      : {};
+    const verifications = verificationsRes.ok ? await verificationsRes.json() : { rows: [] };
+    const usage         = usageRes.ok         ? await usageRes.json()         : {};
+    if (!overviewRes.ok) console.error('overview load failed', overviewRes.status);
 
     const topbarOrg    = document.getElementById('topbar-org');
     const topbarAvatar = document.getElementById('topbar-avatar');

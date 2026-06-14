@@ -27,6 +27,7 @@ import {
   listAppWebhooks,
   createAppWebhook,
   deleteAppWebhook,
+  findOrCreateCustomer,
   ApiError,
 } from '../services/apiClient.js'
 import type { AppPatch } from '../services/apiClient.js'
@@ -47,6 +48,31 @@ function relayApiError(fastify: FastifyInstance, reply: any, err: unknown, event
   }
   fastify.log.error({ err, event })
   return reply.status(500).send({ error: 'request_failed' })
+}
+
+/** Self-heal for sessions that don't carry a sandbox API key. Pre-apps-refactor
+ *  logins (and any code path that landed a customer in /dashboard without
+ *  running auth.ts's full session bootstrap) leave `sandboxWriteKey` empty,
+ *  which makes every per-app data fetch 401 and — combined with the dashboard's
+ *  old 401→/signup redirect — caused a redirect loop. Resolve lazily: re-run
+ *  findOrCreateCustomer (admin-keyed, idempotent) to get the customer's default
+ *  App key, write it back into the session so subsequent requests stay cheap. */
+async function ensureSandboxWriteKey(request: any): Promise<string> {
+  const existing = (request.session.get('sandboxWriteKey') as string | undefined) ?? ''
+  if (existing.trim()) return existing
+  const email = request.session.get('email') as string | undefined
+  if (!email) return ''
+  try {
+    const customer = await findOrCreateCustomer(email)
+    const key = customer.sandboxWriteKey ?? ''
+    if (key) {
+      request.session.set('sandboxWriteKey', key)
+      if (customer.sandboxReadKey) request.session.set('sandboxReadKey', customer.sandboxReadKey)
+    }
+    return key
+  } catch {
+    return ''
+  }
 }
 
 /** After mutations that change the active App's keys (create, switch, archive
@@ -429,7 +455,7 @@ export default async function webRoutes(fastify: FastifyInstance) {
   // GET /web/overview — current app's stats
   fastify.get<{ Querystring: { range?: string } }>('/web/overview', async (request) => {
     const customerId      = request.session.get('customerId') as string
-    const sandboxWriteKey = request.session.get('sandboxWriteKey') as string
+    const sandboxWriteKey = await ensureSandboxWriteKey(request)
     const env             = (request.session.get('env') as 'sandbox' | 'production' | undefined) ?? 'sandbox'
     return getOverviewStats(customerId, sandboxWriteKey, env, request.query.range)
   })
@@ -437,7 +463,7 @@ export default async function webRoutes(fastify: FastifyInstance) {
   fastify.get<{
     Querystring: { limit?: string; offset?: string; confidence?: string; platform?: string; range?: string; result?: string; type?: string }
   }>('/web/verifications', async (request) => {
-    const sandboxWriteKey = request.session.get('sandboxWriteKey') as string
+    const sandboxWriteKey = await ensureSandboxWriteKey(request)
     const env             = (request.session.get('env') as 'sandbox' | 'production' | undefined) ?? 'sandbox'
     return getVerifications(sandboxWriteKey, {
       limit:      request.query.limit      ? parseInt(request.query.limit)  : 20,
@@ -454,7 +480,7 @@ export default async function webRoutes(fastify: FastifyInstance) {
   fastify.get<{ Params: { sessionId: string } }>(
     '/web/verifications/:sessionId',
     async (request, reply) => {
-      const sandboxWriteKey = request.session.get('sandboxWriteKey') as string
+      const sandboxWriteKey = await ensureSandboxWriteKey(request)
       try {
         return await getVerification(request.params.sessionId, sandboxWriteKey)
       } catch {
@@ -464,7 +490,7 @@ export default async function webRoutes(fastify: FastifyInstance) {
   )
 
   fastify.get('/web/devices', async (request) => {
-    const sandboxWriteKey = request.session.get('sandboxWriteKey') as string
+    const sandboxWriteKey = await ensureSandboxWriteKey(request)
     return getDevices(sandboxWriteKey)
   })
 
@@ -476,7 +502,7 @@ export default async function webRoutes(fastify: FastifyInstance) {
 
   fastify.get('/web/usage', async (request) => {
     const customerId      = request.session.get('customerId') as string
-    const sandboxWriteKey = request.session.get('sandboxWriteKey') as string
+    const sandboxWriteKey = await ensureSandboxWriteKey(request)
     return getUsage(customerId, sandboxWriteKey)
   })
 
