@@ -582,7 +582,7 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
       Home
     </a>
     <div class="sidenav-footer">
-      <div class="usage-label"><span>Sandbox usage</span><strong>3,412 / 10k</strong></div>
+      <div class="usage-label"><span>Sandbox usage</span><strong id="usage-strong">— / ∞</strong></div>
       <div class="usage-track"><div class="usage-fill"></div></div>
       <div class="usage-sub">Beta · unlimited · no billing</div>
     </div>
@@ -1338,6 +1338,18 @@ document.addEventListener('click', async (e) => {
 });
 
 document.addEventListener('DOMContentLoaded', loadApp);
+
+// Sandbox-usage footer: same pattern as verifications.html — replace the
+// "— / ∞" placeholder with the real count, leave it alone on failure.
+document.addEventListener('DOMContentLoaded', () => {
+  fetch('/web/usage', { credentials: 'include' })
+    .then(r => r.ok ? r.json() : null)
+    .then(usage => {
+      const el = document.getElementById('usage-strong');
+      if (el && usage) el.textContent = `${(usage.verificationCount ?? 0).toLocaleString()} / ∞`;
+    })
+    .catch(() => {});
+});
 </script>
 
 </body>

@@ -591,7 +591,7 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
       Home
     </a>
     <div class="sidenav-footer">
-      <div class="usage-label"><span>Sandbox usage</span><strong>3,412 / 10k</strong></div>
+      <div class="usage-label"><span>Sandbox usage</span><strong id="usage-strong">— / ∞</strong></div>
       <div class="usage-track"><div class="usage-fill"></div></div>
       <div class="usage-sub">Free tier · resets monthly</div>
     </div>
@@ -1244,6 +1244,20 @@ document.addEventListener('click', (e) => {
   }
 });
 document.addEventListener('DOMContentLoaded', vfLoadAppChip);
+
+// Sandbox-usage footer: the static placeholder ("— / ∞") needs a real count
+// or it stays misleading. /web/usage is cheap (returns count + period); on
+// failure we leave the placeholder in place so a transient error never
+// surfaces a wrong number.
+document.addEventListener('DOMContentLoaded', () => {
+  fetch('/web/usage', { credentials: 'include' })
+    .then(r => r.ok ? r.json() : null)
+    .then(usage => {
+      const el = document.getElementById('usage-strong');
+      if (el && usage) el.textContent = `${(usage.verificationCount ?? 0).toLocaleString()} / ∞`;
+    })
+    .catch(() => {});
+});
 
 </script>
 </body>
