@@ -6,39 +6,55 @@ import rateLimit from '@fastify/rate-limit'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { config } from './config.js'
-import { redis } from './lib/redis.js'
 import authRoutes from './routes/auth.js'
 import pageRoutes from './routes/pages.js'
 import webRoutes from './routes/web.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// Minimal ioredis-compatible session store for @fastify/session
-const SESSION_PREFIX = 'sess:'
+// In-process session store. We run a single web machine; an external store
+// just paid per-request Upstash commands for every /web/session / /web/apps
+// hit. Trade: a deploy restarts the process and logs everyone out. At this
+// scale that's acceptable; deploys are infrequent and re-login is one click.
+//
+// Records are { value, expiresAt }; expired entries are pruned by the
+// reaper below so the Map doesn't grow without bound from abandoned sessions.
+type StoredSession = { value: unknown; expiresAt: number }
+const sessions = new Map<string, StoredSession>()
+const ONE_DAY_MS = 24 * 60 * 60 * 1000
+
 const sessionStore = {
-  async get(sid: string, cb: (err: any, session?: any) => void) {
-    try {
-      const val = await redis.get(SESSION_PREFIX + sid)
-      cb(null, val ? JSON.parse(val) : null)
-    } catch (err) { cb(err) }
+  get(sid: string, cb: (err: any, session?: any) => void) {
+    const row = sessions.get(sid)
+    if (!row) return cb(null, null)
+    if (row.expiresAt <= Date.now()) {
+      sessions.delete(sid)
+      return cb(null, null)
+    }
+    cb(null, row.value)
   },
-  async set(sid: string, session: any, cb: (err?: any) => void) {
-    try {
-      const expires = session?.cookie?.expires
-      const ttl = expires
-        ? Math.max(1, Math.floor((new Date(expires).getTime() - Date.now()) / 1000))
-        : 30 * 24 * 60 * 60 // 30 days fallback
-      await redis.set(SESSION_PREFIX + sid, JSON.stringify(session), 'EX', ttl)
-      cb()
-    } catch (err) { cb(err) }
+  set(sid: string, value: any, cb: (err?: any) => void) {
+    const expires = value?.cookie?.expires
+    const expiresAt = expires
+      ? new Date(expires).getTime()
+      : Date.now() + 30 * ONE_DAY_MS
+    sessions.set(sid, { value, expiresAt })
+    cb()
   },
-  async destroy(sid: string, cb: (err?: any) => void) {
-    try {
-      await redis.del(SESSION_PREFIX + sid)
-      cb()
-    } catch (err) { cb(err) }
+  destroy(sid: string, cb: (err?: any) => void) {
+    sessions.delete(sid)
+    cb()
   },
 }
+
+// Reap expired sessions hourly so abandoned sessions don't pile up. Cheap
+// linear scan over the Map; at our cardinality this is microseconds.
+setInterval(() => {
+  const now = Date.now()
+  for (const [sid, row] of sessions) {
+    if (row.expiresAt <= now) sessions.delete(sid)
+  }
+}, 60 * 60 * 1000).unref()
 
 export async function buildApp() {
   const fastify = Fastify({
@@ -46,9 +62,10 @@ export async function buildApp() {
     trustProxy: true,
   })
 
-  // Rate limiting — backed by same Redis instance
+  // Rate limiting — in-process Map (default). One web machine = no
+  // distribution needed; Redis was paying per-request commands for what's
+  // effectively a counter.
   await fastify.register(rateLimit, {
-    redis,
     max: 100,
     timeWindow: '1 minute',
     keyGenerator: (req) => `web:${req.ip}:${req.routeOptions.url}`,
