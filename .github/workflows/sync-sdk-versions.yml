@@ -70,8 +70,10 @@ jobs:
           IOS:      ${{ steps.latest.outputs.ios }}
         run: |
           branch="docs/sync-sdk-${ANDROID}-${IOS}"
-          # If a PR for these exact versions already exists, skip silently.
-          if gh pr list --head "$branch" --json number --jq 'length' | grep -qx 1; then
+          # If an OPEN PR for these exact versions already exists, skip silently.
+          # (Default `gh pr list` is open-only; we make the state explicit so the
+          # guard never trips on a closed/merged PR.)
+          if [ "$(gh pr list --head "$branch" --state open --json number --jq 'length')" != "0" ]; then
             echo "PR already open for android=$ANDROID ios=$IOS"
             exit 0
           fi
@@ -81,7 +83,11 @@ jobs:
           git checkout -b "$branch"
           git add -A
           git commit -m "docs: bump SDK refs to android-sdk@${ANDROID}, ios-sdk@${IOS}"
-          git push origin "$branch"
+          # Force-push: this is a dedicated, version-keyed bot branch with no open
+          # PR (guard above). A stale copy can linger from a prior run whose PR
+          # was closed or never created; overwrite it rather than dead-lock on a
+          # non-fast-forward rejection (which is what blocked this job for weeks).
+          git push --force origin "$branch"
 
           gh pr create \
             --title "docs: bump SDK refs to android-sdk@${ANDROID}, ios-sdk@${IOS}" \
