@@ -117,6 +117,20 @@ describe('/web/apps proxy', () => {
     expect(mock.calls.some(c => c.url.includes('/apps/app_test/archive') && c.method === 'POST')).toBe(true)
   })
 
+  // Regression: archiveApp() sends no body, but apiFetch used to attach
+  // Content-Type: application/json unconditionally. The API's Fastify
+  // instance rejects that combination with FST_ERR_CTP_EMPTY_JSON_BODY
+  // (400) before the route handler runs, so archiving silently failed.
+  it('POST /web/apps/:appId/archive omits Content-Type on the bodyless upstream call', async () => {
+    mock.on('/apps/app_test/archive', () => ({ body: { ok: true, archivedAt: new Date().toISOString() } }))
+    mock.on(/\/apps$/, () => ({ body: { apps: [{ id: 'app_other', slug: 'other', name: 'Other' }] } }))
+    mock.on('/apps/app_other', () => ({ body: { id: 'app_other', slug: 'other', name: 'Other', sandboxWriteKeyPrefix: '', sandboxReadKeyPrefix: '' } }))
+    const res = await app.inject({ method: 'POST', url: '/web/apps/app_test/archive' })
+    expect(res.statusCode).toBe(200)
+    const archiveCall = mock.calls.find(c => c.url.includes('/apps/app_test/archive'))
+    expect(archiveCall?.headers['Content-Type']).toBeUndefined()
+  })
+
   it('POST /web/apps/:appId/live-keys proxies to per-app live-keys', async () => {
     mock.on('/apps/app_test/live-keys', () => ({
       body: {

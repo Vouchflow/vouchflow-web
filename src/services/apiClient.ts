@@ -36,8 +36,13 @@ async function apiFetch<T>(
     bearer = apiKey
   }
 
+  // Only declare JSON when we're actually sending a JSON body — the API's
+  // Fastify instance rejects `Content-Type: application/json` on an empty
+  // body with FST_ERR_CTP_EMPTY_JSON_BODY (400) before the route handler
+  // even runs. Bodyless calls (archiveApp, unarchiveApp, generateInitialLiveKeys,
+  // deleteAccount, etc.) were tripping this and never reaching the API logic.
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
     ...(options.headers as Record<string, string>),
   }
 
