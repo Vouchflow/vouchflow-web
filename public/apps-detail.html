@@ -628,6 +628,14 @@ body { font-family: var(--sans); color: var(--ink); font-size: 13px; line-height
         <div class="section-sub">For development and testing. Verifications don't bill or enter the network graph.</div>
       </div>
       <div class="section-body">
+        <div class="field">
+          <label class="field-label">Customer ID</label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <code id="customer-id-value" style="font-family:var(--mono);font-size:11px;background:var(--ground);padding:6px 10px;border-radius:4px;border:1px solid var(--border);flex:1">—</code>
+            <button class="btn btn-secondary btn-sm" type="button" onclick="vfCopyCustomerId()">Copy</button>
+          </div>
+          <div class="field-hint">The <code>aud</code> claim on every signed mandate. Use this as the expected audience when verifying signed payloads.</div>
+        </div>
         <div class="key-row">
           <span class="key-env" style="background:var(--w-bg);color:var(--warn)">sandbox</span>
           <span class="key-scope">write</span>
@@ -882,6 +890,7 @@ async function loadApp() {
     document.getElementById('topbar-org').textContent = sess.orgName || sess.email || '';
     document.getElementById('avatar-menu-email').textContent = sess.email || '—';
     renderAvatar(document.getElementById('topbar-avatar'), sess);
+    document.getElementById('customer-id-value').textContent = sess.customerId || '—';
 
     const res = await fetch(`/web/apps/${APP_ID}`);
     if (res.status === 404) { showToast('App not found', true); setTimeout(() => location.href = '/settings', 1200); return; }
@@ -988,6 +997,12 @@ function vfCopyJwksUrl() {
   const el = document.getElementById('jwks-url');
   navigator.clipboard.writeText(el?.textContent || '').then(
     () => showToast('JWKs URL copied'), () => showToast('Copy failed', true));
+}
+function vfCopyCustomerId() {
+  const v = document.getElementById('customer-id-value')?.textContent || '';
+  if (!v || v === '—') return;
+  navigator.clipboard.writeText(v).then(
+    () => showToast('Customer ID copied'), () => showToast('Copy failed', true));
 }
 
 // Confidence policy
