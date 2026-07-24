@@ -194,6 +194,7 @@ describe('/web/session app context', () => {
     expect(body.apps).toHaveLength(2)
     expect(body.iosTeamId).toBe('TEAM12345X')
     expect(body.signPayloadMinConfidence).toBe('high')
+    expect(body.customerId).toBe('cust_test')
     await app.close()
   })
 
